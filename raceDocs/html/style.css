@@ -1,0 +1,91 @@
+/* table, th, td, tr {
+    border-style: solid;
+    border-color: black;
+} */
+
+.compInfo th {
+    width: 6cm;
+    vertical-align: bottom;
+    font-size: 12px;
+    /*height: 3.8cm;*/
+}
+
+ .raceInfo table, .raceInfo tr {
+    background-color: #f2f2f2;
+    text-align: center;
+    width: 18cm;
+    font-size: 12px;
+}
+
+.raceHeaders {
+    font-size: 12px;
+    border-collapse: collapse;
+    border-top: 1px solid black;
+    border-bottom: 1px solid black;
+}
+
+.rText {
+    border-collapse: collapse;
+}
+
+.rText tr td {
+    page-break-inside: avoid;
+}
+
+.rText th{
+    text-align: center;
+    vertical-align: center;
+    font-size: 10px;
+}
+
+.rText td{
+    text-align: center;
+    vertical-align: top;
+    font-size: 9px;
+}
+
+.rTextTbl {
+    border-top: 1px solid gray;
+    border-bottom: 1px solid gray;
+}
+
+.rTextTbl tr td {
+    page-break-inside: avoid;
+}
+
+.postInfo {
+    font-size: 9px;
+}
+
+.footer {
+    position: absolute;
+    bottom: 0;
+    width: 100%;
+}
+
+* {
+    font-family: Calibri, sans-serif;
+}
+
+@page {
+    size: A4 portrait;
+    margin-top: 0mm;
+    margin-left: 0mm;
+    margin-bottom: 0mm;
+    margin-right: 0mm;
+
+    @bottom-center {
+        content: element(pageHeader);
+    }
+}
+
+@media print {
+    thead { display: table-header-group; }
+    tfoot { display: table-footer-group; }
+    footer {
+        page-break-after: always;
+    }
+    #divHeader{
+        position: running(pageHeader);
+    }
+}

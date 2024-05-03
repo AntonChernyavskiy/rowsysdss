@@ -1,0 +1,6 @@
+<tr class="rTextTbl">
+	td style="width: 17.73mm">{rLane}</td>
+	td style="width: 40mm"><i>{rTeam}</i></td>
+	td style="width: 81.11mm;">{rAthletes}</td>
+	td style="width: 41.16mm"></td>
+</tr>
