@@ -1,0 +1,158 @@
+body {
+    margin: 0;
+    padding: 0;
+    font-family: 'Exo', sans-serif;
+}
+
+.sidebar-divider {
+    background: hsla(0, 0%, 100%, .15);
+    height: 2px;
+    margin: 0 0 1rem;
+}
+
+.my-0 {
+    margin-bottom: 15px !important;
+    margin-top: 15px !important;
+}
+
+.navbar {
+    margin-left: 250px;
+    height: 80px;
+    padding-top: 20px;
+    background-color: white;
+}
+
+.brand {
+    color: white !important;
+    font-family: 'Montserrat';
+    font-weight: bold;
+    vertical-align: middle;
+    align-self: middle;
+    font-size: xx-large;
+    display: inline-block;
+    line-height: 1.2;
+    padding-right: 20px;
+    padding-left: 5px;
+}
+
+.navbar a {
+    padding: 10px;
+    text-decoration: none;
+    color: black;
+    vertical-align: center;
+    font-weight: bold;
+}
+
+.sidebar {
+    height: 100%;
+    width: 210px;
+    position: fixed;
+    top: 0;
+    left: 0;
+    background-color: #1a475f ;
+    padding: 20px;
+    display: inline;
+    font-size: .85rem;
+    font-family: 'Montserrat';
+}
+.sidebar a {
+    padding: 10px;
+    text-decoration: none;
+    display: block;
+    color: white;
+    transition: 0.3s;
+    line-height: normal;
+}
+.sidebar a:hover {
+    background-color: #32576d ;
+}
+
+.main-container {
+    margin-left: 250px;
+    padding-left: 20px;
+    padding-top: 10px;
+    background: radial-gradient(circle at 18.7% 37.8%, rgb(250, 250, 250) 0%, rgb(225, 234, 238) 90%);
+    height: 100%;
+    width: 100%;
+    position: fixed;
+    color:rgb(65, 65, 65);
+    font-size: 1rem;
+}
+
+table {
+    border-collapse: collapse;
+    border: 0.5px solid lightgray;
+    border-radius: 2px;
+  }
+
+.tableName {
+    background-color: #1a475f;
+    color: white;
+    font-weight: bold;
+    /* height: 30px; */
+}
+
+.tableColName {
+    background-color: lightgray;
+    font-weight: bold;
+    text-align: left;
+}
+
+.comingEvent a {
+    color: rgb(21,185,21);
+    font-weight: bold;
+    text-decoration: none;
+    
+}
+
+.closedEvent a {
+    color: rgb(185, 21, 21);
+    font-weight: bold;
+    text-decoration: none;
+}
+
+.pastEvent a {
+    color:rgb(65, 65, 65);
+    font-size: 1rem;
+    font-weight: bold;
+    text-decoration: none;
+}
+
+.pastEvent td, .closedEvent td, .comingEvent td {
+    padding: 5px;
+    border-bottom: 0.5px solid lightgray;
+}
+
+.addInfo {
+    font-size: 0.8rem;
+    font-weight: 600;
+}
+
+.danger {
+    background-color: #ffdddd;
+    border-left: 6px solid #f44336;
+  }
+
+.alert {
+    padding: 20px;
+    background-color: #f44336; /* Red */
+    color: white;
+    margin-bottom: 15px;
+  }
+  
+  /* The close button */
+  .closebtn {
+    margin-left: 15px;
+    color: white;
+    font-weight: bold;
+    float: right;
+    font-size: 22px;
+    line-height: 20px;
+    cursor: pointer;
+    transition: 0.3s;
+  }
+  
+  /* When moving the mouse over the close button */
+  .closebtn:hover {
+    color: black;
+  }
