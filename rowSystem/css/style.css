@@ -138,10 +138,10 @@ table {
     background-color: #f44336; /* Red */
     color: white;
     margin-bottom: 15px;
-  }
-  
-  /* The close button */
-  .closebtn {
+}
+
+/* The close button */
+.closebtn {
     margin-left: 15px;
     color: white;
     font-weight: bold;
@@ -150,9 +150,33 @@ table {
     line-height: 20px;
     cursor: pointer;
     transition: 0.3s;
-  }
-  
-  /* When moving the mouse over the close button */
-  .closebtn:hover {
+}
+
+/* When moving the mouse over the close button */
+.closebtn:hover {
     color: black;
-  }
+}
+
+.responsive-div {
+    display: none; /* Initially hide the div */
+}
+
+@media only screen and (max-width: 600px) {
+    .sidebar {
+        width: 100%;
+        padding: 10px;
+    }
+    .navbar {
+        margin-left: 0;
+    }
+    .main-container {
+        margin-left: 0;
+        padding-left: 10px;
+    }
+    table {
+        font-size: 0.8rem;
+    }
+    .responsive-div {
+        display: block;
+      }
+}
