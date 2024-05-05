@@ -2,6 +2,8 @@ body {
     margin: 0;
     padding: 0;
     font-family: 'Exo', sans-serif;
+    overflow: auto;
+    height: 100%;
 }
 
 .sidebar-divider {
@@ -77,6 +79,7 @@ body {
     position: fixed;
     color:rgb(65, 65, 65);
     font-size: 1rem;
+    
 }
 
 table {
@@ -157,26 +160,34 @@ table {
     color: black;
 }
 
-.responsive-div {
-    display: none; /* Initially hide the div */
-}
-
 @media only screen and (max-width: 600px) {
+    * {
+        text-align: center;
+        position: relative;
+    }
+
     .sidebar {
         width: 100%;
         padding: 10px;
+        height: 370px;
+        /* position: relative; */
+        text-align: center;
     }
     .navbar {
+        margin-top: 370px;
+        width: 100%;
         margin-left: 0;
+        /* height: auto; */
+        padding-top: 0;
     }
     .main-container {
         margin-left: 0;
         padding-left: 10px;
+        margin-top: 0px;
+        overflow: auto;
+        position: relative;
     }
     table {
         font-size: 0.8rem;
     }
-    .responsive-div {
-        display: block;
-      }
 }
