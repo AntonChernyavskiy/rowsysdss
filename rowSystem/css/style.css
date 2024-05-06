@@ -1,9 +1,14 @@
+* {
+    overflow: auto;
+}
+
 body {
     margin: 0;
     padding: 0;
     font-family: 'Exo', sans-serif;
     overflow: auto;
     height: 100%;
+    position: relative;
 }
 
 .sidebar-divider {
