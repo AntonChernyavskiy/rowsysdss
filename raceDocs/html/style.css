@@ -1,12 +1,11 @@
-/* table, th, td, tr {
-    border-style: solid;
-    border-color: black;
-} */
+.raceInfo td, .raceInfo th {
+    width: 6cm;
+}
 
 .compInfo th {
     width: 6cm;
     vertical-align: bottom;
-    font-size: 12px;
+    font-size: 14px;
     /*height: 3.8cm;*/
 }
 
@@ -14,11 +13,11 @@
     background-color: #f2f2f2;
     text-align: center;
     width: 18cm;
-    font-size: 12px;
+    font-size: 14px;
 }
 
 .raceHeaders {
-    font-size: 12px;
+    font-size: 14px;
     border-collapse: collapse;
     border-top: 1px solid black;
     border-bottom: 1px solid black;
@@ -35,18 +34,18 @@
 .rText th{
     text-align: center;
     vertical-align: center;
-    font-size: 10px;
+    font-size: 12px;
 }
 
 .rText td{
     text-align: center;
     vertical-align: top;
-    font-size: 9px;
+    font-size: 11px;
 }
 
-.rTextTbl {
-    border-top: 1px solid gray;
-    border-bottom: 1px solid gray;
+.rTextTbl td {
+    /* border-top: 1px solid gray; */
+    border-bottom: 1px solid lightgrey;
 }
 
 .rTextTbl tr td {
@@ -54,7 +53,7 @@
 }
 
 .postInfo {
-    font-size: 9px;
+    font-size: 11px;
 }
 
 .footer {

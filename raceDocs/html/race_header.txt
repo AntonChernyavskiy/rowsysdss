@@ -1,4 +1,4 @@
-<tr class="rTextTbl">
+<tr>
 	<th colspan="7"><p style="page-break-before: always;">&nbsp;</p>
 		<div class="raceInfo">
 			<table>
@@ -12,14 +12,13 @@
 				</tr>
 				<tr>
 					<td>race {}</td>
-					<th>{} | {}</th>
-					<td>Series: {}</td>
+					<th style="text-align: center">{} | {}</th>
 				</tr>
 			</table>
 		</div>
 	</th>
 </tr>
-<tr class="rTextTbl">
+<tr>
 	<th colspan="7">
 		<div class="raceHeaders">
 			<table class="rText">

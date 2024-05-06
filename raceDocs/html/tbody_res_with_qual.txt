@@ -1,9 +1,9 @@
 <tr class="rTextTbl">
-    <td style="width: 17.73mm">{rPlace}</td>
+    <td style="width: 17.73mm">{}</td>
     <td style="width: 2.91mm"></td>
-    <td style="width: 12.96mm;">{rLane}</td>
-    <td style="width:59.8mm; text-align: left"><b>{rTeam}</b><br><t style="font-family: calibri light">{rCrew}</t></td>
+    <td style="width: 12.96mm;">{}</td>
+    <td style="width:59.8mm; text-align: left"><b>{}</b><br><t style="font-family: calibri light">{}</t></td>
     <td style="width: 43.39mm;"></td>
-    <td style="width: 25.14mm;"><b>{rResult}</b><br>{rDelta}<br><t style="font-size: 8px"><i>{rSplit}: {rSplitAvg}</i></t></td>
-    <td style="width: 12.96mm">{rQual}<br>&#8203<br>&#8203</td>
+    <td style="width: 25.14mm;"><b>{}</b><br>{}<br><t style="font-size: 8px"><i>{}: {}</i></t></td>
+    <td style="width: 12.96mm">{}<br>&#8203<br>&#8203</td>
 </tr>
