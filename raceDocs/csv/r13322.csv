@@ -1,82 +1,152 @@
-EventNum,Event,Place,Crew,CrewAbbrev,Bow,Stroke,Start,Finish,RawTime,PenaltyCode,AdjTime,Delta
-1,JAM2x TT,,Jelgavas BJSS,JBSS,1,"Andrejs KĻAVIŅŠ 2004/ 
- Patriks STRAZDS 2005/ ",,03:36.2,,,,
-1,JAM2x TT,,"MSĢ TSV ""Jūrmala""",JMSG,2,"Ralfs Kristians VALDOVSKIS 2004/ 
- Filips ANDREJEVS 2004/ ",07:20.0,03:46.4,,,,
-1,JAM2x TT,,MSĢ TSV SASS,SASS,3,"Kristers ŠMITS 2005/ 
- Dilans BAIBEKOVS 2005/ ",07:23.7,04:00.4,,,,
-1,JAM2x TT,,MSĢ TSV SASS / Jelgavas BJSS,SASS / JBSS,4,"Kristaps BRŪVERIS 2004 / 
- Emīls JANSONS 2005 / ",07:23.2,04:22.4,,,,
-,,,,,,,,,,,,
-,,,,,,,,,,,,
-,,,,,,,,,,,,
-,,,,,,,,,,,,
-,,,,,,,,,,,,
-,,,,,,,,,,,,
-,,,,,,,,,,,,
-,,,,,,,,,,,,
-,,,,,,,,,,,,
-,,,,,,,,,,,,
-,,,,,,,,,,,,
-,,,,,,,,,,,,
-,,,,,,,,,,,,
-,,,,,,,,,,,,
-,,,,,,,,,,,,
-,,,,,,,,,,,,
-,,,,,,,,,,,,
-,,,,,,,,,,,,
-,,,,,,,,,,,,
-,,,,,,,,,,,,
-,,,,,,,,,,,,
-,,,,,,,,,,,,
-,,,,,,,,,,,,
-,,,,,,,,,,,,
-,,,,,,,,,,,,
-,,,,,,,,,,,,
-,,,,,,,,,,,,
-,,,,,,,,,,,,
-,,,,,,,,,,,,
-,,,,,,,,,,,,
-,,,,,,,,,,,,
-,,,,,,,,,,,,
-,,,,,,,,,,,,
-,,,,,,,,,,,,
-,,,,,,,,,,,,
-,,,,,,,,,,,,
-,,,,,,,,,,,,
-,,,,,,,,,,,,
-,,,,,,,,,,,,
-,,,,,,,,,,,,
-,,,,,,,,,,,,
-,,,,,,,,,,,,
-,,,,,,,,,,,,
-,,,,,,,,,,,,
-,,,,,,,,,,,,
-,,,,,,,,,,,,
-,,,,,,,,,,,,
-,,,,,,,,,,,,
-,,,,,,,,,,,,
-,,,,,,,,,,,,
-,,,,,,,,,,,,
-,,,,,,,,,,,,
-,,,,,,,,,,,,
-,,,,,,,,,,,,
-,,,,,,,,,,,,
-,,,,,,,,,,,,
-,,,,,,,,,,,,
-,,,,,,,,,,,,
-,,,,,,,,,,,,
-,,,,,,,,,,,,
-,,,,,,,,,,,,
-,,,,,,,,,,,,
-,,,,,,,,,,,,
-,,,,,,,,,,,,
-,,,,,,,,,,,,
-,,,,,,,,,,,,
-,,,,,,,,,,,,
-,,,,,,,,,,,,
-,,,,,,,,,,,,
-,,,,,,,,,,,,
-,,,,,,,,,,,,
-,,,,,,,,,,,,
-,,,,,,,,,,,,
+"EventNum","Event","Place","Crew","CrewAbbrev","Bow","Stroke","Start","Finish","RawTime","PenaltyCode","AdjTime","Delta"
+"1","JAM2x TT","","Jelgavas BJSS","JBSS","1","Andrejs KĻAVIŅŠ 2004/ 
+ Patriks STRAZDS 2005/ ","","00:03:36.20","","","",""
+"1","JAM2x TT","","MSĢ TSV ""Jūrmala""","JMSG","2","Ralfs Kristians VALDOVSKIS 2004/ 
+ Filips ANDREJEVS 2004/ ","19:07:20.04","00:03:46.40","","","",""
+"1","JAM2x TT","","MSĢ TSV SASS","SASS","3","Kristers ŠMITS 2005/ 
+ Dilans BAIBEKOVS 2005/ ","19:07:23.66","00:04:00.40","","","",""
+"1","JAM2x TT","","MSĢ TSV SASS / Jelgavas BJSS","SASS / JBSS","4","Kristaps BRŪVERIS 2004 / 
+ Emīls JANSONS 2005 / ","19:07:23.16","00:04:22.40","","","",""
+"2","JBM2x TT","1","MSĢ TSV ""Jūrmala""","JMSG","8","Kristers BERĢIS KALNS 2006/ 
+ Ernests BRŪNS 2006/ ","19:07:35.85","19:08:09.07","00:33.22","","00:33.22",""
+"2","JBM2x TT","2","Jelgavas BJSS","JBSS","5","Emīls Niks DONOVS 2006/
+ Valters SĒJĀNS 2006/","19:07:35.11","19:08:08.47","00:33.36","","00:33.36","00:00.14"
+"2","JBM2x TT","3","Jelgavas BJSS","JBSS","6","Svens Edgars ELKSNIS 2007/ 
+ Jānis EGLĀJS 2006/ ","19:07:35.30","19:08:08.67","00:33.37","","00:33.37","00:00.15"
+"2","JBM2x TT","4","MSĢ TSV SASS","SASS","7","Artūrs ZIRNIS 2007/ 
+ Tomass REZEVSKIS 2006/ ","19:07:35.48","19:08:08.87","00:33.39","","00:33.39","00:00.17"
+"2","JBM2x TT","5","MSĢ TSV SASS","SASS","15","Dāvis LEGZDIŅŠ 2007/ 
+ Dāvis KRIŠJĀNIS 2006/ ","19:07:38.88","19:08:17.56","00:38.68","","00:38.68","00:05.46"
+"2","JBM2x TT","6","MSĢ TSV SASS","SASS","14","Roberts KRISKĀNS 2007/ 
+ Guntars GERHARDS 2007/ ","19:07:38.67","19:08:17.39","00:38.72","","00:38.72","00:05.50"
+"2","JBM2x TT","7","SK ""Jūrmalas sports""","SKJS","13","Toms MULAREKS 2007/ 
+ Rihards PAKULIS 2007/ ","19:07:38.47","19:08:17.21","00:38.74","","00:38.74","00:05.52"
+"2","JBM2x TT","8","DISVS","DSS","12","Artūrs FJODOROVS 2007/ 
+ Ilja KALISTRATOVS 2006/ ","19:07:37.67","19:08:17.02","00:39.35","","00:39.35","00:06.13"
+"2","JBM2x TT","9","SK ""Jūrmalas sports""","SKJS","11","Rustams JEVLAMPIJEVS 2006/ 
+ Arnolds ARSENTJEVS 2007/ ","19:07:37.33","19:08:16.86","00:39.53","","00:39.53","00:06.31"
+"2","JBM2x TT","10","MSĢ TSV SASS","SASS","10","Oskars Larss DRUVIETIS 2006/ MSĢ TSV SASS
+ Kristians PUDULIS 2006/ MSĢ TSV SASS","19:07:37.12","19:08:16.67","00:39.55","","00:39.55","00:06.33"
+"2","JBM2x TT","11","MSĢ TSV SASS","SASS","9","Kristiāns KALCENAVS 2006/ 
+ Kristers Aleksandrs JAKOVĻEVS 2006/ ","19:07:36.93","19:08:16.49","00:39.56","","00:39.56","00:06.34"
+"3","JCM4x TT","1","MSĢ TSV SASS","SASS","16","Linards FREIMANIS 2009/  Eduards ELSTS 2009/ 
+ Frederiks RASA 2009/ 
+ Henriks RASA 2008/ ","19:07:43.55","19:08:17.72","00:34.17","","00:34.17",""
+"3","JCM4x TT","2","Jelgavas BJSS","JBSS","17","Edgars RINČS 2008/  Edgars SLAKTERIS 2008/  Mareks ŠULCS 2010/ 
+ Maksims SAVEĻJEVS 2008/ ","19:07:43.73","19:08:22.25","00:38.52","","00:38.52","00:04.35"
+"3","JCM4x TT","2","DISVS","DSS","18","Nikita PUŠKELIS 2008/  Vadims ZELENKOVS 2009 / 
+ Grigorijs MURAVSKIS 2008/ 
+ Vladislavs LEDAKS 2008/ ","19:07:43.90","19:08:22.42","00:38.52","","00:38.52","00:04.35"
+"3","JCM4x TT","4","Jelgavas BJSS","JBSS","19","Marks LULBERGS 2008/  Ņikita PETRIKS 2008/  Kristers LIEPIŅŠ 2009/ 
+ Renārs JĀTNIEKS 2009/ ","19:07:44.08","19:08:23.80","00:39.72","","00:39.72","00:05.55"
+"4","JAW2x TT","1","MSĢ TSV SASS / MSĢ TSV ""Jūrmala""","SASS / JMSG","20","Dinija Paula NIEDRA 2004/ 
+ Eimija MISJURO 2005/ ","19:07:44.25","19:08:24.82","00:40.57","","00:40.57",""
+"4","JAW2x TT","2","DISVS","DSS","21","Daniela STRODE 2005/ 
+ Jekaterina SIMANOVIČA 2006/ ","19:07:44.41","19:08:25.01","00:40.60","","00:40.60","00:00.03"
+"4","JAW2x TT","3","MSĢ TSV SASS","SASS","22","Ariana ALKSNE 2004/ 
+ Emīlija Anna JASAITE 2005/ ","19:07:44.58","19:08:25.19","00:40.61","","00:40.61","00:00.04"
+"4","JAW2x TT","3","MSĢ TSV SASS","SASS","24","Dagnija METĀLA 2005/ 
+ Eva GOBA 2005/ ","19:07:44.95","19:08:25.56","00:40.61","","00:40.61","00:00.04"
+"4","JAW2x TT","5","MSĢ TSV ""Jūrmala""","JMSG","23","Ģertrūde DZENE 2004/ 
+ Daniela RAKICKA 2005/ ","19:07:44.76","19:08:25.39","00:40.63","","00:40.63","00:00.06"
+"4","JAW2x TT","6","DISVS","DSS","25","Jurana SENDRJUTE 2008/ 
+ Elīna ROSMANOVIČA 2004/ ","19:07:45.13","19:08:28.41","00:43.28","","00:43.28","00:02.71"
+"5","JAM2- TT","1","DISVS","DSS","28","Rainers SILOVS 2004/ 
+ Auris-Aurlijs SUSEJS 2004/ ","19:07:50.04","19:08:28.94","00:38.90","","00:38.90",""
+"5","JAM2- TT","2","DISVS","DSS","31","Niķita VASIĻJEVS 2006/ 
+ Jegors ŠELKOVSKIS 2006/ ","19:07:51.28","19:08:31.40","00:40.12","","00:40.12","00:01.22"
+"5","JAM2- TT","3","DISVS","DSS","30","Ilja LOZJUKS 2006/ 
+ Dmitrijs BATURA 2006/ ","19:07:50.49","19:08:31.22","00:40.73","","00:40.73","00:01.83"
+"5","JAM2- TT","4","DISVS","DSS","29","Rihards AZAREVIČS 2005/ 
+ Vladimirs IVANOVS 2007/ ","19:07:50.28","19:08:31.04","00:40.76","","00:40.76","00:01.86"
+"5","JAM2- TT","5","DISVS","DSS","27","Renārs JĀNUZIS 2004/ 
+ Vladislavs KRIVOBOKS 2004/ ","19:07:45.48","19:08:28.76","00:43.28","","00:43.28","00:04.38"
+"5","JAM2- TT","6","MSĢ TSV ""Jūrmala""","JMSG","26","Nikolass DRENGERS 2005/ 
+ Andis MATISONS 2004/ ","19:07:45.30","19:08:28.59","00:43.29","","00:43.29","00:04.39"
+"6","JBW2x TT","1","MSĢ TSV SASS","SASS","32","Evija FREIMANE 2007/ 
+ Helēna GARKĀJA 2006/ ","19:07:56.36","19:08:31.55","00:35.19","","00:35.19",""
+"6","JBW2x TT","2","DISVS","DSS","34","Veronika BOGDANOVA 2007/ 
+ Anastasija IVANOVA 2007/ ","19:07:57.02","19:08:33.36","00:36.34","","00:36.34","00:01.15"
+"6","JBW2x TT","3","MSĢ TSV SASS","SASS","33","Līva LAVRINOVIČA 2007/ 
+ Līva INDĀNE 2008/ ","19:07:56.74","19:08:33.17","00:36.43","","00:36.43","00:01.24"
+"7","JCW2x TT","1","Jelgavas BJSS","JBSS","35","Viktorija KUZMINA 2008/ 
+ Jelizaveta ANCIFEROVA 2009/ ","19:07:58.37","19:08:33.53","00:35.16","","00:35.16",""
+"7","JCW2x TT","2","Jelgavas BJSS","JBSS","36","Alija MINAJEVA 2009/ 
+ Marta PLŪDUMA 2009/ ","19:07:58.57","19:08:35.13","00:36.56","","00:36.56","00:01.40"
+"7","JCW2x TT","3","Jelgavas BJSS","JBSS","37","Liāna SADIGOVA 2008/ 
+ Beāte BONDARE 2008/ ","19:07:58.76","19:08:35.45","00:36.69","","00:36.69","00:01.53"
+"9","JBM2x FC","","Empty","Empty","1","","","","","Exhib","",""
+"9","JBM2x FC","","SK ""Jūrmalas sports""","SKJS","2","Rustams JEVLAMPIJEVS 2006/ 
+ Arnolds ARSENTJEVS 2007/ ","","","","","",""
+"9","JBM2x FC","","MSĢ TSV SASS","SASS","3","Oskars Larss DRUVIETIS 2006/ MSĢ TSV SASS
+ Kristians PUDULIS 2006/ MSĢ TSV SASS","","","","","",""
+"9","JBM2x FC","","MSĢ TSV SASS","SASS","4","Kristiāns KALCENAVS 2006/ 
+ Kristers Aleksandrs JAKOVĻEVS 2006/ ","","","","","",""
+"10","JBM2x FB","","DISVS","DSS","1","Artūrs FJODOROVS 2007/ 
+ Ilja KALISTRATOVS 2006/ ","","","","","",""
+"10","JBM2x FB","","MSĢ TSV SASS","SASS","2","Dāvis LEGZDIŅŠ 2007/ 
+ Dāvis KRIŠJĀNIS 2006/ ","","","","","",""
+"10","JBM2x FB","","MSĢ TSV SASS","SASS","3","Roberts KRISKĀNS 2007/ 
+ Guntars GERHARDS 2007/ ","","","","","",""
+"10","JBM2x FB","","SK ""Jūrmalas sports""","SKJS","4","Toms MULAREKS 2007/ 
+ Rihards PAKULIS 2007/ ","","","","","",""
+"11","JBM2x FA","","MSĢ TSV SASS","SASS","1","Artūrs ZIRNIS 2007/ 
+ Tomass REZEVSKIS 2006/ ","","","","","",""
+"11","JBM2x FA","","MSĢ TSV ""Jūrmala""","JMSG","2","Kristers BERĢIS KALNS 2006/ 
+ Ernests BRŪNS 2006/ ","","","","","",""
+"11","JBM2x FA","","Jelgavas BJSS","JBSS","3","Emīls Niks DONOVS 2006/
+ Valters SĒJĀNS 2006/","","","","","",""
+"11","JBM2x FA","","Jelgavas BJSS","JBSS","4","Svens Edgars ELKSNIS 2007/ 
+ Jānis EGLĀJS 2006/ ","","","","","",""
+"12","JAM2- FB","","Empty","Empty","1","","","","","Exhib","",""
+"12","JAM2- FB","","DISVS","DSS","2","Renārs JĀNUZIS 2004/ 
+ Vladislavs KRIVOBOKS 2004/ ","","","","","",""
+"12","JAM2- FB","","MSĢ TSV ""Jūrmala""","JMSG","3","Nikolass DRENGERS 2005/ 
+ Andis MATISONS 2004/ ","","","","","",""
+"12","JAM2- FB","","Empty","Empty","4","","","","","Exhib","",""
+"13","JAM2- FA","","DISVS","DSS","1","Rihards AZAREVIČS 2005/ 
+ Vladimirs IVANOVS 2007/ ","","","","","",""
+"13","JAM2- FA","","DISVS","DSS","2","Rainers SILOVS 2004/ 
+ Auris-Aurlijs SUSEJS 2004/ ","","","","","",""
+"13","JAM2- FA","","DISVS","DSS","3","Niķita VASIĻJEVS 2006/ 
+ Jegors ŠELKOVSKIS 2006/ ","","","","","",""
+"13","JAM2- FA","","DISVS","DSS","4","Ilja LOZJUKS 2006/ 
+ Dmitrijs BATURA 2006/ ","","","","","",""
+"14","JCM4x FA","","Jelgavas BJSS","JBSS","1","Marks LULBERGS 2008/  Ņikita PETRIKS 2008/  Kristers LIEPIŅŠ 2009/ 
+ Renārs JĀTNIEKS 2009/ ","","","","","",""
+"14","JCM4x FA","","MSĢ TSV SASS","SASS","2","Linards FREIMANIS 2009/  Eduards ELSTS 2009/ 
+ Frederiks RASA 2009/ 
+ Henriks RASA 2008/ ","","","","","",""
+"14","JCM4x FA","","Jelgavas BJSS","JBSS","3","Edgars RINČS 2008/  Edgars SLAKTERIS 2008/  Mareks ŠULCS 2010/ 
+ Maksims SAVEĻJEVS 2008/ ","","","","","",""
+"14","JCM4x FA","","DISVS","DSS","4","Nikita PUŠKELIS 2008/  Vadims ZELENKOVS 2009 / 
+ Grigorijs MURAVSKIS 2008/ 
+ Vladislavs LEDAKS 2008/ ","","","","","",""
+"15","JAW2x FB","","Empty","Empty","1","","","","","Exhib","",""
+"15","JAW2x FB","","MSĢ TSV ""Jūrmala""","JMSG","2","Ģertrūde DZENE 2004/ 
+ Daniela RAKICKA 2005/ ","","","","","",""
+"15","JAW2x FB","","DISVS","DSS","3","Jurana SENDRJUTE 2008/ 
+ Elīna ROSMANOVIČA 2004/ ","","","","","",""
+"15","JAW2x FB","","Empty","Empty","4","","","","","Exhib","",""
+"16","JAW2x FA","","MSĢ TSV SASS","SASS","1","Dagnija METĀLA 2005/ 
+ Eva GOBA 2005/ ","","","","","",""
+"16","JAW2x FA","","MSĢ TSV SASS / MSĢ TSV ""Jūrmala""","SASS / JMSG","2","Dinija Paula NIEDRA 2004/ 
+ Eimija MISJURO 2005/ ","","","","","",""
+"16","JAW2x FA","","DISVS","DSS","3","Daniela STRODE 2005/ 
+ Jekaterina SIMANOVIČA 2006/ ","","","","","",""
+"16","JAW2x FA","","MSĢ TSV SASS","SASS","4","Ariana ALKSNE 2004/ 
+ Emīlija Anna JASAITE 2005/ ","","","","","",""
+"17","JBW2x FA","","Empty","Empty","1","","","","","Exhib","",""
+"17","JBW2x FA","","MSĢ TSV SASS","SASS","2","Evija FREIMANE 2007/ 
+ Helēna GARKĀJA 2006/ ","","","","","",""
+"17","JBW2x FA","","DISVS","DSS","3","Veronika BOGDANOVA 2007/ 
+ Anastasija IVANOVA 2007/ ","","","","","",""
+"17","JBW2x FA","","MSĢ TSV SASS","SASS","4","Līva LAVRINOVIČA 2007/ 
+ Līva INDĀNE 2008/ ","","","","","",""
+"18","JCW2x FA","","Empty","Empty","1","","","","","Exhib","",""
+"18","JCW2x FA","","Jelgavas BJSS","JBSS","2","Viktorija KUZMINA 2008/ 
+ Jelizaveta ANCIFEROVA 2009/ ","","","","","",""
+"18","JCW2x FA","","Jelgavas BJSS","JBSS","3","Alija MINAJEVA 2009/ 
+ Marta PLŪDUMA 2009/ ","","","","","",""
+"18","JCW2x FA","","Jelgavas BJSS","JBSS","4","Liāna SADIGOVA 2008/ 
+ Beāte BONDARE 2008/ ","","","","","",""

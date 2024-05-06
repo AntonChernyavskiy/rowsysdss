@@ -93,13 +93,12 @@ for i,en in enumerate(df["EventNum"]):
     for j, a in enumerate(data):
         if a[-1] == last:
             html = html.replace("[rinda]", tr.format(a[0], a[1], a[2], a[3], a[4], a[5], a[6], a[7], a[8]) + "\n[rinda]")
-            print("1111111")
             last = a[-1]
         else:
-            html = html.replace("[rinda]", tr.format( "<p style=\"page-break-before: always;\">&nbsp;</p>" + inf.format("boat", j, j, j, j, j, j, j, "series") + a[0], a[1], a[2], a[3], a[4], a[5], a[6], a[7], a[8]) + "\n[rinda]")
-            print("222222222")
+            html = html.replace("[rinda]", inf.format("boat", j, j, j, j, j, j, j, "series") + tr.format(a[0], a[1], a[2], a[3], a[4], a[5], a[6], a[7], a[8]) + "\n[rinda]")
             last = a[-1]
     html = html.replace("[rinda]", "")
+    # "<p style=\"page-break-before: always;\">&nbsp;</p>" +
 
     ft = open("html\log.html", "w", encoding='utf-8')
     ft.write(html)

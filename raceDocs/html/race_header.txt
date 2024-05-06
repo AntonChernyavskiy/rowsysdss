@@ -1,5 +1,5 @@
 <tr class="rTextTbl">
-	<th colspan="7">
+	<th colspan="7"><p style="page-break-before: always;">&nbsp;</p>
 		<div class="raceInfo">
 			<table>
 				<tr>
