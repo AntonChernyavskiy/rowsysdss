@@ -150,7 +150,7 @@ for j, a in enumerate(data):
 html = html.replace("[rinda]", "")
 # "<p style=\"page-break-before: always;\">&nbsp;</p>" +
 
-ft = open("html\log.html", "w", encoding='utf-8')
+ft = open("html/log.html", "w", encoding='utf-8')
 ft.write(html)
 ft.close()
 
@@ -174,7 +174,7 @@ for j, a in enumerate(start_data):
         last_id+=1
 start_html = start_html.replace("[st_rinda]", "")
 
-ft = open("html\start_log.html", "w", encoding='utf-8')
+ft = open("html/start_log.html", "w", encoding='utf-8')
 ft.write(start_html)
 ft.close()
 
