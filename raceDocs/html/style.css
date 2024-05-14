@@ -5,7 +5,7 @@
 .compInfo th {
     width: 6cm;
     vertical-align: bottom;
-    font-size: 14px;
+    font-size: 16px;
     /*height: 3.8cm;*/
 }
 
@@ -13,11 +13,11 @@
     background-color: #f2f2f2;
     text-align: center;
     width: 18cm;
-    font-size: 14px;
+    font-size: 15px;
 }
 
 .raceHeaders {
-    font-size: 14px;
+    font-size: 15px;
     border-collapse: collapse;
     border-top: 1px solid black;
     border-bottom: 1px solid black;
@@ -34,13 +34,13 @@
 .rText th{
     text-align: center;
     vertical-align: center;
-    font-size: 12px;
+    font-size: 13px;
 }
 
 .rText td{
     text-align: center;
     vertical-align: top;
-    font-size: 11px;
+    font-size: 12px;
 }
 
 .rTextTbl td {
@@ -53,7 +53,7 @@
 }
 
 .postInfo {
-    font-size: 11px;
+    font-size: 12px;
 }
 
 .footer {
