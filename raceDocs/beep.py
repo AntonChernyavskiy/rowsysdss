@@ -4,7 +4,7 @@ import winsound
 # Function to handle key press events
 def on_key_press(event):
     if event.keysym == 'space':
-        winsound.Beep(1000, 500)  # Frequency: 1000 Hz, Duration: 200 ms
+        winsound.Beep(1000, 1500)  # Frequency: 1000 Hz, Duration: 200 ms
 
 # Create the main window
 root = tk.Tk()
