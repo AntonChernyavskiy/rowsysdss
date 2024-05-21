@@ -4,6 +4,6 @@
     <td style="width: 12.96mm;">{}</td>
     <td style="width:59.8mm; text-align: left"><b>{}</b><br><t style="font-family: calibri light">{}</t></td>
     <td style="width: 43.39mm;"></td>
-    <td style="width: 25.14mm;"><b>{}</b><br>{}<br><t style="font-size: 8px"><i>{}: {}</i></t></td>
+    <td style="width: 25.14mm;"><b>{}</b><br>{}<br><t style="font-size: 8px"><i>{} {}</i></t></td>
     <td style="width: 12.96mm">{}<br>&#8203<br>&#8203</td>
 </tr>

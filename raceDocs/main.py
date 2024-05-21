@@ -4,30 +4,30 @@ import os
 from winreg import *
 import shutil
 
-splitFun = "500 m"
-splitCount = 4
-cn = "Daugavpils Sporta skolas slēgtais čempionāts airēšanā"
-cd = "2024. gada 18. maijs"
+# splitFun = "500 m"
+# splitCount = 4
+cn = "LR kausa izcīņa"
+cd = "2024. gada 31. maijs - 01. jūnijs"
 prog = ""
 # cn = input("compName: ")
 # cd = input("compDate: ")
 # prog = input("progression: ")
 
 
-def split_time(Adjtime):
-    if not Adjtime:
-        return "0"
-
-    # Преобразование строки в объект времени
-    time_obj = datetime.datetime.strptime(Adjtime, '%M:%S.%f')
-
-    # Деление времени на 4
-    result_time = time_obj + datetime.timedelta(milliseconds=(time_obj.microsecond / 1000) / splitCount)
-
-    # Преобразование объекта времени обратно в строку
-    result_str = result_time.strftime('%M:%S.%f')[:-4]
-
-    return result_str
+# def split_time(Adjtime):
+#     if not Adjtime:
+#         return "0"
+#
+#     # Преобразование строки в объект времени
+#     time_obj = datetime.datetime.strptime(Adjtime, '%M:%S.%f')
+#
+#     # Деление времени на 4
+#     result_time = time_obj + datetime.timedelta(milliseconds=(time_obj.microsecond / 1000) / splitCount)
+#
+#     # Преобразование объекта времени обратно в строку
+#     result_str = result_time.strftime('%M:%S.%f')[:-4]
+#
+#     return result_str
 
 
 aReg = ConnectRegistry(None,HKEY_LOCAL_MACHINE)
@@ -91,6 +91,7 @@ f.close()
 start = datetime.datetime.now()
 print("Start: ", start)
 info = []
+#prog = []
 data = []
 start_data = []
 st_info = []
@@ -99,6 +100,7 @@ st_info = []
 # print(df["EventNum"])
 for i,en in enumerate(df["EventNum"]):
     info.append([en, boat_list[df["Event"][i].split()[1]], df["Event"][i].split()[1], df["Event"][i].split()[2], suf_list[df["Event"][i].split()[2]], df["Day"][i], df["Start"][i], cat_list[df["Event"][i].split()[1]]])
+    #prog.append([[df["Prog"][i]]])
 
 #print(info)\
 # print(df["EventNum"])
@@ -112,7 +114,7 @@ for i,en in enumerate(df["EventNum"]):
     else:
         a = ["","",""]
 for j, en in enumerate(fl["EventNum"]):
-    if fl["Crew"][j] != "Empty": data.append([str(fl["Place"][j]).split(sep=".")[0], str(fl["Bow"][j]).split(sep=".")[0], fl["Crew"][j], fl["Stroke"][j].replace("/", "<br>"), fl["AdjTime"][j], fl["Delta"][j], splitFun, split_time(fl["AdjTime"][j]), " ", en])
+    if fl["Crew"][j] != "Empty": data.append([str(fl["Place"][j]).split(sep=".")[0], str(fl["Bow"][j]).split(sep=".")[0], fl["Crew"][j], fl["Stroke"][j].replace("/", "<br>"), fl["AdjTime"][j], fl["Delta"][j], " ", " ", fl["Qual"][j], en])
     if fl["Crew"][j] != "Empty": start_data.append([str(fl["Bow"][j]).split(sep=".")[0], fl["Crew"][j], fl["Stroke"][j].replace("/", ", "), en])
 
 html = html.format(compName=cn, compDates=cd,
@@ -120,7 +122,7 @@ html = html.format(compName=cn, compDates=cd,
                    cTime=datetime.datetime.now().strftime('%H:%M:%S'))
 start_html = start_html.format(compName=cn, compDates=cd,
                    cDate=datetime.datetime.now().strftime('%Y-%m-%d'),
-                   cTime=datetime.datetime.now().strftime('%H:%M:%S'), rProgression=prog)
+                   cTime=datetime.datetime.now().strftime('%H:%M:%S'))
 
 f = open("html/tbody_res_with_qual.txt", "r")
 tr = f.read()
@@ -170,6 +172,7 @@ for j, a in enumerate(start_data):
         last = a[-1]
     else:
         start_html = start_html.replace("[st_rinda]", inf.format(info[last_id][7], info[last_id][2], info[last_id][1], info[last_id][4], info[last_id][3], info[last_id][0], info[last_id][5], info[last_id][6]) + tr.format(a[0], a[1], a[2]) + "\n[st_rinda]")
+        #start_html = start_html.replace("[prog_sys]", ft.format(prog[last_id][0]))
         last = a[-1]
         last_id+=1
 start_html = start_html.replace("[st_rinda]", "")
