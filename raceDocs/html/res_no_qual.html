@@ -3,125 +3,84 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>res_no_qual</title>
+    <title>RESULTS | {compName} - {compDates}</title>
     <link rel="stylesheet" href="style.css">
 </head>
 <body>
     <div style="width: 21cm">
-        <div style="width: 18cm; margin-left: 1.6cm; margin-right: 1.4cm;">
+        <div style="width: 18cm; margin-left: 1.6cm; margin-right: 1.4cm">
             <table>
                 <thead>
-                    <tr>
-                        <th colspan="7">
-                            <div>
-                                <table class="compInfo">
-                                    <tr>
-                                        <th style="text-align: left">{compName}</th>
-                                        <th><img src="compLogo.png" class="imgLogo"></th>
-                                        <th style="text-align: right">{compDates}</th>
-                                    </tr>
-                                </table>
-                                <hr style="border-top: 1.5px solid black">
-                            </div>
-                        </th>
-                    </tr>
-                    <tr>
-                        <th colspan="7">
-                            <div class="raceInfo">
-                                <table>
-                                    <tr>
-                                        <th></th>
-                                        <th style="font-size: 14px;">RESULTS</th>
-                                        <th></th>
-                                    </tr>
-                                    <tr>
-                                        <th>{eventNum} - {boatClass}</th>
-                                        <td>{boatClassFull}</td>
-                                        <th>{phaseFull} - {phase}</th>
-                                    </tr>
-                                    <tr>
-                                        <td>race {raceNum}</td>
-                                        <th>{raceDate} | {raceTime}</th>
-                                        <td>Series: {phaseNum}</td>
-                                    </tr>
-                                </table>
-                            </div>
-                            <br>
-                        </th>
-                    </tr>
-                    <tr>
-                        <th colspan="7">
-                            <div class="raceHeaders">
-                                <table>
-                                    <tr>
-                                        <th style="height: 7mm; width: 17.73mm">Place</th>
-                                        <th style="width: 17.73mm">Rank</th>
-                                        <th style="width: 12.96mm">Lane</th>
-                                        <th style="width: 59.8mm; text-align: left;">Team</th>
-                                        <th style="width: 35.05mm"></th>
-                                        <th style="width: 25.14mm">Finish</th>
-                                        <th style="width: 6.48mm"></th>
-                                    </tr>
-                                </table>
-                            </div>
-                        </th>
-                    </tr>
+                <tr>
+                    <th colspan="10">
+                        <div>
+                            <table class="compInfo">
+                                <tr>
+                                    <th colspan="2"><img src="img/compLogo.png" class="compLogo"></th>
+                                </tr>
+                                <tr>
+                                    <th colspan="2">
+                                        <div class="compNameDates">
+                                            <span class="compName">{compName}</span>
+                                            <span class="compDates">{compDates}</span>
+                                        </div>
+                                    </th>
+                                </tr>
+                            </table>
+                            <hr style="border-top: 1.5px solid black">
+                        </div>
+                    </th>
+                </tr>
                 </thead>
                 <tbody>
                     <tr>
-                        <td colspan="7">
+                        <td colspan="10">
                             <table class="rText">
-                                <tr class="rTextTbl">
-                                    <td style="width: 17.73mm">{rPlace}</td>
-                                    <td style="width: 17.73mm"><i>{rRank}</i></td>
-                                    <td style="width: 12.96mm;">{rLane}</td>
-                                    <td style="width:59.8mm; text-align: left"><b>{rTeam}</b><br><t style="font-family: calibri light">{rCrew}</t></td>
-                                    <td style="width: 35.05mm;"></td>
-                                    <td style="width: 25.14mm;"><b>{rResult}</b><br>{rDelta}<br><t style="font-size: 8px"><i>{rSplit}: {rSplitAvg}</i></t></td>
-                                    <td style="width: 6.48mm"></td>
-                                </tr>
-                                <tr class="rTextTbl">
-                                    <td style="width: 17.73mm">{rPlace}</td>
-                                    <td style="width: 17.73mm"><i>{rRank}</i></td>
-                                    <td style="width: 12.96mm;">{rLane}</td>
-                                    <td style="width:59.8mm; text-align: left"><b>{rTeam}</b><br><t style="font-family: calibri light">{rCrew}</t></td>
-                                    <td style="width: 35.05mm;"></td>
-                                    <td style="width: 25.14mm;"><b>{rResult}</b><br>{rDelta}<br><t style="font-size: 8px"><i>{rSplit}: {rSplitAvg}</i></t></td>
-                                    <td style="width: 6.48mm"></td>
-                                </tr>
+                                [rinda_noq]
                             </table>
-                             <table>
-                            <tr>
-                                <div class="postInfo">
-                                    <p style="text-align: center; font-size: 10px;"> Page <b>{cPage}</b> of <b>{tPage}</b></p>
-                                    <br>
-                                    <b>Flags description:</b><br>
-                                    <b>DNF</b> - did not finish; <b>DNS</b> - did not start; <b>DSQ</b> - disqualified; <b>EXC</b> - excluded; <b>OOC</b> - out of competition; <b>BUW</b> - boat under weight<br>
-                                    <b>Generated: {cDate} {cTime}</b>
-                                    
-                                </div>
-                            </tr>
+                            <table style="width: 100%;">
+                                <tr style="font-size: 12px;">
+                                    <td colspan="10">
+                                        <table style="width: 100%;">
+                                            <tr class="postInfo">
+                                                <td colspan="6" style="text-align: left">
+                                                <hr style="border-top: 1px solid black;">
+                                                Results delivered by crewtimer.<br><br>
+                                                <b>Flags description:</b><br>
+                                                <b>DNF</b> - did not finish; <b>DNS</b> - did not start; <b>DSQ</b> - disqualified; <b>EXC</b> - excluded; <b>OOC</b> - out of competition; <b>BUW</b> - boat under weight<br>
+                                                <b>ELM</b> - eliminated<br><br>
+                                                <b>Generated: {cDate} {cTime}</b><br>
+                                                Results available at https://antonchernyavskiy.github.io/rowsysdss
+                                                <div>Timing & data processing: <b>Antons Cernavskis</b></div>
+                                                </td>
+                                            </tr>
+                                        </table>  
+                                    </td>
+                                </tr>
                             </table>
                         </td>
                     </tr>
                 </tbody>
-                <tfoot>
-                    <div class="footer"></div>
-                        <tr>
-                            <td colspan="7">
-                                <hr style="border-top: 1px solid black;">
-                                <table style="width: 18cm">
-                                    <tr>
-                                        <th><img src="foot1.png"></th>
-                                        <th><img src="foot2.png"></th>
-                                        <th><img src="foot3.png"></th>
-                                        <th><img src="foot4.png"></th>
-                                        <th><img src="foot5.png"></th>
-                                    </tr>
-                                </table>
-                            </td>
-                        </tr>
-                    </div>
+                <tfoot class="tfoot">
+                    <tr class="postImg">
+                        <td colspan="10">
+                            <table>                              
+                                <tr>
+                                    <td colspan="10">
+                                        <table style="width: 18cm">
+                                            <tr style="max-height: 5cm;">
+                                                <th><img src="img/foot1.png"></th>
+                                                <th><img src="img/foot2.png"></th>
+                                                <th><img src="img/foot3.png"></th>
+                                                <th><img src="img/foot4.png"></th>
+                                                <th><img src="img/foot5.png"></th>
+                                            </tr>
+                                        </table>
+                                    </td>
+                                </tr>
+                            </table>
+                        </td>  
+                    </tr>
                 </tfoot>
             </table>
         </div>

@@ -1,5 +1,5 @@
 <tr>
-	<th colspan="7">
+	<th colspan="11">
 	<p style="page-break-before: always;">&nbsp;</p>
 		<div class="raceInfo">
 			<table>
@@ -20,16 +20,20 @@
 	</th>
 </tr>
 <tr>
-	<th colspan="7">
+	<th colspan="11">
 		<div class="raceHeaders">
 			<table class="rText">
 				<tr>
 					<th style="height: 7mm; width: 17.73mm">Place</th>
 					<th style="width: 2.91mm"></th>
 					<th style="width: 12.96mm">Lane</th>
-					<th style="width: 59.8mm; text-align: left;">Team</th>
-					<th style="width: 43.39mm"></th>
-					<th style="width: 25.14mm">Finish</th>
+					<th style="width: 10mm"></th>
+					<th style="width: 45mm; text-align: left;">Team</th>
+					<th style="width: 8.15mm"></th>
+					<th style="width: 20mm">500 m</th>
+					<th style="width: 20mm">1000 m</th>
+					<th style="width: 20mm">1500 m</th>
+					<th style="width: 20mm">Finish</th>
 					<th style="width: 12.96mm">Qual</th>
 				</tr>
 			</table>

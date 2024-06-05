@@ -25,9 +25,10 @@
 			<table class="rText">
 				<tr>
 					<th style="width: 17.73mm">Lane</td>
+					<th style="width: 10mm;"></td>
 					<th style="width: 40mm">Team</td>
 					<th style="width: 81.11mm;">Athletes</td>
-					<th style="width: 41.16mm"></td>
+					<th style="width: 31.16mm"></td>
 				</tr>
 			</table>
 		</div>

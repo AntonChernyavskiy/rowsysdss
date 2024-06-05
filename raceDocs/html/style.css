@@ -61,6 +61,10 @@
     border-style: 1px solid black;
 }
 
+.rTextTbl img {
+    max-width: 6mm;
+}
+
 .postInfo {
     font-size: 12px;
     text-align: left;
