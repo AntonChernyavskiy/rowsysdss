@@ -301,44 +301,47 @@ class RaceApp(BoxLayout):
                 info.append(
                     [en, boat_list[df["Event"][i].split()[1]], df["Event"][i].split()[1], df["Event"][i].split()[2],
                      suf_list[df["Event"][i].split()[2]], df["Day"][i], df["Start"][i],
-                     cat_list[df["Event"][i].split()[1]], df["Prog"][i]])
+                     cat_list[df["Event"][i].split()[1]], str(df["Prog"][i])])
+
         for j, en in enumerate(fl["EventNum"]):
             if str(en) in selected_event_nums:
                 if fl["Crew"][j] != "Empty":
-                    try:
-                        penalty_code = str(fl["PenaltyCode"][j])
-                        if penalty_code:
-                            age_part, handicap_part = penalty_code.split("(-")
-                            av_age = age_part.split()[1]
-                            handicap = handicap_part.split(")")[0]
-                        else:
+                    def masterFun(a):
+                        try:
+                            penalty_code = a
+                            if penalty_code:
+                                age_part, handicap_part = penalty_code.split("(-")
+                                av_age = age_part.split()[1]
+                                handicap = handicap_part.split(")")[0]
+                                return(f'AV AGE: {av_age} <br> HANDICAP: {handicap}')
+                            else:
+                                return(" ")
+                        except IndexError:
                             pass
-                    except IndexError:
-                        pass
 
                     data.append(
                         [str(fl["Place"][j]).split(sep=".")[0], str(fl["Bow"][j]).split(sep=".")[0], f'<img src="flags/{flag_list[fl["CrewAbbrev"][j]]}" style="max-width: 6mm">',
                          fl["Crew"][j],
-                         fl["Stroke"][j].replace("/", "<br>"), fl["AdjTime"][j], fl["Delta"][j], " ", " ", en])
+                         fl["Stroke"][j].replace("/", "<br>"), fl["AdjTime"][j], fl["Delta"][j], " ", " ", fl["Qual"][j], en])
                     dataQ.append(
-                        [str(fl["Place"][j]).split(sep=".")[0], f"({str(fl["Rank"][j]).split(sep='.')[0]})", str(fl["Bow"][j]).split(sep=".")[0], f'<img src="flags/{flag_list[fl["CrewAbbrev"][j]]}" style="max-width: 6mm">',
-                         fl["Crew"][j], fl["Stroke"][j].replace("/", "<br>"), fl["AdjTime"][j], fl["Delta"][j], " ", " ", en])
+                        [str(fl["Place"][j]).split(sep=".")[0], f"({str(fl["Rank"][j])})", str(fl["Bow"][j]).split(sep=".")[0], f'<img src="flags/{flag_list[fl["CrewAbbrev"][j]]}" style="max-width: 6mm">',
+                         fl["Crew"][j], fl["Stroke"][j].replace("/", "<br>"), fl["AdjTime"][j], fl["Delta"][j], " ", " ",  en])
 
                     dataMaster.append(
                         [str(fl["Place"][j]).split(sep=".")[0], str(fl["Bow"][j]).split(sep=".")[0], f'<img src="flags/{flag_list[fl["CrewAbbrev"][j]]}" style="max-width: 6mm">',
                          fl["Crew"][j],
                          fl["Stroke"][j].replace("/", "<br>"), fl["RawTime"][j], fl["AdjTime"][j], fl["Delta"][j], " ", " ",
-                         fl["Qual"][j], f'AV AGE: {av_age} / HANDICAP: {handicap}',  en])
+                         fl["Qual"][j], masterFun(str(fl["PenaltyCode"][j])),  en])
 
                     dataMasterQ.append(
-                        [str(fl["Place"][j]).split(sep=".")[0], f"({str(fl["Rank"][j]).split(sep='.')[0]})",
+                        [str(fl["Place"][j]).split(sep=".")[0], f"({str(fl["Rank"][j])})",
                          str(fl["Bow"][j]).split(sep=".")[0],
                          f'<img src="flags/{flag_list[fl["CrewAbbrev"][j]]}" style="max-width: 6mm">',
                          fl["Crew"][j], fl["Stroke"][j].replace("/", "<br>"), fl["RawTime"][j], fl["AdjTime"][j], fl["Delta"][j], " ",
-                         " ", f'AV AGE: {av_age} / HANDICAP: {handicap}', en])
+                         " ", masterFun(str(fl["PenaltyCode"][j])), en])
 
                     start_data.append(
-                        [str(fl["Bow"][j]).split(sep=".")[0], f'<img src="flags/{flag_list[fl["CrewAbbrev"][j]]}" style="max-width: 6mm">', fl["Crew"][j], fl["Stroke"][j].replace("/", ", "), f'AV AGE: {av_age} <br> HANDICAP: {handicap}', en])
+                        [str(fl["Bow"][j]).split(sep=".")[0], f'<img src="flags/{flag_list[fl["CrewAbbrev"][j]]}" style="max-width: 6mm">', fl["Crew"][j], fl["Stroke"][j].replace("/", ", "), masterFun(str(fl["PenaltyCode"][j])), en])
 
         current_date = datetime.datetime.now().strftime('%Y-%m-%d')
         current_time = datetime.datetime.now().strftime('%H:%M:%S')
@@ -398,12 +401,12 @@ class RaceApp(BoxLayout):
 
                 last = a[-1]
                 last_id += 1
-        print(info)
         html = html.replace("[rinda]", "")
         last_prog = ""
         for sublist in info:
             last_prog = sublist[-1]
         html = html.replace("[prog_sys]", last_prog)
+        html = html.replace("[prog_sys]", "")
 
         with open("html/tbody_res_with_qual_masters.txt", "r") as f:
             trMast = f.read()
@@ -417,7 +420,6 @@ class RaceApp(BoxLayout):
         last = ''
         last_id = 0
         first_insert = True
-        print("222")
         for j, a in enumerate(dataMaster):
             if a[-1] == last:
                 htmlMaster = htmlMaster.replace("[rinda]",
@@ -447,12 +449,12 @@ class RaceApp(BoxLayout):
 
                 last = a[-1]
                 last_id += 1
-        print(info)
         htmlMaster = htmlMaster.replace("[rinda]", "")
         last_prog = ""
         for sublist in info:
             last_prog = sublist[-1]
         htmlMaster = htmlMaster.replace("[prog_sys]", last_prog)
+        htmlMaster = htmlMaster.replace("[prog_sys]", "")
 
         with open("html/log.html", "w", encoding='utf-8') as ft:
             ft.write(html)
@@ -501,6 +503,7 @@ class RaceApp(BoxLayout):
 
         start_htmlMaster = start_htmlMaster.replace("[st_rinda]", "")
         start_htmlMaster = start_htmlMaster.replace("[prog_sys]", last_prog)
+        start_htmlMaster = start_htmlMaster.replace("[prog_sys]", "")
 
         with open("html/start_log_master.html", "w", encoding='utf-8') as ft:
             ft.write(start_htmlMaster)
@@ -546,6 +549,7 @@ class RaceApp(BoxLayout):
 
         start_html = start_html.replace("[st_rinda]", "")
         start_html = start_html.replace("[prog_sys]", last_prog)
+        start_html = start_html.replace("[prog_sys]", "")
 
         with open("html/start_log.html", "w", encoding='utf-8') as ft:
             ft.write(start_html)
@@ -595,6 +599,7 @@ class RaceApp(BoxLayout):
                 last_id += 1
         print(info)
         htmlQ = htmlQ.replace("[rinda_noq]", "")
+        htmlQ = htmlQ.replace("[prog_sys]", "")
 
         with open("html/log_noq.html", "w", encoding='utf-8') as ft:
             ft.write(htmlQ)
@@ -643,6 +648,7 @@ class RaceApp(BoxLayout):
                 last_id += 1
         print(info)
         htmlMasterQ = htmlMasterQ.replace("[rinda_noq]", "")
+        htmlMasterQ = htmlMasterQ.replace("[prog_sys]", "")
 
         with open("html/log_noq_master.html", "w", encoding='utf-8') as ft:
             ft.write(htmlMasterQ)

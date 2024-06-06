@@ -1,0 +1,286 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <title>DSS Sport System - Entries</title>
+    <meta name="description" content="">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <link rel="stylesheet" href="styles.css">
+    <link href="https://fonts.googleapis.com/css?family=Montserrat:500&display=swap" rel="stylesheet">
+
+    <script src="https://smtpjs.com/v3/smtp.js"></script>
+    <script src="index.js"></script>
+    <style>
+        /* Добавим стили только для формы, чтобы сохранить ее внешний вид в соответствии с дизайном сайта */
+        form {
+            width: 50%;
+            margin: auto;
+            padding: 20px;
+            background-color: #f9f9f9;
+            border-radius: 8px;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+        }
+
+        label {
+            display: block;
+            margin-bottom: 10px;
+            font-weight: bold;
+        }
+
+        input[type="text"],
+        input[type="number"],
+        select {
+            width: 100%;
+            padding: 8px;
+            margin-bottom: 10px;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+            font-size: 16px;
+            box-sizing: border-box;
+        }
+
+        input[type="submit"] {
+            width: 100%;
+            background-color: #0088a9;
+            color: #fff;
+            padding: 10px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 16px;
+            transition: background-color 0.3s;
+        }
+
+        input[type="submit"]:hover {
+            background-color: #006f88;
+        }
+
+        /* Стили для таблицы участников */
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-bottom: 20px;
+        }
+
+        th, td {
+            padding: 8px;
+            border: 1px solid #ccc;
+            text-align: left;
+        }
+
+        th {
+            background-color: #f2f2f2;
+        }
+
+        /* Стили для подсветки рулевых */
+        .highlight {
+            background-color: rgba(255, 166, 0, 0.75);
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <a class="cta" href="/">DSS Sport System</a>
+        <nav>
+            <ul class="nav__links">
+                <li><a href="/">Dashboard</a></li>
+                <li><a href="calendar.html">Calendar</a></li>
+                <li><a href="entries.html">Entries</a></li>
+                <li><a href="results.html">Results</a></li>
+                <li><a href="live_results.html">Live results</a></li>
+            </ul>
+        </nav>
+        <p class="menu cta">Menu</p>
+    </header>
+    <div class="overlay">
+        <a class="close">&times;</a>
+        <div class="overlay__content">
+            <a href="/">Dashboard</a>
+            <a href="calendar.html">Calendar</a>
+            <a href="entries.html">Entries</a>
+            <a href="results.html">Results</a>
+            <a href="live_results.html">Live results</a>
+        </div>
+    </div>
+    
+    <form id="emailForm">
+        <h2>Jelgavas jaunatnes čempionāts</h2><br><br>
+        <label for="organization">Organization:</label>
+        <select id="organization" name="organization">
+            <option value="MSĢ TSV SASS">MSĢ TSV SASS</option>
+            <option value="MSĢ TSV Jūrmala">MSĢ TSV Jūrmala</option>
+            <option value="Daugavpils Sporta skola">Daugavpils Sporta skola</option>
+            <option value="Jelgavas BJSS">Jelgavas BJSS</option>
+            <option value="LATC">LATC</option>
+            <option value="Rīgas Airētāju klubs">Rīgas Airētāju klubs</option>
+            <option value="Lielupes airēšanas klubs">Lielupes airēšanas klubs</option>
+            <option value="Airusports">Airusports</option>
+            <option value="other">Other (Specify)</option>
+        </select>
+
+        <!-- Если выбран вариант "Other", отображается поле для ввода своей организации -->
+        <div id="otherOrganization" style="display: none;">
+            <label for="otherOrganizationInput">Other Organization:</label>
+            <input type="text" id="otherOrganizationInput" name="otherOrganizationInput">
+        </div>
+
+        <label for="category">Category:</label>
+        <select id="category" name="category">
+            <option value="M1x">M1x</option>
+            <option value="W1x">W1x</option>
+            <option value="M2x">M2x</option>
+            <option value="W2x">W2x</option>
+            <option value="M2-">M2-</option>
+            <option value="W2-">W2-</option>
+            <option value="M4x">M4x</option>
+            <option value="W4x">W4x</option>
+            <option value="M4-">M4-</option>
+            <option value="W4-">W4-</option>
+            <option value="M4+">M4+</option>
+            <option value="W4+">W4+</option>
+            <option value="M8+">M8+</option>
+            <option value="W8+">W8+</option>
+        </select>
+
+        <!-- Таблица для ввода участников -->
+        <table id="participantsTable">
+            <thead>
+                <tr>
+                    <th>Year of Birth</th>
+                    <th>Last Name</th>
+                    <th>First Name</th>
+                </tr>
+            </thead>
+            <tbody>
+                <!-- Строки будут добавлены динамически с помощью JavaScript -->
+            </tbody>
+        </table>
+
+        <label for="contactInfo">Contact Information:</label>
+        <input type="text" id="contactInfo" name="contactInfo" required>
+
+        <input type="submit" value="Submit">
+    </form>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            document.querySelector('#category').addEventListener('change', function() {
+                const category = this.value;
+                const participantsTable = document.getElementById('participantsTable').getElementsByTagName('tbody')[0];
+                participantsTable.innerHTML = ''; // Очищаем содержимое таблицы при изменении категории
+    
+                // Добавляем строки таблицы в зависимости от выбранной категории
+                let numParticipants = 1;
+                let coxswainIndex = -1; // Индекс рулевого в списке участников, если есть
+                switch(category) {
+                    case 'M1x':
+                    case 'W1x':
+                        numParticipants = 1;
+                        break;
+                    case 'M2x':
+                    case 'M2-':
+                    case 'W2x':
+                    case 'W2-':
+                        numParticipants = 2;
+                        break;
+                    case 'M4x':
+                    case 'M4-':
+                    case 'W4x':
+                    case 'W4-':
+                        numParticipants = 4;
+                        break;
+                    case 'M4+':
+                    case 'W4+':
+                        numParticipants = 5;
+                        coxswainIndex = 4;
+                        break;
+                    case 'M8+':
+                    case 'W8+':
+                        numParticipants = 9;
+                        coxswainIndex = 8; // Рулевой в восьмой позиции
+                        break;
+                    default:
+                        break;
+                }
+    
+                // Добавляем строки в таблицу
+                for (let i = 0; i < numParticipants; i++) {
+                    const newRow = participantsTable.insertRow();
+                    newRow.innerHTML = `
+                        <td>
+                            <label for="birthYear${i + 1}">Year of Birth:</label>
+                            <input type="number" id="birthYear${i + 1}" name="birthYear${i + 1}" min="1900" max="2024" required>
+                        </td>
+                        <td>
+                            <label for="lastName${i + 1}">Last Name:</label>
+                            <input type="text" id="lastName${i + 1}" name="lastName${i + 1}" required>
+                        </td>
+                        <td>
+                            <label for="firstName${i + 1}">First Name:</label>
+                            <input type="text" id="firstName${i + 1}" name="firstName${i + 1}" required>
+                        </td>
+                    `;
+                    // Подсветка рулевого
+                    if (i === coxswainIndex) {
+                        newRow.classList.add('highlight');
+                    }
+                }
+            });
+        });
+    </script>
+    
+    <script>
+        // JavaScript для отображения поля ввода своей организации при выборе варианта "Other"
+        document.getElementById('organization').addEventListener('change', function() {
+            if (this.value === 'other') {
+                document.getElementById('otherOrganization').style.display = 'block';
+            } else {
+                document.getElementById('otherOrganization').style.display = 'none';
+            }
+        });
+    </script>
+    <script>
+        document.querySelector('#emailForm').addEventListener('submit', (e) => {
+  e.preventDefault();
+
+  // Собираем данные формы
+  const organization = document.getElementById('organization').value;
+  const category = document.getElementById('category').value;
+  const contactInfo = document.getElementById('contactInfo').value;
+
+  // Собираем данные участников
+  const participantsTable = document.getElementById('participantsTable').getElementsByTagName('tbody')[0];
+  const rows = participantsTable.getElementsByTagName('tr');
+  let participants = '';
+
+  for (let row of rows) {
+      const lastName = row.querySelector('input[name^="lastName"]').value.toUpperCase();
+      const firstName = row.querySelector('input[name^="firstName"]').value;
+      const birthYear = row.querySelector('input[name^="birthYear"]').value;
+      const shortBirthYear = birthYear.slice(-2);
+      participants += `${lastName} ${firstName} ${shortBirthYear}/ `;
+  }
+
+  // Формируем тело письма
+  const emailBody = `
+      ${category},
+      ${organization},
+      ${participants}\n
+      ${contactInfo}
+  `;
+
+  // Отправляем email с использованием SMTP.js
+  Email.send({
+      SecureToken: "eee0e3b5-eb6a-4611-bd1f-03bbeef9bd6f",
+      To: 'antons.cernavskis@gmail.com',
+      From: "antons.cernavskis@gmail.com",
+      Subject: "Pieteiksanas sacensibam",
+      Body: emailBody
+  }).then(
+      alert("Saņemts")
+  );
+});
+    </script>
+</body>
+</html>

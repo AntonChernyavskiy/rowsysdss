@@ -1,0 +1,67 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin Page</title>
+    <link rel="stylesheet" href="styles.css">
+    <link href="https://fonts.googleapis.com/css?family=Montserrat:500&display=swap" rel="stylesheet">
+</head>
+<body>
+    <header>
+        <a class="cta-admin" href="/">Admin page</a>
+        <nav>
+            <ul class="nav__links">
+                <li><a href="index.html">Dashboard</a></li>
+                <li><a href="calendar.html">Calendar</a></li>
+                <li><a href="entries.html">Entries</a></li>
+                <li><a href="results.html">Results</a></li>
+                <li><a href="live_results.html">Live results</a></li>
+                <li><a href="login_admin.html">Admin page</a></li>
+            </ul>
+        </nav>
+        <p class="menu cta">Menu</p>
+    </header>
+    <div class="overlay">
+        <a class="close">&times;</a>
+        <div class="overlay__content">
+            <a href="index.html">Dashboard</a>
+            <a href="calendar.html">Calendar</a>
+            <a href="entries.html">Entries</a>
+            <a href="results.html">Results</a>
+            <a href="live_results.html">Live results</a>
+            <a href="login_admin.html">Admin page</a>
+        </div>
+    </div>
+
+    <div class="main-content">
+        <h2>Edit Buttons and Filters</h2>
+        <form id="adminForm">
+            <div class="admin-input">
+                <label for="button1">Button 1:</label>
+                <input type="text" id="button1" name="button1" placeholder="Button 1">
+            </div>
+            <div class="admin-input">
+                <label for="button2">Button 2:</label>
+                <input type="text" id="button2" name="button2" placeholder="Button 2">
+            </div>
+            <!-- Add more input fields for additional buttons if needed -->
+            
+            <div class="admin-input">
+                <label for="filter1">Filter 1:</label>
+                <input type="text" id="filter1" name="filter1" placeholder="Filter 1">
+            </div>
+            <div class="admin-input">
+                <label for="filter2">Filter 2:</label>
+                <input type="text" id="filter2" name="filter2" placeholder="Filter 2">
+            </div>
+            <!-- Add more input fields for additional filters if needed -->
+
+            <button type="submit">Save Changes</button>
+        </form>
+    </div>
+
+    <script type="text/javascript" src="admin.js"></script>
+    <script type="text/javascript" src="mobile.js"></script>
+</body>
+</html>
