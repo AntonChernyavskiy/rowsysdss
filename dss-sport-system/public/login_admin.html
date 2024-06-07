@@ -64,11 +64,11 @@
         button[type="button"] {
             background-color: #0088a9;
             color: #fff;
-            margin-top: 10px; /* Добавляем небольшое отступ после поля ввода */
+            margin-top: 10px;
         }
 
         button:hover {
-            background-color: #666; /* Общее состояние при наведении для всех кнопок */
+            background-color: #666;
         }
 
         .error {
@@ -80,32 +80,27 @@
 </head>
 <body>
     <form id="loginForm">
-        <h1>Admin Login</h1> <!-- Переносим заголовок внутрь формы -->
+        <h1>Admin Login</h1>
         <label for="password">Password:</label>
         <input type="password" id="password" name="password" required>
         <button type="submit">Login</button>
-        <button type="button" onclick="returnBack()">Return back</button> <!-- Используем type="button" и добавляем onclick -->
+        <button type="button" onclick="returnBack()">Return back</button>
     </form>
 
     <script>
-        // Функция для возврата на предыдущую страницу
         function returnBack() {
             window.location.href = 'index.html';
         }
 
-        // Функция для проверки пароля и перенаправления на страницу администратора
         function loginAndRedirect(event) {
-            event.preventDefault(); // Предотвратить отправку формы
+            event.preventDefault();
             
-            // Запросить пароль
+
             const password = document.getElementById('password').value;
             
-            // Проверить, совпадает ли пароль с ожидаемым значением
             if (password === 'admin123') {
-                // Если пароль верный, перенаправить на страницу администратора
                 window.location.href = 'admin.html';
             } else {
-                // Если пароль неверный, вывести сообщение об ошибке
                 const errorElement = document.createElement('p');
                 errorElement.textContent = 'Incorrect password. Please try again.';
                 errorElement.classList.add('error');
@@ -114,10 +109,8 @@
             }
         }
 
-        // Найти форму для входа
         const loginForm = document.getElementById('loginForm');
 
-        // Добавить обработчик события отправки формы
         loginForm.addEventListener('submit', loginAndRedirect);
     </script>
 </body>

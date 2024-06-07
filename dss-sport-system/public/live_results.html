@@ -6,8 +6,9 @@
     <title>DSS Sport System</title>
     <meta name="description" content="">
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    <link rel="stylesheet" href="styles.css">
     <link href="https://fonts.googleapis.com/css?family=Montserrat:500&display=swap" rel="stylesheet">
+    <!-- <link rel="stylesheet" href="styles.css"> -->
+    <link rel="stylesheet" href="live_results.css">
 </head>
 <body>
     <header>
@@ -64,29 +65,36 @@
             </ul>
         </div>
     </div>
-    <script type="text/javascript" src="mobile.js"></script>
     <script src="filter.js"></script>
+    <script type="text/javascript" src="mobile.js"></script>
     <script>
         document.addEventListener('DOMContentLoaded', function () {
             fetch('/files')
                 .then(response => response.json())
                 .then(files => {
-                    const startlists = document.getElementById('startlists');
                     const resultsList = document.getElementById('results-list');
                     const otherFiles = document.getElementById('other-files');
+                    const startlists = document.getElementById('startlists');
 
                     files.forEach(file => {
                         const li = document.createElement('li');
+                        
+                        const img = document.createElement('img');
+                        img.src = '/images/document_icon.png';
+                        img.alt = 'Document Icon';
+                        img.style.marginRight = '10px';
+
                         const a = document.createElement('a');
                         a.href = `/files/${file}`;
                         a.textContent = file;
 
+                        li.appendChild(img);
                         li.appendChild(a);
 
                         if (file.includes('-')) {
                             otherFiles.appendChild(li);
                         } else if (file.includes('race_')) {
-                            li.classList.add('race-item'); // Add 'race-item' class here
+                            li.classList.add('race-item');
                             resultsList.appendChild(li);
                         } else {
                             startlists.appendChild(li);

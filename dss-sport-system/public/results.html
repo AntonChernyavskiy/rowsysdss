@@ -1,39 +1,146 @@
 <!DOCTYPE html>
-    <head>
-        <meta charset="utf-8">
-        <meta http-equiv="X-UA-Compatible" content="IE=edge">
-        <title>DSS Sport System</title>
-        <meta name="description" content="">
-        <meta name="viewport" content="width=device-width, initial-scale=1">
-        <link rel="stylesheet" href="styles.css">
-        <link href="https://fonts.googleapis.com/css?family=Montserrat:500&display=swap" rel="stylesheet">
-    </head>
-    <body>
-        <header>
-            <a class="cta" href="/">DSS Sport System</a>
-            <nav>
-                <ul class="nav__links">
-                    <li><a href="index.html">Dashboard</a></li>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <title>DSS Sport System</title>
+    <meta name="description" content="">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <link href="https://fonts.googleapis.com/css?family=Montserrat:500&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <header>
+        <a class="cta" href="/">DSS Sport System</a>
+        <nav>
+            <ul class="nav__links">
+                <li><a href="index.html">Dashboard</a></li>
                 <li><a href="calendar.html">Calendar</a></li>
                 <li><a href="entries.html">Entries</a></li>
                 <li><a href="results.html">Results</a></li>
                 <li><a href="live_results.html">Live results</a></li>
                 <li><a href="login_admin.html">Admin page</a></li>
-                </ul>
-            </nav>
-            <p class="menu cta">Menu</p>
-        </header>
-        <div class="overlay">
-            <a class="close">&times;</a>
-            <div class="overlay__content">
+            </ul>
+        </nav>
+        <p class="menu cta">Menu</p>
+    </header>
+    <div class="overlay">
+        <a class="close">&times;</a>
+        <div class="overlay__content">
             <a href="index.html">Dashboard</a>
             <a href="calendar.html">Calendar</a>
             <a href="entries.html">Entries</a>
             <a href="results.html">Results</a>
             <a href="live_results.html">Live results</a>
             <a href="login_admin.html">Admin page</a>
+        </div>
+    </div>
+    <div class="main-content">
+        <div class="news" style="width: 44%">
+            <h2>Rezultāti</h2>
+            <ul id="other-files">
+            </ul>
+        </div>
+        <div class="news" style="width: 44%">
+            <h2>Rezultātu pārskats</h2>
+            <div class="upcoming-events">
+                <h2>Startlists</h2>
+                <ul id="startlists">
+                </ul>
+            </div>
+            <div class="recent-results">
+                <div class="results-header">
+                    <h2>Results</h2>
+                </div>
+                <ul id="results-list">
+                </ul>
+            </div>
+            <div class="news">
+                <h2>Other files</h2>
+                <ul id="other-files">
+                </ul>
             </div>
         </div>
-        <script type="text/javascript" src="mobile.js"></script>
-    </body>
+    </div>
+    <script src="filter.js"></script>
+    <script src="mobile.js"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', function () {
+            fetch('/files2')
+                .then(response => response.json())
+                .then(data => {
+                    const otherFiles = document.getElementById('other-files');
+                    const startlists = document.getElementById('startlists');
+                    const resultsList = document.getElementById('results-list');
+
+                    const events = data.map(entry => {
+                        const [date, eventName] = entry.split('  ');
+                        return { date: date, name: eventName };
+                    });
+
+                    events.sort((a, b) => new Date(b.date) - new Date(a.date));
+
+                    events.forEach(event => {
+                        const li = document.createElement('li');
+                        const div = document.createElement('div');
+                        div.classList.add('event-details');
+
+                        const h3 = document.createElement('h3');
+                        h3.textContent = event.name;
+
+                        const p = document.createElement('p');
+                        p.classList.add('event-dates');
+                        p.textContent = event.date;
+
+                        const divButtons = document.createElement('div');
+                        divButtons.classList.add('event-buttons');
+
+                        const a = document.createElement('a');
+                        a.classList.add('event-btn');
+                        a.href = '';
+                        a.textContent = 'Rezultāti';
+                        a.setAttribute('data-event', event.name);
+
+                        divButtons.appendChild(a);
+
+                        div.appendChild(h3);
+                        div.appendChild(p);
+                        div.appendChild(divButtons);
+
+                        li.appendChild(div);
+
+                        // Categorize events and add them to their respective sections
+                        if (event.name.includes('Startlist')) {
+                            startlists.appendChild(li);
+                        } else if (event.name.includes('Results')) {
+                            resultsList.appendChild(li);
+                        } else {
+                            otherFiles.appendChild(li);
+                        }
+                    });
+
+                    // Add event listeners to result buttons
+                    const resultButtons = document.querySelectorAll('.event-btn');
+                    resultButtons.forEach(button => {
+                        button.addEventListener('click', function (event) {
+                            event.preventDefault();
+                            const eventName = this.getAttribute('data-event');
+                            const eventInfo = events.find(event => event.name === eventName);
+                            const eventDate = eventInfo.date;
+
+                            // Fetch and display results based on the event
+                            fetch(`files/events/${eventDate}%20%20${eventName}/`)
+                                .then(response => response.text())
+                                .then(html => {
+                                    const resultsContainer = document.querySelector('.recent-results');
+                                    resultsContainer.innerHTML = html;
+                                })
+                                .catch(error => console.error('Error loading results:', error));
+                        });
+                    });
+                })
+                .catch(error => console.error('Error loading files:', error));
+        });
+    </script>
+</body>
 </html>

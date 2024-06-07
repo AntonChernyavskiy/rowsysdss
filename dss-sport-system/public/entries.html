@@ -3,16 +3,16 @@
 <head>
     <meta charset="utf-8">
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
-    <title>DSS Sport System - Entries</title>
+    <title>DSS Sport System</title>
     <meta name="description" content="">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <link rel="stylesheet" href="styles.css">
     <link href="https://fonts.googleapis.com/css?family=Montserrat:500&display=swap" rel="stylesheet">
 
+    <script type="text/javascript" src="mobile.js"></script>
     <script src="https://smtpjs.com/v3/smtp.js"></script>
     <script src="index.js"></script>
     <style>
-        /* Добавим стили только для формы, чтобы сохранить ее внешний вид в соответствии с дизайном сайта */
         form {
             width: 50%;
             margin: auto;
@@ -56,7 +56,6 @@
             background-color: #006f88;
         }
 
-        /* Стили для таблицы участников */
         table {
             width: 100%;
             border-collapse: collapse;
@@ -73,9 +72,23 @@
             background-color: #f2f2f2;
         }
 
-        /* Стили для подсветки рулевых */
         .highlight {
             background-color: rgba(255, 166, 0, 0.75);
+        }
+
+        .competition-title {
+            text-align: center;
+            font-size: 2.5em;
+            font-weight: bold;
+            margin: 20px 0;
+            text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.1);
+        }
+
+        .competition-date {
+            text-align: center;
+            font-size: 1.2em;
+            color: #555;
+            margin-bottom: 40px;
         }
     </style>
 </head>
@@ -89,6 +102,7 @@
                 <li><a href="entries.html">Entries</a></li>
                 <li><a href="results.html">Results</a></li>
                 <li><a href="live_results.html">Live results</a></li>
+                <li><a href="login_admin.html">Admin page</a></li>
             </ul>
         </nav>
         <p class="menu cta">Menu</p>
@@ -96,17 +110,18 @@
     <div class="overlay">
         <a class="close">&times;</a>
         <div class="overlay__content">
-            <a href="/">Dashboard</a>
+            <a href="index.html">Dashboard</a>
             <a href="calendar.html">Calendar</a>
             <a href="entries.html">Entries</a>
             <a href="results.html">Results</a>
             <a href="live_results.html">Live results</a>
+            <a href="login_admin.html">Admin page</a>
         </div>
     </div>
-    
+    <h2 class="competition-title">Jelgavas jaunatnes čempionāts</h2>
+    <p class="competition-date">2024-07-20</p>
     <form id="emailForm">
-        <h2>Jelgavas jaunatnes čempionāts</h2><br><br>
-        <label for="organization">Organization:</label>
+        <label for="organization">Organizācija:</label>
         <select id="organization" name="organization">
             <option value="MSĢ TSV SASS">MSĢ TSV SASS</option>
             <option value="MSĢ TSV Jūrmala">MSĢ TSV Jūrmala</option>
@@ -116,17 +131,17 @@
             <option value="Rīgas Airētāju klubs">Rīgas Airētāju klubs</option>
             <option value="Lielupes airēšanas klubs">Lielupes airēšanas klubs</option>
             <option value="Airusports">Airusports</option>
-            <option value="other">Other (Specify)</option>
+            <option value="other">Cita (norādīt)</option>
         </select>
 
-        <!-- Если выбран вариант "Other", отображается поле для ввода своей организации -->
         <div id="otherOrganization" style="display: none;">
-            <label for="otherOrganizationInput">Other Organization:</label>
+            <label for="otherOrganizationInput">Cita organizācija</label>
             <input type="text" id="otherOrganizationInput" name="otherOrganizationInput">
         </div>
 
-        <label for="category">Category:</label>
+        <label for="category">Kategorija</label>
         <select id="category" name="category">
+            <option value="M1x">Izvēlēties</option>
             <option value="M1x">M1x</option>
             <option value="W1x">W1x</option>
             <option value="M2x">M2x</option>
@@ -143,24 +158,22 @@
             <option value="W8+">W8+</option>
         </select>
 
-        <!-- Таблица для ввода участников -->
         <table id="participantsTable">
             <thead>
                 <tr>
-                    <th>Year of Birth</th>
-                    <th>Last Name</th>
-                    <th>First Name</th>
+                    <th>Dzimšanas gads</th>
+                    <th>Vārds</th>
+                    <th>Uzvārds</th>
                 </tr>
             </thead>
             <tbody>
-                <!-- Строки будут добавлены динамически с помощью JavaScript -->
             </tbody>
         </table>
 
-        <label for="contactInfo">Contact Information:</label>
+        <label for="contactInfo">Kontaktinformācija</label>
         <input type="text" id="contactInfo" name="contactInfo" required>
 
-        <input type="submit" value="Submit">
+        <input type="submit" value="Pieteikt">
     </form>
 
     <script>
@@ -168,11 +181,10 @@
             document.querySelector('#category').addEventListener('change', function() {
                 const category = this.value;
                 const participantsTable = document.getElementById('participantsTable').getElementsByTagName('tbody')[0];
-                participantsTable.innerHTML = ''; // Очищаем содержимое таблицы при изменении категории
-    
-                // Добавляем строки таблицы в зависимости от выбранной категории
+                participantsTable.innerHTML = '';
+
                 let numParticipants = 1;
-                let coxswainIndex = -1; // Индекс рулевого в списке участников, если есть
+                let coxswainIndex = -1;
                 switch(category) {
                     case 'M1x':
                     case 'W1x':
@@ -198,30 +210,28 @@
                     case 'M8+':
                     case 'W8+':
                         numParticipants = 9;
-                        coxswainIndex = 8; // Рулевой в восьмой позиции
+                        coxswainIndex = 8;
                         break;
                     default:
                         break;
                 }
     
-                // Добавляем строки в таблицу
                 for (let i = 0; i < numParticipants; i++) {
                     const newRow = participantsTable.insertRow();
                     newRow.innerHTML = `
                         <td>
-                            <label for="birthYear${i + 1}">Year of Birth:</label>
+                            <label for="birthYear${i + 1}">Dzimšanas gads:</label>
                             <input type="number" id="birthYear${i + 1}" name="birthYear${i + 1}" min="1900" max="2024" required>
                         </td>
                         <td>
-                            <label for="lastName${i + 1}">Last Name:</label>
-                            <input type="text" id="lastName${i + 1}" name="lastName${i + 1}" required>
-                        </td>
-                        <td>
-                            <label for="firstName${i + 1}">First Name:</label>
+                            <label for="firstName${i + 1}">Vārds:</label>
                             <input type="text" id="firstName${i + 1}" name="firstName${i + 1}" required>
                         </td>
+                        <td>
+                            <label for="lastName${i + 1}">Uzvārds:</label>
+                            <input type="text" id="lastName${i + 1}" name="lastName${i + 1}" required>
+                        </td>
                     `;
-                    // Подсветка рулевого
                     if (i === coxswainIndex) {
                         newRow.classList.add('highlight');
                     }
@@ -231,7 +241,6 @@
     </script>
     
     <script>
-        // JavaScript для отображения поля ввода своей организации при выборе варианта "Other"
         document.getElementById('organization').addEventListener('change', function() {
             if (this.value === 'other') {
                 document.getElementById('otherOrganization').style.display = 'block';
@@ -244,12 +253,10 @@
         document.querySelector('#emailForm').addEventListener('submit', (e) => {
   e.preventDefault();
 
-  // Собираем данные формы
   const organization = document.getElementById('organization').value;
   const category = document.getElementById('category').value;
   const contactInfo = document.getElementById('contactInfo').value;
 
-  // Собираем данные участников
   const participantsTable = document.getElementById('participantsTable').getElementsByTagName('tbody')[0];
   const rows = participantsTable.getElementsByTagName('tr');
   let participants = '';
@@ -262,7 +269,6 @@
       participants += `${lastName} ${firstName} ${shortBirthYear}/ `;
   }
 
-  // Формируем тело письма
   const emailBody = `
       ${category},
       ${organization},
@@ -270,7 +276,6 @@
       ${contactInfo}
   `;
 
-  // Отправляем email с использованием SMTP.js
   Email.send({
       SecureToken: "eee0e3b5-eb6a-4611-bd1f-03bbeef9bd6f",
       To: 'antons.cernavskis@gmail.com',

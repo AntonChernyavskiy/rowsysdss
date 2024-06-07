@@ -36,69 +36,57 @@
         </div>
     </div>
     <div class="main-content">
-        <div class="upcoming-events">
-            <h2>Startlists</h2>
-            <ul id="startlists">
-                <!-- Файлы будут загружены здесь -->
-            </ul>
-        </div>
-        <div class="recent-results">
-            <div class="results-header">
-                <h2>Results</h2>
-                <div class="filter-buttons">
-                    <button class="filter-btn" onclick="filterResults('all')">All</button>
-                    <button class="filter-btn" onclick="filterResults('JU19M2x')">JU19M2x</button>
-                    <button class="filter-btn" onclick="filterResults('JU19M2-')">JU19M2-</button>
-                    <button class="filter-btn" onclick="filterResults('JU19W2x')">JU19W2x</button>
-                    <button class="filter-btn" onclick="filterResults('JU17M2x')">JU17M2x</button>
-                    <button class="filter-btn" onclick="filterResults('JU17W2x')">JU17W2x</button>
-                    <button class="filter-btn" onclick="filterResults('JU15M4x')">JU15M4x</button>
-                    <button class="filter-btn" onclick="filterResults('JU15W2x')">JU15W2x</button>
-                </div>
-            </div>
-            <ul id="results-list">
-                <!-- Файлы будут загружены здесь -->
+        <div class="news" style="width: 44%;">
+            <h2>Gaidāmie notikumi</h2>
+            <ul>
+                <li>
+                    <div class="event-details">
+                        <h3>Jelgavas atklātais čempionāts</h3>
+                        <p class="event-dates">2024-07-20</p>
+                        <div class="event-buttons">
+                            <a class="event-btn" href="entries.html">Pieteikšanās</a>
+                            <div class="event-buttons inactive">
+                                <a href="" class="event-btn">Rezultāti</a>
+                            </div>
+                        </div>
+                    </div>
+                </li>
+                <li>
+                    <div class="event-details">
+                        <h3>Latvijas Republikas čempionāts airēšanā U17 vecumu grupā</h3>
+                        <p class="event-dates">2024-08-02 -> 2024-08-04</p>
+                        <div class="event-buttons inactive">
+                            <a class="event-btn" href="">Pieteikšanās</a>
+                            <a href="" class="event-btn">Rezultāti</a>
+                        </div>
+                    </div>
+                </li>
             </ul>
         </div>
         <div class="news">
-            <h2>Other files</h2>
-            <ul id="other-files">
-                <!-- Файлы будут загружены здесь -->
+            <h2>Iepriekšējie notikumi</h2>
+            <ul class="">
+                <li>
+                    <div class="event-details">
+                        <h3>Daugavpils Sporta skolas slēgtais čempionāts airēšanā</h3>
+                        <p class="event-dates">2024-05-18</p>
+                        <div class="event-buttons">
+                            <a class="event-btn" href="https://drive.google.com/drive/folders/1aqVnr8qMYsA9D0IbOpyvn80icnJnG6MN?usp=drive_link">Rezultāti</a>
+                        </div>
+                    </div>
+                </li>
+                <li>
+                    <div class="event-details">
+                        <h3>Daugavpils Sporta skolas Ziemassvētku sacensības airēšanā</h3>
+                        <p class="event-dates">2023-12-29</p>
+                        <div class="event-buttons">
+                            <a class="event-btn" href="https://drive.google.com/file/d/1kMKKJUTr5C8sYt5dn_QiNO55x3WXONjM/view?usp=drive_link">Rezultāti</a>
+                        </div>
+                    </div>
+                </li>
             </ul>
         </div>
     </div>
     <script type="text/javascript" src="mobile.js"></script>
-    <script type="text/javascript" src="filter.js"></script>
-    <script>
-        document.addEventListener('DOMContentLoaded', function () {
-            fetch('/files')
-                .then(response => response.json())
-                .then(files => {
-                    const startlists = document.getElementById('startlists');
-                    const resultsList = document.getElementById('results-list');
-                    const otherFiles = document.getElementById('other-files');
-
-                    files.forEach(file => {
-                        const li = document.createElement('li');
-                        const a = document.createElement('a');
-                        a.href = `/files/${file}`;
-                        a.textContent = file;
-
-                        li.appendChild(a);
-
-                        // Здесь можно добавить логику для распределения файлов по категориям
-                        // Например, если имя файла содержит определенные ключевые слова
-                        if (file.includes('startlist')) {
-                            startlists.appendChild(li);
-                        } else if (file.includes('race_')) {
-                            resultsList.appendChild(li);
-                        } else {
-                            otherFiles.appendChild(li);
-                        }
-                    });
-                })
-                .catch(error => console.error('Ошибка при загрузке файлов:', error));
-        });
-    </script>
 </body>
 </html>
