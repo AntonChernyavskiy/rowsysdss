@@ -9,10 +9,8 @@
     <link rel="stylesheet" href="styles.css">
     <link href="https://fonts.googleapis.com/css?family=Montserrat:500&display=swap" rel="stylesheet">
 
-    <script type="text/javascript" src="mobile.js"></script>
-    <script src="https://smtpjs.com/v3/smtp.js"></script>
-    <script src="index.js"></script>
     <style>
+        /* Ваши стили здесь */
         form {
             width: 50%;
             margin: auto;
@@ -101,7 +99,6 @@
                 <li><a href="calendar.html">Calendar</a></li>
                 <li><a href="entries.html">Entries</a></li>
                 <li><a href="results.html">Results</a></li>
-                <li><a href="live_results.html">Live results</a></li>
                 <li><a href="login_admin.html">Admin page</a></li>
             </ul>
         </nav>
@@ -114,48 +111,29 @@
             <a href="calendar.html">Calendar</a>
             <a href="entries.html">Entries</a>
             <a href="results.html">Results</a>
-            <a href="live_results.html">Live results</a>
             <a href="login_admin.html">Admin page</a>
         </div>
     </div>
-    <h2 class="competition-title">Jelgavas jaunatnes čempionāts</h2>
+    
+    <!-- <form id="emailForm">
+        Pašreiz nav izsludināto pieteikšanu sacensībām.
+    </form> -->
+    <!-- Заголовок и дата соревнования -->
+    <h2 class="competition-title">Daugavpils 6 Starptautiskais "DRAGON BOAT "festivāls</h2>
     <p class="competition-date">2024-07-20</p>
+
     <form id="emailForm">
         <label for="organization">Organizācija:</label>
-        <select id="organization" name="organization">
-            <option value="MSĢ TSV SASS">MSĢ TSV SASS</option>
-            <option value="MSĢ TSV Jūrmala">MSĢ TSV Jūrmala</option>
-            <option value="Daugavpils Sporta skola">Daugavpils Sporta skola</option>
-            <option value="Jelgavas BJSS">Jelgavas BJSS</option>
-            <option value="LATC">LATC</option>
-            <option value="Rīgas Airētāju klubs">Rīgas Airētāju klubs</option>
-            <option value="Lielupes airēšanas klubs">Lielupes airēšanas klubs</option>
-            <option value="Airusports">Airusports</option>
-            <option value="other">Cita (norādīt)</option>
-        </select>
+        <!-- <select id="organization" name="organization">
+        </select> -->
 
         <div id="otherOrganization" style="display: none;">
-            <label for="otherOrganizationInput">Cita organizācija</label>
+            <label for="otherOrganizationInput">Komanda</label>
             <input type="text" id="otherOrganizationInput" name="otherOrganizationInput">
         </div>
 
         <label for="category">Kategorija</label>
         <select id="category" name="category">
-            <option value="M1x">Izvēlēties</option>
-            <option value="M1x">M1x</option>
-            <option value="W1x">W1x</option>
-            <option value="M2x">M2x</option>
-            <option value="W2x">W2x</option>
-            <option value="M2-">M2-</option>
-            <option value="W2-">W2-</option>
-            <option value="M4x">M4x</option>
-            <option value="W4x">W4x</option>
-            <option value="M4-">M4-</option>
-            <option value="W4-">W4-</option>
-            <option value="M4+">M4+</option>
-            <option value="W4+">W4+</option>
-            <option value="M8+">M8+</option>
-            <option value="W8+">W8+</option>
         </select>
 
         <table id="participantsTable">
@@ -176,71 +154,42 @@
         <input type="submit" value="Pieteikt">
     </form>
 
+    <script src="https://smtpjs.com/v3/smtp.js"></script>
+    <script src="index.js"></script>
     <script>
+        // Загрузка данных из config.en и заполнение формы
         document.addEventListener('DOMContentLoaded', () => {
-            document.querySelector('#category').addEventListener('change', function() {
-                const category = this.value;
-                const participantsTable = document.getElementById('participantsTable').getElementsByTagName('tbody')[0];
-                participantsTable.innerHTML = '';
+            fetch('/files/entries/2024-07-20  Dragon boat 2024/config.en')
+                .then(response => response.json())
+                .then(config => {
+                    // Установка заголовка и даты соревнования
+                    document.querySelector('.competition-title').textContent = config.competitionTitle;
+                    document.querySelector('.competition-date').textContent = config.competitionDate;
 
-                let numParticipants = 1;
-                let coxswainIndex = -1;
-                switch(category) {
-                    case 'M1x':
-                    case 'W1x':
-                        numParticipants = 1;
-                        break;
-                    case 'M2x':
-                    case 'M2-':
-                    case 'W2x':
-                    case 'W2-':
-                        numParticipants = 2;
-                        break;
-                    case 'M4x':
-                    case 'M4-':
-                    case 'W4x':
-                    case 'W4-':
-                        numParticipants = 4;
-                        break;
-                    case 'M4+':
-                    case 'W4+':
-                        numParticipants = 5;
-                        coxswainIndex = 4;
-                        break;
-                    case 'M8+':
-                    case 'W8+':
-                        numParticipants = 9;
-                        coxswainIndex = 8;
-                        break;
-                    default:
-                        break;
-                }
-    
-                for (let i = 0; i < numParticipants; i++) {
-                    const newRow = participantsTable.insertRow();
-                    newRow.innerHTML = `
-                        <td>
-                            <label for="birthYear${i + 1}">Dzimšanas gads:</label>
-                            <input type="number" id="birthYear${i + 1}" name="birthYear${i + 1}" min="1900" max="2024" required>
-                        </td>
-                        <td>
-                            <label for="firstName${i + 1}">Vārds:</label>
-                            <input type="text" id="firstName${i + 1}" name="firstName${i + 1}" required>
-                        </td>
-                        <td>
-                            <label for="lastName${i + 1}">Uzvārds:</label>
-                            <input type="text" id="lastName${i + 1}" name="lastName${i + 1}" required>
-                        </td>
-                    `;
-                    if (i === coxswainIndex) {
-                        newRow.classList.add('highlight');
-                    }
-                }
-            });
+                    // Заполнение выпадающего списка организаций
+                    const organizationSelect = document.getElementById('organization');
+                    config.organizations.forEach(org => {
+                        const option = document.createElement('option');
+                        option.value = org;
+                        option.textContent = org;
+                        organizationSelect.appendChild(option);
+                    });
+
+                    // Заполнение выпадающего списка категорий
+                    const categorySelect = document.getElementById('category');
+                    config.categories.forEach(cat => {
+                        const option = document.createElement('option');
+                        option.value = cat;
+                        option.textContent = cat;
+                        categorySelect.appendChild(option);
+                    });
+                })
+                .catch(error => {
+                    console.error('Error fetching or parsing config:', error);
+                });
         });
-    </script>
-    
-    <script>
+
+        // Динамическое изменение поля для другой организации
         document.getElementById('organization').addEventListener('change', function() {
             if (this.value === 'other') {
                 document.getElementById('otherOrganization').style.display = 'block';
@@ -248,44 +197,116 @@
                 document.getElementById('otherOrganization').style.display = 'none';
             }
         });
-    </script>
-    <script>
+
+        // Динамическое добавление полей участников в зависимости от категории
+        document.getElementById('category').addEventListener('change', function() {
+            const category = this.value;
+            const participantsTable = document.getElementById('participantsTable').getElementsByTagName('tbody')[0];
+            participantsTable.innerHTML = '';
+
+            let numParticipants = 1;
+            let coxswainIndex = -1;
+            switch(category) {
+                case 'M1x':
+                case 'W1x':
+                    numParticipants = 1;
+                    break;
+                case 'M2x':
+                case 'M2-':
+                case 'W2x':
+                case 'W2-':
+                    numParticipants = 2;
+                    break;
+                case 'M4x':
+                case 'M4-':
+                case 'W4x':
+                case 'W4-':
+                    numParticipants = 4;
+                    break;
+                case 'M4+':
+                case 'W4+':
+                    numParticipants = 5;
+                    coxswainIndex = 4;
+                    break;
+                case 'M8+':
+                case 'W8+':
+                    numParticipants = 9;
+                    coxswainIndex = 8;
+                    break;
+
+                case 'Vīrieši D-20':
+                case 'Sievietes D-20':
+                case 'Mix - Sport':
+                case 'Mix - Amatieri':
+                case 'Mix - Bērni':
+                    numParticipants = 21;
+                    coxswainIndex = 20;
+                    break;
+                default:
+                    break;
+            }
+
+            for (let i = 0; i < numParticipants; i++) {
+                const newRow = participantsTable.insertRow();
+                newRow.innerHTML = `
+                    <td>
+                        <label for="birthYear${i + 1}">Dzimšanas gads:</label>
+                        <input type="number" id="birthYear${i + 1}" name="birthYear${i + 1}" min="1900" max="2024" required>
+                    </td>
+                    <td>
+                        <label for="firstName${i + 1}">Vārds:</label>
+                        <input type="text" id="firstName${i + 1}" name="firstName${i + 1}" required>
+                    </td>
+                                       <td>
+                        <label for="lastName${i + 1}">Uzvārds:</label>
+                        <input type="text" id="lastName${i + 1}" name="lastName${i + 1}" required>
+                    </td>
+                `;
+                if (i === coxswainIndex) {
+                    newRow.classList.add('highlight');
+                }
+            }
+        });
+
+        // Отправка формы по электронной почте
         document.querySelector('#emailForm').addEventListener('submit', (e) => {
-  e.preventDefault();
+            e.preventDefault();
 
-  const organization = document.getElementById('organization').value;
-  const category = document.getElementById('category').value;
-  const contactInfo = document.getElementById('contactInfo').value;
+            const organization = document.getElementById('organization').value;
+            const category = document.getElementById('category').value;
+            const contactInfo = document.getElementById('contactInfo').value;
 
-  const participantsTable = document.getElementById('participantsTable').getElementsByTagName('tbody')[0];
-  const rows = participantsTable.getElementsByTagName('tr');
-  let participants = '';
+            const participantsTable = document.getElementById('participantsTable').getElementsByTagName('tbody')[0];
+            const rows = participantsTable.getElementsByTagName('tr');
+            let participants = '';
 
-  for (let row of rows) {
-      const lastName = row.querySelector('input[name^="lastName"]').value.toUpperCase();
-      const firstName = row.querySelector('input[name^="firstName"]').value;
-      const birthYear = row.querySelector('input[name^="birthYear"]').value;
-      const shortBirthYear = birthYear.slice(-2);
-      participants += `${lastName} ${firstName} ${shortBirthYear}/ `;
-  }
+            for (let row of rows) {
+                const lastName = row.querySelector('input[name^="lastName"]').value.toUpperCase();
+                const firstName = row.querySelector('input[name^="firstName"]').value;
+                const birthYear = row.querySelector('input[name^="birthYear"]').value;
+                const shortBirthYear = birthYear.slice(-2);
+                participants += `${lastName} ${firstName} ${shortBirthYear}/ `;
+            }
 
-  const emailBody = `
-      ${category},
-      ${organization},
-      ${participants}\n
-      ${contactInfo}
-  `;
+            const emailBody = `
+                ${category},
+                ${organization},
+                ${participants}\n
+                ${contactInfo}
+            `;
 
-  Email.send({
-      SecureToken: "eee0e3b5-eb6a-4611-bd1f-03bbeef9bd6f",
-      To: 'antons.cernavskis@gmail.com',
-      From: "antons.cernavskis@gmail.com",
-      Subject: "Pieteiksanas sacensibam",
-      Body: emailBody
-  }).then(
-      alert("Saņemts")
-  );
-});
+            // Отправка письма
+            Email.send({
+                SecureToken: "eee0e3b5-eb6a-4611-bd1f-03bbeef9bd6f",
+                To: 'antons.cernavskis@gmail.com',
+                From: "antons.cernavskis@gmail.com",
+                Subject: "Pieteiksanas sacensibam",
+                Body: emailBody
+            }).then(
+                alert("Saņemts")
+            );
+        });
     </script>
 </body>
 </html>
+

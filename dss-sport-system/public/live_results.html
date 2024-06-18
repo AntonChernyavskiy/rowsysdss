@@ -7,7 +7,6 @@
     <meta name="description" content="">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <link href="https://fonts.googleapis.com/css?family=Montserrat:500&display=swap" rel="stylesheet">
-    <!-- <link rel="stylesheet" href="styles.css"> -->
     <link rel="stylesheet" href="live_results.css">
 </head>
 <body>
@@ -25,6 +24,7 @@
         </nav>
         <p class="menu cta">Menu</p>
     </header>
+
     <div class="overlay">
         <a class="close">&times;</a>
         <div class="overlay__content">
@@ -36,6 +36,7 @@
             <a href="login_admin.html">Admin page</a>
         </div>
     </div>
+
     <div class="main-content">
         <div class="upcoming-events">
             <h2>Startlists</h2>
@@ -46,14 +47,7 @@
             <div class="results-header">
                 <h2>Results</h2>
                 <div class="filter-buttons">
-                    <button class="filter-btn" onclick="filterResults('all')">All</button>
-                    <button class="filter-btn" onclick="filterResults('JU19M2x')">JU19M2x</button>
-                    <button class="filter-btn" onclick="filterResults('JU19M2-')">JU19M2-</button>
-                    <button class="filter-btn" onclick="filterResults('JU19W2x')">JU19W2x</button>
-                    <button class="filter-btn" onclick="filterResults('JU17M2x')">JU17M2x</button>
-                    <button class="filter-btn" onclick="filterResults('JU17W2x')">JU17W2x</button>
-                    <button class="filter-btn" onclick="filterResults('JU15M4x')">JU15M4x</button>
-                    <button class="filter-btn" onclick="filterResults('JU15W2x')">JU15W2x</button>
+                    <!-- Filter buttons can be added here if needed -->
                 </div>
             </div>
             <ul id="results-list">
@@ -65,43 +59,82 @@
             </ul>
         </div>
     </div>
+
+    <!-- Подключение скриптов -->
     <script src="filter.js"></script>
-    <script type="text/javascript" src="mobile.js"></script>
+    <script src="mobile.js"></script>
     <script>
         document.addEventListener('DOMContentLoaded', function () {
-            fetch('/files')
-                .then(response => response.json())
-                .then(files => {
-                    const resultsList = document.getElementById('results-list');
-                    const otherFiles = document.getElementById('other-files');
-                    const startlists = document.getElementById('startlists');
-
-                    files.forEach(file => {
-                        const li = document.createElement('li');
-                        
-                        const img = document.createElement('img');
-                        img.src = '/images/document_icon.png';
-                        img.alt = 'Document Icon';
-                        img.style.marginRight = '10px';
-
-                        const a = document.createElement('a');
-                        a.href = `/files/${file}`;
-                        a.textContent = file;
-
-                        li.appendChild(img);
-                        li.appendChild(a);
-
-                        if (file.includes('-')) {
-                            otherFiles.appendChild(li);
-                        } else if (file.includes('race_')) {
-                            li.classList.add('race-item');
-                            resultsList.appendChild(li);
-                        } else {
-                            startlists.appendChild(li);
-                        }
+            // Функция для получения последнего мероприятия из results.html
+            function fetchLatestResultsEvent() {
+                return fetch('/files2')
+                    .then(response => response.json())
+                    .then(data => {
+                        // Предполагаем, что данные отсортированы по дате и первое событие самое новое
+                        return data[0]; // Возвращаем первое событие как самое новое
+                    })
+                    .catch(error => {
+                        console.error('Error loading files:', error);
+                        throw error; // Пробрасываем ошибку дальше для обработки
                     });
+            }
+
+            // Функция для загрузки и отображения результатов выбранного мероприятия
+            function fetchAndDisplayResults(eventName, eventDate) {
+                return fetch(`/files/events/${eventDate}%20%20${eventName}/`)
+                    .then(response => response.json())
+                    .then(files => {
+                        const resultsList = document.getElementById('results-list');
+                        const otherFiles = document.getElementById('other-files');
+                        const startlists = document.getElementById('startlists');
+
+                        // Очищаем списки перед добавлением новых данных
+                        resultsList.innerHTML = '';
+                        otherFiles.innerHTML = '';
+                        startlists.innerHTML = '';
+
+                        files.forEach(file => {
+                            const li = document.createElement('li');
+                            const img = document.createElement('img');
+                            img.src = '/images/document_icon.png';
+                            img.alt = 'Document Icon';
+                            img.style.marginRight = '10px';
+
+                            const a = document.createElement('a');
+                            a.href = `/files/events/${eventDate}%20%20${eventName}/${file}`;
+                            a.textContent = file;
+
+                            li.appendChild(img);
+                            li.appendChild(a);
+
+                            if (file.includes('-')) {
+                                otherFiles.appendChild(li);
+                            } else if (file.includes('race_')) {
+                                li.classList.add('race-item');
+                                resultsList.appendChild(li);
+                            } else {
+                                startlists.appendChild(li);
+                            }
+                        });
+                    })
+                    .catch(error => {
+                        console.error('Error loading results:', error);
+                        throw error; // Пробрасываем ошибку дальше для обработки
+                    });
+            }
+
+            // Загружаем последнее мероприятие из results.html и отображаем его результаты
+            fetchLatestResultsEvent()
+                .then(latestEvent => {
+                    const eventName = latestEvent.name;
+                    const eventDate = latestEvent.date;
+
+                    fetchAndDisplayResults(eventName, eventDate); // Загружаем и отображаем результаты для последнего мероприятия
                 })
-                .catch(error => console.error('Ошибка при загрузке файлов:', error));
+                .catch(error => {
+                    console.error('Error loading latest results event:', error);
+                    // Возможно, стоит добавить обработку ошибок или уведомление пользователю о проблеме
+                });
         });
     </script>
 </body>

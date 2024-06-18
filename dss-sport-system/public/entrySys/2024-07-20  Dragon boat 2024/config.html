@@ -1,0 +1,54 @@
+<!-- registration-form.html -->
+<label for="organization">Organizācija:</label>
+<select id="organization" name="organization">
+    <option value="MSĢ TSV SASS">MSĢ TSV SASS</option>
+    <option value="MSĢ TSV Jūrmala">MSĢ TSV Jūrmala</option>
+    <option value="Daugavpils Sporta skola">Daugavpils Sporta skola</option>
+    <option value="Jelgavas BJSS">Jelgavas BJSS</option>
+    <option value="LATC">LATC</option>
+    <option value="Rīgas Airētāju klubs">Rīgas Airētāju klubs</option>
+    <option value="Lielupes airēšanas klubs">Lielupes airēšanas klubs</option>
+    <option value="Airusports">Airusports</option>
+    <option value="other">Cita (norādīt)</option>
+</select>
+
+<div id="otherOrganization" style="display: none;">
+    <label for="otherOrganizationInput">Cita organizācija</label>
+    <input type="text" id="otherOrganizationInput" name="otherOrganizationInput">
+</div>
+
+<label for="category">Kategorija</label>
+<select id="category" name="category">
+    <option value="M1x">M1x</option>
+    <option value="W1x">W1x</option>
+    <option value="M2x">M2x</option>
+    <option value="W2x">W2x</option>
+    <option value="M2-">M2-</option>
+    <option value="W2-">W2-</option>
+    <option value="M4x">M4x</option>
+    <option value="W4x">W4x</option>
+    <option value="M4-">M4-</option>
+    <option value="W4-">W4-</option>
+    <option value="M4+">M4+</option>
+    <option value="W4+">W4+</option>
+    <option value="M8+">M8+</option>
+    <option value="W8+">W8+</option>
+</select>
+
+<table id="participantsTable">
+    <thead>
+        <tr>
+            <th>Dzimšanas gads</th>
+            <th>Vārds</th>
+            <th>Uzvārds</th>
+        </tr>
+    </thead>
+    <tbody>
+        <!-- Здесь будут генерироваться строки с участниками через JavaScript -->
+    </tbody>
+</table>
+
+<label for="contactInfo">Kontaktinformācija</label>
+<input type="text" id="contactInfo" name="contactInfo" required>
+
+<input type="submit" value="Pieteikt">
