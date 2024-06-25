@@ -30,9 +30,9 @@
 					<th style="width: 10mm"></th>
 					<th style="width: 45mm; text-align: left;">Team</th>
 					<th style="width: 6.29mm"></th>
-					<th style="width: 20mm">500 m</th>
-					<th style="width: 20mm">1000 m</th>
-					<th style="width: 20mm">1500 m</th>
+					<th style="width: 20mm"></th>
+					<th style="width: 20mm"></th>
+					<th style="width: 20mm"></th>
 					<th style="width: 20mm">Finish</th>
 				</tr>
 			</table>

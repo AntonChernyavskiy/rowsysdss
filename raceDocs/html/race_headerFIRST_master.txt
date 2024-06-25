@@ -30,8 +30,8 @@
 					<th style="width: 10mm"></th>
 					<th style="width: 45mm; text-align: left;">Team</th>
 					<th style="width: 8.15mm"></th>
-					<th style="width: 20mm">500 m</th>
-					<th style="width: 20mm">1000 m</th>
+					<th style="width: 20mm"></th>
+					<th style="width: 20mm"></th>
 					<th style="width: 20mm">Finish</th>
 					<th style="width: 20mm">Corrected</th>
 					<th style="width: 12.96mm">Qual</th>
