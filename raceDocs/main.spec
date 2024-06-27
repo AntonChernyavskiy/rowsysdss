@@ -1,36 +1,47 @@
-                    def masterFun(a):
-                        try:
-                            penalty_code = a
-                            if penalty_code:
-                                age_part, handicap_part = penalty_code.split("(-")
-                                av_age = age_part.split()[1]
-                                handicap = handicap_part.split(")")[0]
-                                return(f'AV AGE: {av_age} <br> HANDICAP: {handicap}')
-                            else:
-                                return(" ")
-                        except IndexError:
-                            pass
+from kivy_deps import sdl2, glew
 
-                    data.append(
-                        [str(fl["Place"][j]).split(sep=".")[0], str(fl["Bow"][j]).split(sep=".")[0], f'<img src="flags/{flag_list[fl["CrewAbbrev"][j]]}" style="max-width: 6mm">',
-                         fl["Crew"][j],
-                         fl["Stroke"][j].replace("/", "<br>"), fl["AdjTime"][j], fl["Delta"][j], " ", " ", en])
-                    dataQ.append(
-                        [str(fl["Place"][j]).split(sep=".")[0], f"({str(fl["Rank"][j]).split(sep='.')[0]})", str(fl["Bow"][j]).split(sep=".")[0], f'<img src="flags/{flag_list[fl["CrewAbbrev"][j]]}" style="max-width: 6mm">',
-                         fl["Crew"][j], fl["Stroke"][j].replace("/", "<br>"), fl["AdjTime"][j], fl["Delta"][j], " ", " ", en])
+# -*- mode: python ; coding: utf-8 -*-
 
-                    dataMaster.append(
-                        [str(fl["Place"][j]).split(sep=".")[0], str(fl["Bow"][j]).split(sep=".")[0], f'<img src="flags/{flag_list[fl["CrewAbbrev"][j]]}" style="max-width: 6mm">',
-                         fl["Crew"][j],
-                         fl["Stroke"][j].replace("/", "<br>"), fl["RawTime"][j], fl["AdjTime"][j], fl["Delta"][j], " ", " ",
-                         fl["Qual"][j], masterFun(str(fl["PenaltyCode"][j])),  en])
 
-                    dataMasterQ.append(
-                        [str(fl["Place"][j]).split(sep=".")[0], f"({str(fl["Rank"][j]).split(sep='.')[0]})",
-                         str(fl["Bow"][j]).split(sep=".")[0],
-                         f'<img src="flags/{flag_list[fl["CrewAbbrev"][j]]}" style="max-width: 6mm">',
-                         fl["Crew"][j], fl["Stroke"][j].replace("/", "<br>"), fl["RawTime"][j], fl["AdjTime"][j], fl["Delta"][j], " ",
-                         " ", masterFun(str(fl["PenaltyCode"][j])), en])
+a = Analysis(
+    ['main.py'],
+    pathex=[],
+    binaries=[],
+    datas=[],
+    hiddenimports=[],
+    hookspath=[],
+    hooksconfig={},
+    runtime_hooks=[],
+    excludes=[],
+    noarchive=False,
+    optimize=0,
+)
+pyz = PYZ(a.pure)
 
-                    start_data.append(
-                        [str(fl["Bow"][j]).split(sep=".")[0], f'<img src="flags/{flag_list[fl["CrewAbbrev"][j]]}" style="max-width: 6mm">', fl["Crew"][j], fl["Stroke"][j].replace("/", ", "), masterFun(str(fl["PenaltyCode"][j])), en])
+exe = EXE(
+    pyz,
+    a.scripts,
+    [],
+    exclude_binaries=True,
+    name='main',
+    debug=False,
+    bootloader_ignore_signals=False,
+    strip=False,
+    upx=True,
+    console=False,
+    disable_windowed_traceback=False,
+    argv_emulation=False,
+    target_arch=None,
+    codesign_identity=None,
+    entitlements_file=None,
+)
+coll = COLLECT(
+    exe, Tree('C:\\Users\\Admin\\Documents\\GitHub\\rowsysdss\\raceDocs\\'),
+    a.binaries,
+    a.datas,
+*[Tree(p) for p in (sdl2.dep_bins + glew.dep_bins)],
+    strip=False,
+    upx=True,
+    upx_exclude=[],
+    name='main',
+)

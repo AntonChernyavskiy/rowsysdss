@@ -1,6 +1,5 @@
 <tr>
 	<th colspan="10">
-	<p style="page-break-before: always;">&nbsp;</p>
 		<div class="raceInfo">
 			<table>
 				<tr>

@@ -386,17 +386,18 @@ class RaceApp(BoxLayout):
                                                    info[last_id][6]) + tr.format(a[0], a[1], a[2], a[3], a[4], a[5],
                                                                                  a[6], a[7], a[8], a[9]) + "\n[rinda]")
                 else:
-                    html = html.replace("[rinda]", infOne.format(info[last_id][7], info[last_id][2], info[last_id][1],
+                    html = html.replace("[header]", infOne.format(info[last_id][7], info[last_id][2], info[last_id][1],
                                                                  info[last_id][4], info[last_id][3], info[last_id][0],
-                                                                 info[last_id][5], info[last_id][6]) + tr.format(a[0],
-                                                                                                                 a[1],
-                                                                                                                 a[2],
-                                                                                                                 a[3],
-                                                                                                                 a[4],
-                                                                                                                 a[5],
-                                                                                                                 a[6],
-                                                                                                                 a[7],
-                                                                                                                 a[8], a[9]) + "\n[rinda]")
+                                                                 info[last_id][5], info[last_id][6]))
+                    html = html.replace("[rinda]", tr.format(a[0],
+                                                                            a[1],
+                                                                            a[2],
+                                                                            a[3],
+                                                                            a[4],
+                                                                            a[5],
+                                                                            a[6],
+                                                                            a[7],
+                                                                            a[8], a[9]) + "\n[rinda]")
                     first_insert = False
 
                 last = a[-1]
@@ -434,17 +435,18 @@ class RaceApp(BoxLayout):
                                                    info[last_id][6]) + trMast.format(a[0], a[1], a[2], a[3], a[4], a[5],
                                                                                  a[6], a[7], a[8], a[9], a[10], a[11]) + "\n[rinda]")
                 else:
-                    htmlMaster = htmlMaster.replace("[rinda]", infOneMast.format(info[last_id][7], info[last_id][2], info[last_id][1],
+                    htmlMaster = htmlMaster.replace("[header]", infOneMast.format(info[last_id][7], info[last_id][2], info[last_id][1],
                                                                  info[last_id][4], info[last_id][3], info[last_id][0],
-                                                                 info[last_id][5], info[last_id][6]) + trMast.format(a[0],
-                                                                                                                 a[1],
-                                                                                                                 a[2],
-                                                                                                                 a[3],
-                                                                                                                 a[4],
-                                                                                                                 a[5],
-                                                                                                                 a[6],
-                                                                                                                 a[7],
-                                                                                                                 a[8], a[9], a[10], a[11]) + "\n[rinda]")
+                                                                 info[last_id][5], info[last_id][6]))
+                    htmlMaster = htmlMaster.replace("[rinda]", trMast.format(a[0],
+                                                                                             a[1],
+                                                                                             a[2],
+                                                                                             a[3],
+                                                                                             a[4],
+                                                                                             a[5],
+                                                                                             a[6],
+                                                                                             a[7],
+                                                                                             a[8], a[9], a[10], a[11]) + "\n[rinda]")
                     first_insert = False
 
                 last = a[-1]
@@ -582,17 +584,18 @@ class RaceApp(BoxLayout):
                                                    info[last_id][6]) + trQ.format(a[0], a[1], a[2], a[3], a[4], a[5],
                                                                                  a[6], a[7], a[8], a[9]) + "\n[rinda_noq]")
                 else:
-                    htmlQ = htmlQ.replace("[rinda_noq]", infOneQ.format(info[last_id][7], info[last_id][2], info[last_id][1],
+                    htmlQ = htmlQ.replace("[header]", infOneQ.format(info[last_id][7], info[last_id][2], info[last_id][1],
                                                                  info[last_id][4], info[last_id][3], info[last_id][0],
-                                                                 info[last_id][5], info[last_id][6]) + trQ.format(a[0],
-                                                                                                                 a[1],
-                                                                                                                 a[2],
-                                                                                                                 a[3],
-                                                                                                                 a[4],
-                                                                                                                 a[5],
-                                                                                                                 a[6],
-                                                                                                                 a[7],
-                                                                                                                 a[8], a[9]) + "\n[rinda_noq]")
+                                                                 info[last_id][5], info[last_id][6]))
+                    htmlQ = htmlQ.replace("[rinda_noq]", trQ.format(a[0],
+                                                                            a[1],
+                                                                            a[2],
+                                                                            a[3],
+                                                                            a[4],
+                                                                            a[5],
+                                                                            a[6],
+                                                                            a[7],
+                                                                            a[8], a[9]) + "\n[rinda_noq]")
                     first_insert = False
 
                 last = a[-1]
@@ -633,15 +636,16 @@ class RaceApp(BoxLayout):
                 else:
                     htmlMasterQ = htmlMasterQ.replace("[rinda_noq]", infOneQMast.format(info[last_id][7], info[last_id][2], info[last_id][1],
                                                                  info[last_id][4], info[last_id][3], info[last_id][0],
-                                                                 info[last_id][5], info[last_id][6]) + trMasterQ.format(a[0],
-                                                                                                                 a[1],
-                                                                                                                 a[2],
-                                                                                                                 a[3],
-                                                                                                                 a[4],
-                                                                                                                 a[5],
-                                                                                                                 a[6],
-                                                                                                                 a[7],
-                                                                                                                 a[8], a[9], a[10], a[11]) + "\n[rinda_noq]")
+                                                                 info[last_id][5], info[last_id][6]))
+                    htmlMasterQ = htmlMasterQ.replace("[rinda_noq]", trMasterQ.format(a[0],
+                                                                                         a[1],
+                                                                                         a[2],
+                                                                                         a[3],
+                                                                                         a[4],
+                                                                                         a[5],
+                                                                                         a[6],
+                                                                                         a[7],
+                                                                                         a[8], a[9], a[10], a[11]) + "\n[rinda_noq]")
                     first_insert = False
 
                 last = a[-1]
