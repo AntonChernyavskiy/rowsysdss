@@ -32,6 +32,18 @@
     border-bottom: 1px solid black;
 }
 
+.raceHeadersShort {
+    font-size: 15px;
+    border-collapse: collapse;
+    border-bottom: 2px solid black;
+}
+
+.raceHeadersShortMain {
+    font-size: 15px;
+    border-collapse: collapse;
+    border-bottom: 1px solid black;
+}
+
 .rText {
     border-collapse: collapse;
 }

@@ -156,7 +156,7 @@ class RaceApp(BoxLayout):
 
         file_spinner = Spinner(
             text='Select File',
-            values=('Results', 'Results (no qual)', 'Master results', 'Master results (no qual)', 'Startlists', 'Master startlists'),
+            values=('Results', 'Results (no qual)', 'Master results', 'Master results (no qual)', 'Startlists', 'Master startlists', 'Short startlists', 'Entry list by event'),
             size_hint=(1, None),
             height=dp(44)
         )
@@ -221,6 +221,10 @@ class RaceApp(BoxLayout):
                     html_file = f"start_log_{ev}.html"
                 elif selected_file == 'Master startlists':
                     html_file = f"start_log_master_{ev}.html"
+                elif selected_file == 'Entry list by event':
+                    html_file = f"entry_by_events_log_{ev}.html"
+                elif selected_file == 'Short startlists':
+                    html_file = f"start_short_log_{ev}.html"
                 else:
                     raise ValueError("Invalid file selection")
 
@@ -272,7 +276,7 @@ class RaceApp(BoxLayout):
 
             # Remove all HTML files in the 'html' directory
             html_files = glob.glob(os.path.join(html_dir, '*.html'))
-            exceptions = {'res_no_qual.html', 'res_with_qual.html', 'start_lists.html'}
+            exceptions = {'res_no_qual.html', 'res_with_qual.html', 'start_lists.html', 'entry_lists.html', 'start_lists_short.html'}
             for html_file_path in html_files:
                 if os.path.basename(html_file_path) not in exceptions:
                     os.remove(html_file_path)
@@ -305,6 +309,7 @@ class RaceApp(BoxLayout):
         eventNumFILE = os.path.join(race_docs_dir, "compInfo/event_num.csv")
         boatSuffixesFILE = os.path.join(race_docs_dir, "compInfo/boat_suffixes.csv")
         affilationFlagFILE = os.path.join(race_docs_dir, "compInfo/affilation_flags.csv")
+        affilationListFILE = os.path.join(race_docs_dir, "compInfo/affilations.csv")
 
         df = pd.read_csv(heatsheetFILE, skip_blank_lines=True, na_filter=True)
         df = df[df["Event"].notna()]
@@ -317,6 +322,11 @@ class RaceApp(BoxLayout):
         suf_list = {}
         for index, row in sl.iterrows():
             suf_list[row["Shortcut"]] = row["Full"]
+
+        al = pd.read_csv(affilationListFILE, skip_blank_lines=True, na_filter=True)
+        aff_list = {}
+        for index, row in al.iterrows():
+            aff_list[row["Shortcut"]] = row["Full"]
 
         cl = pd.read_csv(eventNumFILE, skip_blank_lines=True, na_filter=True)
         cat_list = {}
@@ -351,10 +361,17 @@ class RaceApp(BoxLayout):
         with open("html/start_lists.html", "r") as f:
             start_htmlMaster = f.read()
 
+        with open("html/entry_lists.html", "r") as f:
+            entry_html = f.read()
+
+        with open("html/start_lists_short.html", "r") as f:
+            start_short = f.read()
+
         start = datetime.datetime.now()
         print("Start: ", start)
 
         info = []
+        infoShort = []
         data = []
         dataQ = []
 
@@ -362,13 +379,69 @@ class RaceApp(BoxLayout):
         dataMasterQ = []
 
         start_data = []
+        entry_data = []
 
         for i, en in enumerate(df["EventNum"]):
             if str(en) in selected_event_nums:
+                def surnameCheck(input_string):
+                    if input_string is None:
+                        return ' '  # or any default value you prefer
+                    lowercased_string = input_string.lower()
+                    if lowercased_string:
+                        result_string = lowercased_string[0].upper() + lowercased_string[1:]
+                    else:
+                        result_string = lowercased_string
+                    return result_string
+
                 info.append(
                     [en, boat_list[df["Event"][i].split()[1]], df["Event"][i].split()[1], df["Event"][i].split()[2],
                      suf_list[df["Event"][i].split()[2]], df["Day"][i], df["Start"][i],
-                     cat_list[df["Event"][i].split()[1]], str(df["Prog"][i])])
+                     cat_list[df["Event"][i].split()[1]], df["Prog"][i]])
+
+                def safe_split(value):
+                    # Convert to string and split
+                    parts = str(value).split()
+                    # Return parts or a default list if there are not enough elements
+                    return parts if len(parts) >= 3 else [None] * 3
+
+                # Iterate through the DataFrame rows and process each row
+                for i in range(len(df)):
+                    event_split = safe_split(df["Event"][i])
+                    lane1_split = safe_split(df["Lane 1"][i])
+                    lane2_split = safe_split(df["Lane 2"][i])
+                    lane3_split = safe_split(df["Lane 3"][i])
+                    lane4_split = safe_split(df["Lane 4"][i])
+                    lane5_split = safe_split(df["Lane 5"][i])
+                    lane6_split = safe_split(df["Lane 6"][i])
+
+                    infoShort.append([
+                        en,
+                        cat_list.get(event_split[1]),  # Safe access
+                        event_split[1],
+                        df["Day"][i],
+                        df["Start"][i],
+                        event_split[2],
+                        f'<img src="flags/{flag_list.get(lane1_split[1], "none.jpg")}" style="max-width: 6mm; max-height: 6mm">',
+                        aff_list.get(lane1_split[1], " "),
+                        surnameCheck(lane1_split[2]),
+                        f'<img src="flags/{flag_list.get(lane2_split[1], "none.jpg")}" style="max-width: 6mm; max-height: 6mm">',
+                        aff_list.get(lane2_split[1], " "),
+                        surnameCheck(lane2_split[2]),
+                        f'<img src="flags/{flag_list.get(lane3_split[1], "none.jpg")}" style="max-width: 6mm; max-height: 6mm">',
+                        aff_list.get(lane3_split[1], " "),
+                        surnameCheck(lane3_split[2]),
+                        f'<img src="flags/{flag_list.get(lane4_split[1], "none.jpg")}" style="max-width: 6mm; max-height: 6mm">',
+                        aff_list.get(lane4_split[1], " "),
+                        surnameCheck(lane4_split[2]),
+                        f'<img src="flags/{flag_list.get(lane5_split[1], "none.jpg")}" style="max-width: 6mm; max-height: 6mm">',
+                        aff_list.get(lane5_split[1], " "),
+                        surnameCheck(lane5_split[2]),
+                        f'<img src="flags/{flag_list.get(lane6_split[1], "none.jpg")}" style="max-width: 6mm; max-height: 6mm">',
+                        aff_list.get(lane6_split[1], " "),
+                        surnameCheck(lane6_split[2]),
+                        df["Prog"][i],
+                        en
+                    ])
 
         for j, en in enumerate(fl["EventNum"]):
             if str(en) in selected_event_nums:
@@ -410,6 +483,8 @@ class RaceApp(BoxLayout):
                     start_data.append(
                         [str(fl["Bow"][j]).split(sep=".")[0], f'<img src="flags/{flag_list[fl["CrewAbbrev"][j]]}" style="max-width: 6mm">', fl["Crew"][j], fl["Stroke"][j].replace("/", ", "), masterFun(str(fl["PenaltyCode"][j])), en])
 
+                    entry_data.append([f'<img src="flags/{flag_list[fl["CrewAbbrev"][j]]}" style="max-width: 6mm">', fl["Crew"][j], fl["Stroke"][j].replace("/", ", "), en])
+
         current_date = datetime.datetime.now().strftime('%Y-%m-%d')
         current_time = datetime.datetime.now().strftime('%H:%M:%S')
 
@@ -425,6 +500,10 @@ class RaceApp(BoxLayout):
         start_html = start_html.format(compName=self.comp_name.text, compDates=self.comp_date.text, cDate=current_date,
                                        cTime=current_time)
         start_htmlMaster = start_htmlMaster.format(compName=self.comp_name.text, compDates=self.comp_date.text, cDate=current_date,
+                                       cTime=current_time)
+        entry_html = entry_html.format(compName=self.comp_name.text, compDates=self.comp_date.text, cDate=current_date,
+                                                   cTime=current_time)
+        start_short = start_short.format(compName=self.comp_name.text, compDates=self.comp_date.text, cDate=current_date,
                                        cTime=current_time)
 
         html_dir = os.path.join(os.path.dirname(__file__), 'html')
@@ -726,6 +805,61 @@ class RaceApp(BoxLayout):
             ft.write(start_html)
 
 #------------------------------------------------------------------------------
+
+            with open(os.path.join(html_dir, "entry_lists.txt"), "r") as f:
+                tr = f.read()
+
+            with open(os.path.join(html_dir, "entry_lists_header.txt"), "r") as f:
+                infOne = f.read()
+
+            last = ''
+            last_id = 0
+            first_insert_start = True
+
+            for j, a in enumerate(entry_data):
+                if a[-1] == last:
+                    entry_html = entry_html.replace("[entry_rinda]",
+                                                    tr.format(a[0], a[1], a[2]) + "\n[entry_rinda]")
+                    last = a[-1]
+                else:
+                    if not first_insert_start:
+                        entry_html = entry_html.replace("[entry_rinda]", "")
+
+                        with open(os.path.join(html_dir, f"entry_by_events_log_{last}.html"), "w", encoding='utf-8') as ft:
+                            ft.write(entry_html)
+
+                        with open(os.path.join(html_dir, "entry_lists.html"), "r") as f:
+                            entry_html = f.read()
+
+                        entry_html = entry_html.format(compName=self.comp_name.text, compDates=self.comp_date.text,
+                                                       cDate=current_date,
+                                                       cTime=current_time)
+
+                        with open(os.path.join(html_dir, "entry_lists.txt"), "r") as f:
+                            tr = f.read()
+
+                        with open(os.path.join(html_dir, "entry_lists_header.txt"), "r") as f:
+                            infOne = f.read()
+
+                        entry_html = entry_html.replace("[entry_rinda]",
+                                                        tr.format(a[0], a[1], a[2]) + "\n[entry_rinda]")
+                        entry_html = entry_html.replace("[header]", infOne.format(info[last_id][7], info[last_id][2],
+                                                                                        info[last_id][1]))
+                    else:
+                        entry_html = entry_html.replace("[entry_rinda]",
+                                                        tr.format(a[0], a[1], a[2]) + "\n[entry_rinda]")
+                        entry_html = entry_html.replace("[header]", infOne.format(info[last_id][7], info[last_id][2],
+                                                                                        info[last_id][1]))
+                        first_insert_start = False
+
+                    last = a[-1]
+                    last_id += 1
+
+            entry_html = entry_html.replace("[entry_rinda]", "")
+            with open(os.path.join(html_dir, f"entry_by_events_log_{last}.html"), "w", encoding='utf-8') as ft:
+                ft.write(entry_html)
+
+# ------------------------------------------------------------------------------
         with open(os.path.join(html_dir, "tbody_res_no_qual.txt"), "r") as f:
             trQ = f.read()
 
@@ -794,7 +928,7 @@ class RaceApp(BoxLayout):
         with open(os.path.join(html_dir, f"log_noq_{last}.html"), "w", encoding='utf-8') as ft:
             ft.write(htmlQ)
 
-        # --------------------------------------------------------------------------------------
+# --------------------------------------------------------------------------------------
 
         with open(os.path.join(html_dir, "tbody_res_no_qual_masters.txt"), "r") as f:
             trMasterQ = f.read()
@@ -869,6 +1003,55 @@ class RaceApp(BoxLayout):
 
         with open(os.path.join(html_dir, f"log_noq_master_{last}.html"), "w", encoding='utf-8') as ft:
             ft.write(htmlMasterQ)
+
+# --------------------------------------------------------------------------------------
+        with open(os.path.join(html_dir, "start_lists_short.txt"), "r") as f:
+            stListSh = f.read()
+
+        last = ''
+        last_id = 0
+        first_insert = True
+
+        for j, a in enumerate(infoShort):
+            if a[-1] == last:
+                start_short = start_short.replace("[short_rinda]",
+                                                  stListSh.format(a[0], a[1], a[2], a[3], a[4], a[5], a[6], a[7],
+                                                                   a[8],
+                                                                   a[9], a[10], a[11], a[12], a[13], a[14], a[15], a[16], a[17], a[18], a[19], a[20], a[21], a[22], a[23], a[24]) + "\n[short_rinda]")
+                last = a[-1]
+            else:
+                if not first_insert:
+                    start_short = start_short.replace("[short_rinda]", "")
+
+                    with open(os.path.join(html_dir, f"start_short_log_{last}.html"), "w", encoding='utf-8') as ft:
+                        ft.write(start_short)
+
+                    with open(os.path.join(html_dir, "start_lists_short.html"), "r") as f:
+                        start_short = f.read()
+
+                    start_short = start_short.format(compName=self.comp_name.text, compDates=self.comp_date.text,
+                                                     cDate=current_date,
+                                                     cTime=current_time)
+
+                    with open(os.path.join(html_dir, "start_lists_short.txt"), "r") as f:
+                        stListSh = f.read()
+
+                    start_short = start_short.replace("[short_rinda]",
+                                                      stListSh.format(a[0], a[1], a[2], a[3], a[4], a[5], a[6], a[7],
+                                                                   a[8],
+                                                                   a[9], a[10], a[11], a[12], a[13], a[14], a[15], a[16], a[17], a[18], a[19], a[20], a[21], a[22], a[23], a[24]) + "\n[short_rinda]")
+                else:
+                    start_short = start_short.replace("[short_rinda]", stListSh.format(a[0], a[1], a[2], a[3], a[4], a[5], a[6], a[7],
+                                                                   a[8],
+                                                                   a[9], a[10], a[11], a[12], a[13], a[14], a[15], a[16], a[17], a[18], a[19], a[20], a[21], a[22], a[23], a[24]) + "\n[short_rinda]")
+                    first_insert = False
+
+                last = a[-1]
+                last_id += 1
+
+        start_short = start_short.replace("[short_rinda]", "")
+        with open(os.path.join(html_dir, f"start_short_log_{last}.html"), "w", encoding='utf-8') as ft:
+            ft.write(start_short)
 
         end = datetime.datetime.now()
         print("End: ", end)
