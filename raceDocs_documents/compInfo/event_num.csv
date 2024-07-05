@@ -66,6 +66,11 @@ EventNum,Category
 65,LW2-
 66,LM4x
 67,LW4x
+1,WD-20
+2,MixSD-20(200m)
+4,MixSD-20(500m)
+3,MixAD-20
+5,MixKD-20
 1,Mix2x
-3,WU15C2
 2,MU15C2
+3,WU15C2

@@ -1,102 +1,13 @@
-EventNum,Event,Place,Crew,CrewAbbrev,Bow,Stroke,Start,Finish,RawTime,PenaltyCode,AdjTime,Delta,Qual
-1,Mix2x TT1,,Daugavpils Sporta skola,DSS,[11:00] 1,LEDAKS Vladislavs 08/ Mahlina Marta 11,,,,,,,F1
-1,Mix2x TT1,,Daugavpils Sporta skola,DSS,[11:01] 2,GERMANE Anastasija 05/ POPKOVIČS Vladislavs 10,,,,,,,F2
-1,Mix2x TT1,,Daugavpils Sporta skola,DSS,[11:02] 3,TRENERE-2/ DUBOVSKIS Mihails 11,,,,,,,F3
-1,Mix2x TT1,,Daugavpils Sporta skola,DSS,[11:03] 4,FJODOROVS Arturs 07/ DANCONOKA Milana 10,,,,,,,F4
-1,Mix2x TT1,,Daugavpils Sporta skola,DSS,[11:04] 5,SIMANOVIČA Jekaterina 06/ JEFREMOVS Andrejs 11,,,,,,,F5
-1,Mix2x TT1,,Daugavpils Sporta skola,DSS,[11:05] 6,TRENERE-1/ MATUSEVIČS Deniss 09,,,,,,,F6
-1,Mix2x TT1,,Daugavpils Sporta skola,DSS,[11:06] 7,SUŠKO Zlatolina 09/ BOGDANS Ričards 10,,,,,,,F7
-1,Mix2x TT1,,Daugavpils Sporta skola,DSS,[11:00] 1,LEDAKS Vladislavs 08/ Mahlina Marta 11,,,,,,,F8
-1,Mix2x TT1,,Daugavpils Sporta skola,DSS,[11:01] 2,GERMANE Anastasija 05/ POPKOVIČS Vladislavs 10,,,,,,,F9
-1,Mix2x TT1,,Daugavpils Sporta skola,DSS,[11:02] 3,TRENERE-2/ DUBOVSKIS Mihails 11,,,,,,,F10
-1,Mix2x TT1,,Daugavpils Sporta skola,DSS,[11:03] 4,FJODOROVS Arturs 07/ DANCONOKA Milana 10,,,,,,,F11
-1,Mix2x TT1,,Daugavpils Sporta skola,DSS,[11:04] 5,SIMANOVIČA Jekaterina 06/ JEFREMOVS Andrejs 11,,,,,,,F12
-1,Mix2x TT1,,Daugavpils Sporta skola,DSS,[11:05] 6,TRENERE-1/ MATUSEVIČS Deniss 09,,,,,,,F13
-1,Mix2x TT1,,Daugavpils Sporta skola,DSS,[11:06] 7,SUŠKO Zlatolina 09/ BOGDANS Ričards 10,,,,,,,F14
-1,Mix2x TT1,,Daugavpils Sporta skola,DSS,[11:00] 1,LEDAKS Vladislavs 08/ Mahlina Marta 11,,,,,,,
-1,Mix2x TT1,,Daugavpils Sporta skola,DSS,[11:01] 2,GERMANE Anastasija 05/ POPKOVIČS Vladislavs 10,,,,,,,
-1,Mix2x TT1,,Daugavpils Sporta skola,DSS,[11:02] 3,TRENERE-2/ DUBOVSKIS Mihails 11,,,,,,,
-1,Mix2x TT1,,Daugavpils Sporta skola,DSS,[11:03] 4,FJODOROVS Arturs 07/ DANCONOKA Milana 10,,,,,,,
-1,Mix2x TT1,,Daugavpils Sporta skola,DSS,[11:04] 5,SIMANOVIČA Jekaterina 06/ JEFREMOVS Andrejs 11,,,,,,,
-1,Mix2x TT1,,Daugavpils Sporta skola,DSS,[11:05] 6,TRENERE-1/ MATUSEVIČS Deniss 09,,,,,,,
-1,Mix2x TT1,,Daugavpils Sporta skola,DSS,[11:06] 7,SUŠKO Zlatolina 09/ BOGDANS Ričards 10,,,,,,,
-1,Mix2x TT1,,Daugavpils Sporta skola,DSS,[11:00] 1,LEDAKS Vladislavs 08/ Mahlina Marta 11,,,,,,,
-1,Mix2x TT1,,Daugavpils Sporta skola,DSS,[11:01] 2,GERMANE Anastasija 05/ POPKOVIČS Vladislavs 10,,,,,,,
-1,Mix2x TT1,,Daugavpils Sporta skola,DSS,[11:02] 3,TRENERE-2/ DUBOVSKIS Mihails 11,,,,,,,
-1,Mix2x TT1,,Daugavpils Sporta skola,DSS,[11:03] 4,FJODOROVS Arturs 07/ DANCONOKA Milana 10,,,,,,,
-1,Mix2x TT1,,Daugavpils Sporta skola,DSS,[11:04] 5,SIMANOVIČA Jekaterina 06/ JEFREMOVS Andrejs 11,,,,,,,F25
-1,Mix2x TT1,,Daugavpils Sporta skola,DSS,[11:05] 6,TRENERE-1/ MATUSEVIČS Deniss 09,,,,,,,F26
-1,Mix2x TT1,,Daugavpils Sporta skola,DSS,[11:06] 7,SUŠKO Zlatolina 09/ BOGDANS Ričards 10,,,,,,,F27
-2,Mix2x TT2,,Daugavpils Sporta skola,DSS,[11:25] 1,MURAVSKIS Grigorijs 08/ KAČALOVA Anastasija 12,,,,,,,F29
-2,Mix2x TT2,,Daugavpils Sporta skola,DSS,[11:26] 2,ANCIFEROVA Jelizaveta 09/ VALTERS Kristaps 10,,,,,,,F30
-2,Mix2x TT2,,Daugavpils Sporta skola,DSS,[11:27] 3,ROSMANOVIČA Elina 04/ UTĀNS Dainis 10,,,,,,,F31
-2,Mix2x TT2,,Daugavpils Sporta skola,DSS,[11:28] 4,HOHLOVA Polina 03/ LAPKOVSKIS Timurs 11,,,,,,,F32
-2,Mix2x TT2,,Daugavpils Sporta skola,DSS,[11:29] 5,STRODE Daniela 05/ GOLOVKO Mihails 10,,,,,,,F33
-2,Mix2x TT2,,Daugavpils Sporta skola,DSS,[11:30] 6,VOLOSOVA Anastasija 09/ LISJAKS Aleksejs 11,,,,,,,F34
-2,Mix2x TT2,,Daugavpils Sporta skola,DSS,[11:31] 7,ŠALKOVSKIS Jegors 06/ KOROĻOVA Ieva 12,,,,,,,F35
-3,Mix2x TT3,,Daugavpils Sporta skola,DSS,[11:50] 1,MIHAILOVS Timurs 09/ ANCIFEROVA Jelizaveta 09,,,,,,,F36
-3,Mix2x TT3,,Daugavpils Sporta skola,DSS,[11:51] 2,VASIĻJEVS Maksims 08/ SUŠKO Zlatolina 09,,,,,,,F37
-3,Mix2x TT3,,Daugavpils Sporta skola,DSS,[11:52] 3,VANAGS Vadims 06/ ROSMANOVIČA Elina 04,,,,,,,F38
-3,Mix2x TT3,,Daugavpils Sporta skola,DSS,[11:53] 4,MELNIKOVS Artjoms 07/ STRODE Daniela 05,,,,,,,F39
-3,Mix2x TT3,,Daugavpils Sporta skola,DSS,[11:54] 5,PUŠKELIS Ņikita 08/ SIMANOVIČA Jekaterina 06,,,,,,,F40
-3,Mix2x TT3,,Daugavpils Sporta skola,DSS,[11:55] 6,DOKTOROVS Artjoms 08/ PARFENA Līga 01,,,,,,,F41
-3,Mix2x TT3,,Daugavpils Sporta skola,DSS,[11:56] 7,BOŽKOVS Kirils 07/ VOLOSOVA Anastasija 09,,,,,,,F42
-4,MU15C2 H1,,Daugavpils Sporta skola,DSS,1,KOKINS Tomass 15,,,,,,,F43
-4,MU15C2 H1,,Daugavpils Sporta skola,DSS,2,KURGANSKIS Platons 12,,,,,,,F44
-4,MU15C2 H1,,Daugavpils Sporta skola,DSS,3,JEFREMOVS Andrejs 11,,,,,,,F45
-4,MU15C2 H1,,Daugavpils Sporta skola,DSS,4,MĪLAŠEVIČS Vladislavs 10,,,,,,,F46
-5,MU15C2 H2,,Daugavpils Sporta skola,DSS,1,VILKOVS Savva 15,,,,,,,F47
-5,MU15C2 H2,,Daugavpils Sporta skola,DSS,2,SIDORENKO Danila 13,,,,,,,F48
-5,MU15C2 H2,,Daugavpils Sporta skola,DSS,3,BOGDANOVS Emīls 12,,,,,,,F49
-5,MU15C2 H2,,Daugavpils Sporta skola,DSS,4,KOKINS Markuss 12,,,,,,,F50
-6,MU15C2 H3,,Daugavpils Sporta skola,DSS,2,MATUSEVIČS Deniss 09,,,,,,,F51
-6,MU15C2 H3,,Daugavpils Sporta skola,DSS,3,GOLOVKO Mihails 10,,,,,,,F52
-6,MU15C2 H3,,Daugavpils Sporta skola,DSS,4,KOLUTOVIČS Igors 12,,,,,,,F53
-7,MU15C2 H4,,Daugavpils Sporta skola,DSS,2,ROSOVSKIS Roberts 15,,,,,,,F54
-7,MU15C2 H4,,Daugavpils Sporta skola,DSS,3,ROŠČENKO-MAKAROVS Edvins 13,,,,,,,F55
-7,MU15C2 H4,,Daugavpils Sporta skola,DSS,4,BARKATS-NOVOJENKO Aleksandrs Joakims 11,,,,,,,F56
-8,MU15C2 H5,,Daugavpils Sporta skola,DSS,2,POPKOVIČS Viktors 14,,,,,,,F57
-8,MU15C2 H5,,Daugavpils Sporta skola,DSS,3,KATKEVIČS Drago 12,,,,,,,F58
-8,MU15C2 H5,,Daugavpils Sporta skola,DSS,4,KOŠLAČS Jegors 11,,,,,,,F59
-9,WU15C2 H1,,Daugavpils Sporta skola,DSS,2,JANUZE Enija 14,,,,,,,F60
-9,WU15C2 H1,,Daugavpils Sporta skola,DSS,3,MIZAVCOVA Violeta 12,,,,,,,F61
-9,WU15C2 H1,,Daugavpils Sporta skola,DSS,4,JĀNĪTE Olga 12,,,,,,,F62
-10,Mix2x FE,,TBD,TBD,TBD,TBD,,,,,,,F63
-10,Mix2x FE,,TBD,TBD,TBD,TBD,,,,,,,F64
-10,Mix2x FE,,TBD,TBD,TBD,TBD,,,,,,,F65
-10,Mix2x FE,,TBD,TBD,TBD,TBD,,,,,,,F66
-11,Mix2x FD,,TBD,TBD,TBD,TBD,,,,,,,F67
-11,Mix2x FD,,TBD,TBD,TBD,TBD,,,,,,,F68
-11,Mix2x FD,,TBD,TBD,TBD,TBD,,,,,,,F69
-11,Mix2x FD,,TBD,TBD,TBD,TBD,,,,,,,F70
-12,Mix2x FC,,TBD,TBD,TBD,TBD,,,,,,,F71
-12,Mix2x FC,,TBD,TBD,TBD,TBD,,,,,,,F72
-12,Mix2x FC,,TBD,TBD,TBD,TBD,,,,,,,F73
-12,Mix2x FC,,TBD,TBD,TBD,TBD,,,,,,,F74
-13,Mix2x FB,,TBD,TBD,TBD,TBD,,,,,,,F75
-13,Mix2x FB,,TBD,TBD,TBD,TBD,,,,,,,F76
-13,Mix2x FB,,TBD,TBD,TBD,TBD,,,,,,,F77
-13,Mix2x FB,,TBD,TBD,TBD,TBD,,,,,,,F78
-14,Mix2x FA,,TBD,TBD,TBD,TBD,,,,,,,F79
-14,Mix2x FA,,TBD,TBD,TBD,TBD,,,,,,,F80
-14,Mix2x FA,,TBD,TBD,TBD,TBD,,,,,,,
-14,Mix2x FA,,TBD,TBD,TBD,TBD,,,,,,,
-15,MU15C2 FD,,TBD,TBD,TBD,TBD,,,,,,,
-15,MU15C2 FD,,TBD,TBD,TBD,TBD,,,,,,,
-15,MU15C2 FD,,TBD,TBD,TBD,TBD,,,,,,,
-15,MU15C2 FD,,TBD,TBD,TBD,TBD,,,,,,,
-16,MU15C2 FC,,TBD,TBD,TBD,TBD,,,,,,,
-16,MU15C2 FC,,TBD,TBD,TBD,TBD,,,,,,,
-16,MU15C2 FC,,TBD,TBD,TBD,TBD,,,,,,,
-16,MU15C2 FC,,TBD,TBD,TBD,TBD,,,,,,,
-17,MU15C2 FB,,TBD,TBD,TBD,TBD,,,,,,,
-17,MU15C2 FB,,TBD,TBD,TBD,TBD,,,,,,,
-17,MU15C2 FB,,TBD,TBD,TBD,TBD,,,,,,,
-17,MU15C2 FB,,TBD,TBD,TBD,TBD,,,,,,,
-18,MU15C2 FA,,TBD,TBD,TBD,TBD,,,,,,,
-18,MU15C2 FA,,TBD,TBD,TBD,TBD,,,,,,,
-18,MU15C2 FA,,TBD,TBD,TBD,TBD,,,,,,,
-18,MU15C2 FA,,TBD,TBD,TBD,TBD,,,,,,,
-19,WU15C2 FA,,TBD,TBD,TBD,TBD,,,,,,,
-19,WU15C2 FA,,TBD,TBD,TBD,TBD,,,,,,,
-19,WU15C2 FA,,TBD,TBD,TBD,TBD,,,,,,,
+﻿EventNum,Event,Place,Crew,CrewAbbrev,Bow,Stroke,Start,Finish,RawTime,PenaltyCode,AdjTime,Delta,Rank,Qual
+1,WD-20 H1,1,Daugavpils Sporta skola,DSS,1,IVANOV Ivan 89/ PETROV Petr 90/ SMIRNOV Sergey 91/ KOZLOV Andrey 92/ SOKOLOV Alexey 93/ POPOV Ivan 94/ LEBEDEV Nikolay 95/ MOROZOV Dmitry 96/ NOVIKOV Igor 97/ FEDOROV Anton 98/ VASILIEV Denis 99/ ZAITSEV Alexey 00/ PAVLOV Pavel 01/ SEMENOV Sergey 02/ GOLUBEV Ivan 03/ VINOGRADOV Alexey 04/ BOGDANOV Mikhail 05/ VOLODIN Ivan 06/ SOLOVYOV Petr 07/ KALININ Dmitry 08/ ALEKSEEV Andrey 09,01:10.0,02:49.6,01:39.6,,01:39.6,,,FA
+1,WD-20 H1,2,MSG TSV SASS,SASS,2,KUZNETSOV Yuri 90/ IVANOVA Anna 91/ PETROVA Maria 92/ SMIRNOVA Olga 93/ KOZLOVA Elena 94/ SOKOLOVA Svetlana 95/ POPOVA Tatiana 96/ LEBEDEVA Marina 97/ MOROZOVA Irina 98/ NOVIKOVA Galina 99/ FEDOROVA Larisa 00/ VASILIEVA Vera 01/ ZAITSEVA Valentina 02/ PAVLOVA Irina 03/ SEMENOVA Nadezhda 04/ GOLUBEVA Lyudmila 05/ VINOGRADOVA Anastasia 06/ BOGDANOVA Ekaterina 07/ VOLODINA Natalia 08/ SOLOVYOVA Olga 09/ KALININA Tatiana 10,02:07.9,03:50.1,01:42.2,,01:42.2,00:02.6,,SA/B
+1,WD-20 H1,3,Daugavpils Sporta skola,DSS,3,SOKOLOV Ivan 89/ KOZLOV Petr 90/ SMIRNOV Andrey 91/ IVANOV Sergey 92/ PETROV Alexey 93/ POPOV Nikolay 94/ LEBEDEV Dmitry 95/ MOROZOV Igor 96/ NOVIKOV Anton 97/ FEDOROV Denis 98/ VASILIEV Alexey 99/ ZAITSEV Pavel 00/ PAVLOV Sergey 01/ SEMENOV Ivan 02/ GOLUBEV Alexey 03/ VINOGRADOV Mikhail 04/ BOGDANOV Ivan 05/ VOLODIN Petr 06/ SOLOVYOV Dmitry 07/ KALININ Andrey 08/ ALEKSEEV Denis 09,04:07.3,05:50.9,01:43.6,,01:43.6,00:04.0,,SA/B
+1,WD-20 H1,4,MSG TSV Jurmala,MSG,4,IVANOVA Maria 90/ PETROVA Olga 91/ SMIRNOVA Elena 92/ KOZLOVA Svetlana 93/ SOKOLOVA Tatiana 94/ POPOVA Marina 95/ LEBEDEVA Irina 96/ MOROZOVA Galina 97/ NOVIKOVA Larisa 98/ FEDOROVA Vera 99/ VASILIEVA Valentina 00/ ZAITSEVA Irina 01/ PAVLOVA Nadezhda 02/ SEMENOVA Lyudmila 03/ GOLUBEVA Anastasia 04/ VINOGRADOVA Ekaterina 05/ BOGDANOVA Natalia 06/ VOLODINA Olga 07/ SOLOVYOVA Tatiana 08/ KALININA Maria 09,00:08.4,01:57.0,01:48.6,,01:48.6,00:09.0,,FC
+1,WD-20 H2,1,Daugavpils Sporta skola,DSS,2,VASILIEVA Maria 90/ ZAITSEVA Olga 91/ PAVLOVA Elena 92/ SEMENOVA Svetlana 93/ GOLUBEVA Tatiana 94/ VINOGRADOVA Marina 95/ BOGDANOVA Irina 96/ VOLODINA Galina 97/ SOLOVYOVA Larisa 98/ KALININA Vera 99/ ALEKSEEVA Valentina 00/ IVANOVA Irina 01/ PETROVA Nadezhda 02/ SMIRNOVA Lyudmila 03/ KOZLOVA Anastasia 04/ SOKOLOVA Ekaterina 05/ POPOVA Natalia 06/ LEBEDEVA Olga 07/ MOROZOVA Tatiana 08/ NOVIKOVA Maria 09,01:10.0,02:49.6,01:39.6,,01:39.6,,,FA
+1,WD-20 H2,2,Daugavpils Sporta skola,DSS,4,SEMENOVA Maria 90/ GOLUBEVA Olga 91/ VINOGRADOVA Elena 92/ BOGDANOVA Svetlana 93/ VOLODINA Tatiana 94/ SOLOVYOVA Marina 95/ KALININA Irina 96/ ALEKSEEVA Galina 97/ IVANOVA Larisa 98/ PETROVA Vera 99/ SMIRNOVA Valentina 00/ KOZLOVA Irina 01/ SOKOLOVA Nadezhda 02/ POPOVA Lyudmila 03/ LEBEDEVA Anastasia 04/ MOROZOVA Ekaterina 05/ NOVIKOVA Natalia 06/ FEDOROVA Olga 07/ VASILIEVA Tatiana 08/ ZAITSEVA Maria 09,02:07.9,03:50.1,01:42.2,,01:42.2,00:02.6,,SA/B
+1,WD-20 H2,3,Jelgavas BJSS,JBJSS,1,FEDOROV Ivan 89/ VASILIEV Petr 90/ ZAITSEV Andrey 91/ PAVLOV Sergey 92/ SEMENOV Alexey 93/ GOLUBEV Nikolay 94/ VINOGRADOV Dmitry 95/ BOGDANOV Igor 96/ VOLODIN Anton 97/ SOLOVYOV Denis 98/ KALININ Alexey 99/ ALEKSEEV Pavel 00/ IVANOV Sergey 01/ PETROV Alexey 02/ SMIRNOV Nikolay 03/ KOZLOV Dmitry 04/ SOKOLOV Igor 05/ POPOV Anton 06/ LEBEDEV Denis 07/ MOROZOV Alexey 08/ NOVIKOV Mikhail 09,04:07.3,05:50.9,01:43.6,,01:43.6,00:04.0,,SA/B
+1,WD-20 H2,4,Daugavpils Sporta skola,DSS,3,PAVLOV Ivan 89/ SEMENOV Petr 90/ GOLUBEV Andrey 91/ VINOGRADOV Sergey 92/ BOGDANOV Alexey 93/ VOLODIN Nikolay 94/ SOLOVYOV Dmitry 95/ KALININ Igor 96/ ALEKSEEV Anton 97/ IVANOV Denis 98/ PETROV Alexey 99/ SMIRNOV Pavel 00/ KOZLOV Sergey 01/ SOKOLOV Ivan 02/ POPOV Petr 03/ LEBEDEV Andrey 04/ MOROZOV Sergey 05/ NOVIKOV Alexey 06/ FEDOROV Nikolay 07/ VASILIEV Dmitry 08/ ZAITSEV Igor 09,00:08.4,01:57.0,01:48.6,,01:48.6,00:09.0,,FC
+1,WD-20 H3,1,RAK1872,RAK,4,VOLODINA Maria 90/ SOLOVYOVA Olga 91/ KALININA Elena 92/ ALEKSEEVA Svetlana 93/ IVANOVA Tatiana 94/ PETROVA Marina 95/ SMIRNOVA Irina 96/ KOZLOVA Galina 97/ SOKOLOVA Larisa 98/ POPOVA Vera 99/ LEBEDEVA Valentina 00/ MOROZOVA Irina 01/ NOVIKOVA Nadezhda 02/ FEDOROVA Lyudmila 03/ VASILIEVA Anastasia 04/ ZAITSEVA Ekaterina 05/ PAVLOVA Natalia 06/ SEMENOVA Olga 07/ GOLUBEVA Tatiana 08/ VINOGRADOVA Maria 09,01:10.0,02:49.6,01:39.6,,01:39.6,,,FA
+1,WD-20 H3,2,Daugavpils Sporta skola,DSS,2,VINOGRADOVA Maria 90/ BOGDANOVA Olga 91/ VOLODINA Elena 92/ SOLOVYOVA Svetlana 93/ KALININA Tatiana 94/ ALEKSEEVA Marina 95/ IVANOVA Irina 96/ PETROVA Galina 97/ SMIRNOVA Larisa 98/ KOZLOVA Vera 99/ SOKOLOVA Valentina 00/ POPOVA Irina 01/ LEBEDEVA Nadezhda 02/ MOROZOVA Lyudmila 03/ NOVIKOVA Anastasia 04/ FEDOROVA Ekaterina 05/ VASILIEVA Natalia 06/ ZAITSEVA Olga 07/ PAVLOVA Tatiana 08/ SEMENOVA Maria 09,02:07.9,03:50.1,01:42.2,,01:42.2,00:02.6,,SA/B
+1,WD-20 H3,3,Daugavpils Sporta skola,DSS,3,BOGDANOV Ivan 89/ VOLODIN Petr 90/ SOLOVYOV Andrey 91/ KALININ Sergey 92/ ALEKSEEV Alexey 93/ IVANOV Nikolay 94/ PETROV Dmitry 95/ SMIRNOV Igor 96/ KOZLOV Anton 97/ SOKOLOV Denis 98/ POPOV Alexey 99/ LEBEDEV Pavel 00/ MOROZOV Sergey 01/ NOVIKOV Ivan 02/ FEDOROV Petr 03/ VASILIEV Andrey 04/ ZAITSEV Sergey 05/ PAVLOV Alexey 06/ SEMENOV Nikolay 07/ GOLUBEV Dmitry 08/ VINOGRADOV Igor 09,04:07.3,05:50.9,01:43.6,,01:43.6,00:04.0,,SA/B
+1,WD-20 H3,4,Daugavpils Sporta skola,DSS,1,GOLUBEV Ivan 89/ VINOGRADOV Petr 90/ BOGDANOV Andrey 91/ VOLODIN Sergey 92/ SOLOVYOV Alexey 93/ KALININ Nikolay 94/ ALEKSEEV Dmitry 95/ IVANOV Igor 96/ PETROV Anton 97/ SMIRNOV Denis 98/ KOZLOV Alexey 99/ SOKOLOV Pavel 00/ POPOV Sergey 01/ LEBEDEV Ivan 02/ MOROZOV Petr 03/ NOVIKOV Andrey 04/ FEDOROV Sergey 05/ VASILIEV Alexey 06/ ZAITSEV Nikolay 07/ PAVLOV Dmitry 08/ SEMENOV Igor 09,00:08.4,01:57.0,01:48.6,,01:48.6,00:09.0,,FC
