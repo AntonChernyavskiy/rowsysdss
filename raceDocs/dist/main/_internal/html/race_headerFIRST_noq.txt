@@ -8,7 +8,7 @@
 				<tr>
 					<th>{} - {}</th>
 					<td>{}</td>
-					<th>{} {}</th>
+					<th>{} - {}</th>
 				</tr>
 				<tr>
 					<td>race {}</td>

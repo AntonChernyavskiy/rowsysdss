@@ -384,13 +384,10 @@ class RaceApp(BoxLayout):
         for i, en in enumerate(df["EventNum"]):
             if str(en) in selected_event_nums:
                 def surnameCheck(input_string):
-                    if input_string is None:
+                    if input_string is None or len(input_string) == 0:
                         return ' '  # or any default value you prefer
-                    lowercased_string = input_string.lower()
-                    if lowercased_string:
-                        result_string = lowercased_string[0].upper() + lowercased_string[1:]
-                    else:
-                        result_string = lowercased_string
+                    modified_string = input_string[1:]
+                    result_string = modified_string.capitalize()
                     return result_string
 
                 info.append(
@@ -415,7 +412,7 @@ class RaceApp(BoxLayout):
                     lane6_split = safe_split(df["Lane 6"][i])
 
                     infoShort.append([
-                        en,
+                        df["EventNum"][i],
                         cat_list.get(event_split[1]),  # Safe access
                         event_split[1],
                         df["Day"][i],
