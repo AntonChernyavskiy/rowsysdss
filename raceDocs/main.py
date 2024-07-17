@@ -525,12 +525,9 @@ class RaceApp(BoxLayout):
             else:
                 if not first_insert:
                     html = html.replace("[rinda]", "")
-                    last_prog = ""
-                    for sublist in info:
-                        last_prog = sublist[-1]
+                    last_prog = info[last_id-1][8]
                     html = html.replace("[prog_sys]", last_prog)
                     html = html.replace("[prog_sys]", "")
-
                     with open(os.path.join(html_dir, f"log_{last}.html"), "w", encoding='utf-8') as ft:
                         ft.write(html)
 
@@ -565,12 +562,9 @@ class RaceApp(BoxLayout):
                 last = a[-1]
                 last_id += 1
         html = html.replace("[rinda]", "")
-        last_prog = ""
-        for sublist in info:
-            last_prog = sublist[-1]
+        last_prog = info[last_id-1][8]
         html = html.replace("[prog_sys]", last_prog)
         html = html.replace("[prog_sys]", "")
-
         with open(os.path.join(html_dir, f"log_{last}.html"), "w", encoding='utf-8') as ft:
             ft.write(html)
 
@@ -596,9 +590,7 @@ class RaceApp(BoxLayout):
             else:
                 if not first_insert:
                     htmlMaster = htmlMaster.replace("[rinda]", "")
-                    last_prog = ""
-                    for sublist in info:
-                        last_prog = sublist[-1]
+                    last_prog = info[last_id-1][8]
                     htmlMaster = htmlMaster.replace("[prog_sys]", last_prog)
                     htmlMaster = htmlMaster.replace("[prog_sys]", "")
 
@@ -649,9 +641,7 @@ class RaceApp(BoxLayout):
                 last = a[-1]
                 last_id += 1
         htmlMaster = htmlMaster.replace("[rinda]", "")
-        last_prog = ""
-        for sublist in info:
-            last_prog = sublist[-1]
+        last_prog = info[last_id-1][8]
         htmlMaster = htmlMaster.replace("[prog_sys]", last_prog)
         htmlMaster = htmlMaster.replace("[prog_sys]", "")
 
@@ -681,6 +671,7 @@ class RaceApp(BoxLayout):
             else:
                 if not first_insert_start:
                     start_htmlMaster = start_htmlMaster.replace("[st_rinda]", "")
+                    last_prog = info[last_id - 1][8]
                     start_htmlMaster = start_htmlMaster.replace("[prog_sys]", last_prog)
                     start_htmlMaster = start_htmlMaster.replace("[prog_sys]", "")
 
@@ -727,6 +718,7 @@ class RaceApp(BoxLayout):
                 last_id += 1
 
         start_htmlMaster = start_htmlMaster.replace("[st_rinda]", "")
+        last_prog = info[last_id - 1][8]
         start_htmlMaster = start_htmlMaster.replace("[prog_sys]", last_prog)
         start_htmlMaster = start_htmlMaster.replace("[prog_sys]", "")
         with open(os.path.join(html_dir, f"start_log_master_{last}.html"), "w", encoding='utf-8') as ft:
@@ -753,6 +745,7 @@ class RaceApp(BoxLayout):
             else:
                 if not first_insert_start:
                     start_html = start_html.replace("[st_rinda]", "")
+                    last_prog = info[last_id - 1][8]
                     start_html = start_html.replace("[prog_sys]", last_prog)
                     start_html = start_html.replace("[prog_sys]", "")
 
@@ -796,6 +789,7 @@ class RaceApp(BoxLayout):
                 last_id += 1
 
         start_html = start_html.replace("[st_rinda]", "")
+        last_prog = info[last_id - 1][8]
         start_html = start_html.replace("[prog_sys]", last_prog)
         start_html = start_html.replace("[prog_sys]", "")
         with open(os.path.join(html_dir, f"start_log_{last}.html"), "w", encoding='utf-8') as ft:
