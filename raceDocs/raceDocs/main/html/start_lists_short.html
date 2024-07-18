@@ -1,0 +1,78 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>STARTLIST SHORT | {compName} - {compDates}</title>
+    <link rel="stylesheet" href="style.css">
+    
+</head>
+<body>
+    <div style="width: 21cm">
+        <div style="width: 19cm; margin-left: 1cm; margin-right: 1cm">
+            <table>
+                <thead>
+                    <tr>
+                        <th colspan="2" class="compInfo">
+                            <div class="compNameDates" style="border-bottom: black solid 1px;">
+                                <span class="compName" >{compName}<o style="font-weight: normal;"> | START LIST SUMMARY</o></span>
+                                <span class="compDates">{compDates}</span>
+                            </div>
+                        </th>
+                    </tr>
+                    <tr class="rText" style="width: 190mm;">
+                        <th>
+                            <div class="raceHeadersShort">
+                                <table class="rText">
+                                    <tr>
+                                        <td style="width: 4mm">R#</td>
+                                        <td style="width: 10mm;">Event</td>
+                                        <td style="width: 8mm">Code</td>
+                                        <td style="width: 15mm;">Date</td>
+                                        <td style="width: 8mm">Time</td>
+                                        <td style="width: 8mm; border-right: 2px solid black;"></td>
+                                        <td style="width: 20mm">1</td>
+                                        <td style="width: 20mm">2</td>
+                                        <td style="width: 20mm">3</td>
+                                        <td style="width: 20mm">4</td>
+                                        <td style="width: 20mm">5</td>
+                                        <td style="width: 20mm">6</td>
+                                        <td style="width: 17mm">Progression</td>
+                                    </tr>
+                                </table>
+                            </div>
+                        </th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td>
+                            <div class="raceHeadersShortMain">
+                                <table class="rText">
+                                    [short_rinda]
+                                </table>
+                            </div>
+                        </td>
+                    </tr>
+                </tbody>
+                <tfoot class="tfoot">
+                    <tr style="font-size: 12px;">
+                        <td>
+                            <table style="width: 100%;">
+                                <tr class="postInfo">
+                                    <td  style="text-align: left">
+                                    <hr style="border-top: 1px solid black;">
+                                    <b>Generated: {cDate} {cTime}</b><br>
+                                    Results available at https://sportdss.eu
+                                    <div>Timing & data processing: <b>Antons Cernavskis</b></div>
+                                    </td>
+                                </tr>
+                            </table>  
+                        </td>
+                    </tr>
+                </tfoot>
+            </table>
+        </div>
+    </div>
+</body>
+</html>
