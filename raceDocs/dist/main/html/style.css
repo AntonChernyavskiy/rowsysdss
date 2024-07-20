@@ -15,31 +15,31 @@
 .compInfo th {
     width: 6cm;
     vertical-align: bottom;
-    font-size: 16px;
+    font-size: 15px;
 }
 
 .raceInfo table, .raceInfo tr {
     background-color: #f2f2f2;
     text-align: center;
     width: 18cm;
-    font-size: 15px;
+    font-size: 14px;
 }
 
 .raceHeaders {
-    font-size: 15px;
+    font-size: 14px;
     border-collapse: collapse;
     border-top: 1px solid black;
     border-bottom: 1px solid black;
 }
 
 .raceHeadersShort {
-    font-size: 15px;
+    font-size: 14px;
     border-collapse: collapse;
     border-bottom: 2px solid black;
 }
 
 .raceHeadersShortMain {
-    font-size: 15px;
+    font-size: 14px;
     border-collapse: collapse;
     border-bottom: 1px solid black;
 }
@@ -55,13 +55,13 @@
 .rText th {
     text-align: center;
     vertical-align: center;
-    font-size: 13px;
+    font-size: 12px;
 }
 
 .rText td {
     text-align: center;
     vertical-align: top;
-    font-size: 12px;
+    font-size: 11px;
 }
 
 .rTextTbl tr td {
@@ -78,7 +78,7 @@
 }
 
 .postInfo {
-    font-size: 12px;
+    font-size: 11px;
     text-align: left;
 }
 
@@ -107,7 +107,7 @@
 }
 
 * {
-    font-family: Calibri, sans-serif;
+    font-family: 'Trebuchet MS',  sans-serif;
 }
 
 @page {

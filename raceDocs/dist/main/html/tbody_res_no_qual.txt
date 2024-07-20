@@ -5,10 +5,8 @@
                                     <td style="width: 10mm;">{}</td>
                                     <td style="width:45mm; text-align: left"><b>{}</b><br><t style="font-family: calibri light">{}</t></td>
                                     <td style="width: 6.29mm;"></td>
-                                    <td style="width: 20mm;"><b></b><br><br><t style="font-size: 8px"><i></i></t></td>
-                                    <td style="width: 20mm;"><b></b><br><br><t style="font-size: 8px"><i></i></t></td>
-                                    <td style="width: 20mm;"><b></b><br><br><t style="font-size: 8px"><i></i></t></td>
-                                    <td style="width: 20mm;"><b>{}</b><br>{}<br><t style="font-size: 8px"><i>{} {}</i></t></td>
+                                    <td style="width: 20mm;"><b></b><br><br><t style="font-size: 7px"><i></i></t></td>
+                                    <td style="width: 20mm;"><b></b><br><br><t style="font-size: 7px"><i></i></t></td>
+                                    <td style="width: 20mm;"><b></b><br><br><t style="font-size: 7px"><i></i></t></td>
+                                    <td style="width: 20mm;"><b>{}</b><br>{}<br><t style="font-size: 7px"><i>{} {}</i></t></td>
                                 </tr>
-
-                                <!--it's me-->

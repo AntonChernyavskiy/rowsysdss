@@ -1,4 +1,4 @@
-<tr style="font-size: 12px;">
+<tr style="font-size: 11px;">
     <td colspan="10">
 		<table style="width: 100%">
 			<tr class="postInfo">

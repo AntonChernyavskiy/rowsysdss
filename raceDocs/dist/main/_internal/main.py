@@ -410,6 +410,7 @@ class RaceApp(BoxLayout):
                     lane4_split = safe_split(df["Lane 4"][i])
                     lane5_split = safe_split(df["Lane 5"][i])
                     lane6_split = safe_split(df["Lane 6"][i])
+                    lane7_split = safe_split(df["Lane 7"][i])
 
                     infoShort.append([
                         df["EventNum"][i],
@@ -436,6 +437,9 @@ class RaceApp(BoxLayout):
                         f'<img src="flags/{flag_list.get(lane6_split[1], "none.jpg")}" style="max-width: 6mm; max-height: 6mm">',
                         aff_list.get(lane6_split[1], " "),
                         surnameCheck(lane6_split[2]),
+                        f'<img src="flags/{flag_list.get(lane7_split[1], "none.jpg")}" style="max-width: 6mm; max-height: 6mm">',
+                        aff_list.get(lane7_split[1], " "),
+                        surnameCheck(lane7_split[2]),
                         df["Prog"][i],
                         en
                     ])
@@ -1008,7 +1012,7 @@ class RaceApp(BoxLayout):
                 start_short = start_short.replace("[short_rinda]",
                                                   stListSh.format(a[0], a[1], a[2], a[3], a[4], a[5], a[6], a[7],
                                                                    a[8],
-                                                                   a[9], a[10], a[11], a[12], a[13], a[14], a[15], a[16], a[17], a[18], a[19], a[20], a[21], a[22], a[23], a[24]) + "\n[short_rinda]")
+                                                                   a[9], a[10], a[11], a[12], a[13], a[14], a[15], a[16], a[17], a[18], a[19], a[20], a[21], a[22], a[23], a[24], a[25], a[26], a[27]) + "\n[short_rinda]")
                 last = a[-1]
             else:
                 if not first_insert:
@@ -1030,11 +1034,11 @@ class RaceApp(BoxLayout):
                     start_short = start_short.replace("[short_rinda]",
                                                       stListSh.format(a[0], a[1], a[2], a[3], a[4], a[5], a[6], a[7],
                                                                    a[8],
-                                                                   a[9], a[10], a[11], a[12], a[13], a[14], a[15], a[16], a[17], a[18], a[19], a[20], a[21], a[22], a[23], a[24]) + "\n[short_rinda]")
+                                                                   a[9], a[10], a[11], a[12], a[13], a[14], a[15], a[16], a[17], a[18], a[19], a[20], a[21], a[22], a[23], a[24], a[25], a[26], a[27]) + "\n[short_rinda]")
                 else:
                     start_short = start_short.replace("[short_rinda]", stListSh.format(a[0], a[1], a[2], a[3], a[4], a[5], a[6], a[7],
                                                                    a[8],
-                                                                   a[9], a[10], a[11], a[12], a[13], a[14], a[15], a[16], a[17], a[18], a[19], a[20], a[21], a[22], a[23], a[24]) + "\n[short_rinda]")
+                                                                   a[9], a[10], a[11], a[12], a[13], a[14], a[15], a[16], a[17], a[18], a[19], a[20], a[21], a[22], a[23], a[24], a[25], a[26], a[27]) + "\n[short_rinda]")
                     first_insert = False
 
                 last = a[-1]

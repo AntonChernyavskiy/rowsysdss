@@ -3,7 +3,7 @@
 		<div class="raceInfo">
 			<table>
 				<tr>
-					<th style="font-size: 14px;" colspan="3">RESULTS</th>
+					<th style="font-size: 13px;" colspan="3">RESULTS</th>
 				</tr>
 				<tr>
 					<th>{} - {}</th>

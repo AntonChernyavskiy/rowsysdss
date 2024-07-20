@@ -1,9 +1,9 @@
-<tr style="font-size: 12px;">
+<tr style="font-size: 11px;">
     <td colspan="11">
 		<table style="width: 100%">
 			<tr>
 				<td>
-					<div style="font-size: 14px; font-weight: bold; text-align: left;"><br><br><br>Progression: {}</div>
+					<div style="font-size: 12px; font-weight: bold; text-align: left;"><br><br><br>Progression: {}</div>
 				</td>
 			</tr>
 			<tr class="postInfo">
