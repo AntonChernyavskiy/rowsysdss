@@ -4,13 +4,13 @@
     <td style="width: 8mm">{}</td>
     <td style="width: 15mm;">{}</td>
     <td style="width: 9mm">{}</td>
-    <td style="width: 8mm; border-right: 2px solid black;">{}</td>
-    <td style="width: 17mm">{}<br><b>{}</b><br>{}</td>
-    <td style="width: 17mm">{}<br><b>{}</b><br>{}</td>
-    <td style="width: 17mm">{}<br><b>{}</b><br>{}</td>
-    <td style="width: 17mm">{}<br><b>{}</b><br>{}</td>
-    <td style="width: 17mm">{}<br><b>{}</b><br>{}</td>
-    <td style="width: 17mm">{}<br><b>{}</b><br>{}</td>
-    <td style="width: 17mm">{}<br><b>{}</b><br>{}</td>
-    <td style="width: 17mm">{}</td>
+    <td style=" border-right: 2px solid black;">{}</td>
+    <td style="width: 15mm">{}<br><b>{}</b><br>{}</td>
+    <td style="width: 15mm">{}<br><b>{}</b><br>{}</td>
+    <td style="width: 15mm">{}<br><b>{}</b><br>{}</td>
+    <td style="width: 15mm">{}<br><b>{}</b><br>{}</td>
+    <td style="width: 15mm">{}<br><b>{}</b><br>{}</td>
+    <td style="width: 15mm">{}<br><b>{}</b><br>{}</td>
+    <td style="width: 15mm">{}<br><b>{}</b><br>{}</td>
+    <td style="width: 15mm">{}</td>
 </tr>

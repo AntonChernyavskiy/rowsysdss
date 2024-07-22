@@ -419,27 +419,27 @@ class RaceApp(BoxLayout):
                         df["Day"][i],
                         df["Start"][i],
                         event_split[2],
-                        f'<img src="flags/{flag_list.get(lane1_split[1], "none.jpg")}" style="max-width: 6mm; max-height: 6mm">',
-                        aff_list.get(lane1_split[1], " "),
-                        surnameCheck(lane1_split[2]),
-                        f'<img src="flags/{flag_list.get(lane2_split[1], "none.jpg")}" style="max-width: 6mm; max-height: 6mm">',
-                        aff_list.get(lane2_split[1], " "),
-                        surnameCheck(lane2_split[2]),
-                        f'<img src="flags/{flag_list.get(lane3_split[1], "none.jpg")}" style="max-width: 6mm; max-height: 6mm">',
-                        aff_list.get(lane3_split[1], " "),
-                        surnameCheck(lane3_split[2]),
-                        f'<img src="flags/{flag_list.get(lane4_split[1], "none.jpg")}" style="max-width: 6mm; max-height: 6mm">',
-                        aff_list.get(lane4_split[1], " "),
-                        surnameCheck(lane4_split[2]),
-                        f'<img src="flags/{flag_list.get(lane5_split[1], "none.jpg")}" style="max-width: 6mm; max-height: 6mm">',
-                        aff_list.get(lane5_split[1], " "),
-                        surnameCheck(lane5_split[2]),
-                        f'<img src="flags/{flag_list.get(lane6_split[1], "none.jpg")}" style="max-width: 6mm; max-height: 6mm">',
-                        aff_list.get(lane6_split[1], " "),
-                        surnameCheck(lane6_split[2]),
-                        f'<img src="flags/{flag_list.get(lane7_split[1], "none.jpg")}" style="max-width: 6mm; max-height: 6mm">',
-                        aff_list.get(lane7_split[1], " "),
-                        surnameCheck(lane7_split[2]),
+                        f'<img src="flags/{flag_list.get(lane1_split[0], "none.jpg")}" style="max-width: 6mm; max-height: 6mm">',
+                        aff_list.get(lane1_split[0], " "),
+                        surnameCheck(lane1_split[1]),
+                        f'<img src="flags/{flag_list.get(lane2_split[0], "none.jpg")}" style="max-width: 6mm; max-height: 6mm">',
+                        aff_list.get(lane2_split[0], " "),
+                        surnameCheck(lane2_split[1]),
+                        f'<img src="flags/{flag_list.get(lane3_split[0], "none.jpg")}" style="max-width: 6mm; max-height: 6mm">',
+                        aff_list.get(lane3_split[0], " "),
+                        surnameCheck(lane3_split[1]),
+                        f'<img src="flags/{flag_list.get(lane4_split[0], "none.jpg")}" style="max-width: 6mm; max-height: 6mm">',
+                        aff_list.get(lane4_split[0], " "),
+                        surnameCheck(lane4_split[1]),
+                        f'<img src="flags/{flag_list.get(lane5_split[0], "none.jpg")}" style="max-width: 6mm; max-height: 6mm">',
+                        aff_list.get(lane5_split[0], " "),
+                        surnameCheck(lane5_split[1]),
+                        f'<img src="flags/{flag_list.get(lane6_split[0], "none.jpg")}" style="max-width: 6mm; max-height: 6mm">',
+                        aff_list.get(lane6_split[0], " "),
+                        surnameCheck(lane6_split[1]),
+                        f'<img src="flags/{flag_list.get(lane7_split[0], "none.jpg")}" style="max-width: 6mm; max-height: 6mm">',
+                        aff_list.get(lane7_split[0], " "),
+                        surnameCheck(lane7_split[1]),
                         df["Prog"][i],
                         en
                     ])
@@ -465,7 +465,7 @@ class RaceApp(BoxLayout):
                          fl["Crew"][j],
                          fl["Stroke"][j].replace("/", "<br>"), fl["AdjTime"][j], fl["Delta"][j], " ", " ", fl["Qual"][j], en])
                     dataQ.append(
-                        [str(fl["Place"][j]).split(sep=".")[0], f"({str(fl["Rank"][j])})", str(fl["Bow"][j]).split(sep=".")[0], f'<img src="flags/{flag_list[fl["CrewAbbrev"][j]]}" style="max-width: 6mm">',
+                        [str(fl["Place"][j]).split(sep=".")[0], f"({str(fl["Rank"][j]).split(sep=".")[0]})", str(fl["Bow"][j]).split(sep=".")[0], f'<img src="flags/{flag_list[fl["CrewAbbrev"][j]]}" style="max-width: 6mm">',
                          fl["Crew"][j], fl["Stroke"][j].replace("/", "<br>"), fl["AdjTime"][j], fl["Delta"][j], " ", " ",  en])
 
                     dataMaster.append(
@@ -475,7 +475,7 @@ class RaceApp(BoxLayout):
                          fl["Qual"][j], masterFun(str(fl["PenaltyCode"][j])),  en])
 
                     dataMasterQ.append(
-                        [str(fl["Place"][j]).split(sep=".")[0], f"({str(fl["Rank"][j])})",
+                        [str(fl["Place"][j]).split(sep=".")[0], f"({str(fl["Rank"][j]).split(sep=".")[0]})",
                          str(fl["Bow"][j]).split(sep=".")[0],
                          f'<img src="flags/{flag_list[fl["CrewAbbrev"][j]]}" style="max-width: 6mm">',
                          fl["Crew"][j], fl["Stroke"][j].replace("/", "<br>"), fl["RawTime"][j], fl["AdjTime"][j], fl["Delta"][j], " ",
