@@ -156,7 +156,7 @@ class RaceApp(BoxLayout):
 
         file_spinner = Spinner(
             text='Select File',
-            values=('Results', 'Results (no qual)', 'Master results', 'Master results (no qual)', 'Startlists', 'Master startlists', 'Short startlists', 'Entry list by event'),
+            values=('Results', 'Results (no qual)', 'Master results', 'Master results (no qual)', 'Startlists', 'Master startlists', 'Short startlists', 'Entry list by event', 'Atlase'),
             size_hint=(1, None),
             height=dp(44)
         )
@@ -225,6 +225,8 @@ class RaceApp(BoxLayout):
                     html_file = f"entry_by_events_log_{ev}.html"
                 elif selected_file == 'Short startlists':
                     html_file = f"start_short_log_{ev}.html"
+                elif selected_file == 'Atlase':
+                    html_file = f"atlase_{ev}.html"
                 else:
                     raise ValueError("Invalid file selection")
 
@@ -276,7 +278,7 @@ class RaceApp(BoxLayout):
 
             # Remove all HTML files in the 'html' directory
             html_files = glob.glob(os.path.join(html_dir, '*.html'))
-            exceptions = {'res_no_qual.html', 'res_with_qual.html', 'start_lists.html', 'entry_lists.html', 'start_lists_short.html'}
+            exceptions = {'res_no_qual.html', 'res_with_qual.html', 'start_lists.html', 'entry_lists.html', 'start_lists_short.html', 'atlase.html'}
             for html_file_path in html_files:
                 if os.path.basename(html_file_path) not in exceptions:
                     os.remove(html_file_path)
@@ -367,6 +369,9 @@ class RaceApp(BoxLayout):
         with open("html/start_lists_short.html", "r") as f:
             start_short = f.read()
 
+        with open("html/atlase.html", "r") as f:
+            atlase_html = f.read()
+
         start = datetime.datetime.now()
         print("Start: ", start)
 
@@ -374,6 +379,7 @@ class RaceApp(BoxLayout):
         infoShort = []
         data = []
         dataQ = []
+        atlase = []
 
         dataMaster = []
         dataMasterQ = []
@@ -444,6 +450,16 @@ class RaceApp(BoxLayout):
                         en
                     ])
 
+        def time_to_seconds(time_str):
+            """Convert a time string in mm:ss.0 format to seconds, return None if the string is empty or invalid."""
+            if time_str and ':' in time_str:
+                try:
+                    minutes, seconds = map(float, time_str.split(':'))
+                    return minutes * 60 + seconds
+                except ValueError:
+                    return None
+            return None
+
         for j, en in enumerate(fl["EventNum"]):
             if str(en) in selected_event_nums:
                 if fl["Crew"][j] != "Empty":
@@ -460,6 +476,17 @@ class RaceApp(BoxLayout):
                         except IndexError:
                             pass
 
+                    adj_time = fl["AdjTime"][j]
+                    penalty_code = fl["Qual"][j]
+                    adj_time_seconds = time_to_seconds(adj_time) if adj_time and ':' in adj_time else None
+                    penalty_code_seconds = time_to_seconds(
+                        penalty_code) if penalty_code and ':' in penalty_code else None
+
+                    if adj_time_seconds is not None and penalty_code_seconds is not None:  # Ensure both times are valid
+                        modeltime = round((penalty_code_seconds / adj_time_seconds) * 100, 2)
+                    else:
+                        modeltime = None
+
                     data.append(
                         [str(fl["Place"][j]).split(sep=".")[0], str(fl["Bow"][j]).split(sep=".")[0], f'<img src="flags/{flag_list[fl["CrewAbbrev"][j]]}" style="max-width: 6mm">',
                          fl["Crew"][j],
@@ -467,6 +494,13 @@ class RaceApp(BoxLayout):
                     dataQ.append(
                         [str(fl["Place"][j]).split(sep=".")[0], f"({str(fl["Rank"][j]).split(sep=".")[0]})", str(fl["Bow"][j]).split(sep=".")[0], f'<img src="flags/{flag_list[fl["CrewAbbrev"][j]]}" style="max-width: 6mm">',
                          fl["Crew"][j], fl["Stroke"][j].replace("/", "<br>"), fl["AdjTime"][j], fl["Delta"][j], " ", " ",  en])
+
+                    atlase.append(
+                        [str(fl["Place"][j]).split(sep=".")[0], str(fl["Bow"][j]).split(sep=".")[0], f'<img src="flags/{flag_list[fl["CrewAbbrev"][j]]}" style="max-width: 6mm">',
+                         fl["Crew"][j], fl["Stroke"][j].replace("/", "<br>"), fl["AdjTime"][j], fl["Delta"][j], " ",
+                         " ", fl["Qual"][j], " ", " ",
+                         " ", modeltime, " ", " ",
+                         " ", en])
 
                     dataMaster.append(
                         [str(fl["Place"][j]).split(sep=".")[0], str(fl["Bow"][j]).split(sep=".")[0], f'<img src="flags/{flag_list[fl["CrewAbbrev"][j]]}" style="max-width: 6mm">',
@@ -506,6 +540,8 @@ class RaceApp(BoxLayout):
                                                    cTime=current_time)
         start_short = start_short.format(compName=self.comp_name.text, compDates=self.comp_date.text, cDate=current_date,
                                        cTime=current_time)
+        atlase_html = atlase_html.format(compName=self.comp_name.text, compDates=self.comp_date.text,
+                                         cDate=current_date, cTime=current_time)
 
         html_dir = os.path.join(os.path.dirname(__file__), 'html')
 
@@ -922,7 +958,66 @@ class RaceApp(BoxLayout):
 
         with open(os.path.join(html_dir, f"log_noq_{last}.html"), "w", encoding='utf-8') as ft:
             ft.write(htmlQ)
+# ------------------------------------------------------------------------------
+        with open(os.path.join(html_dir, "atlase.txt"), "r") as f:
+            trQ = f.read()
 
+        with open(os.path.join(html_dir, "atlase_header.txt"), "r") as f:
+            infOneQ = f.read()
+
+        last = ''
+        last_id = 0
+        first_insert = True
+
+        for j, a in enumerate(atlase):
+            if a[-1] == last:
+                atlase_html = atlase_html.replace("[rinda_noq]",
+                                      trQ.format(a[0], a[1], a[2], a[3], a[4], a[5], a[6], a[7], a[8],
+                                                 a[9], a[10], a[11], a[12], a[13], a[14], a[15], a[16], a[17]) + "\n[rinda_noq]")
+                last = a[-1]
+            else:
+                if not first_insert:
+                    atlase_html = atlase_html.replace("[rinda_noq]", "")
+
+                    with open(os.path.join(html_dir, f"atlase_{last}.html"), "w", encoding='utf-8') as ft:
+                        ft.write(atlase_html)
+
+                    with open(os.path.join(html_dir, "res_no_qual.html"), "r") as f:
+                        atlase_html = f.read()
+
+                    atlase_html = atlase_html.format(compName=self.comp_name.text, compDates=self.comp_date.text,
+                                         cDate=current_date,
+                                         cTime=current_time)
+
+                    with open(os.path.join(html_dir, "atlase.txt"), "r") as f:
+                        trQ = f.read()
+
+                    with open(os.path.join(html_dir, "atlase_header.txt"), "r") as f:
+                        infOneQ = f.read()
+
+                    atlase_html = atlase_html.replace("[rinda_noq]", trQ.format(a[0], a[1], a[2], a[3], a[4], a[5],
+                                                                    a[6], a[7], a[8], a[9], a[10], a[11], a[12], a[13], a[14], a[15], a[16], a[17]) + "\n[rinda_noq]")
+                    atlase_html = atlase_html.replace("[header]",
+                                          infOneQ.format(info[last_id][7], info[last_id][2], info[last_id][1],
+                                                         info[last_id][4], info[last_id][3], info[last_id][0],
+                                                         info[last_id][5], info[last_id][6]))
+                else:
+                    atlase_html = atlase_html.replace("[header]",
+                                          infOneQ.format(info[last_id][7], info[last_id][2], info[last_id][1],
+                                                         info[last_id][4], info[last_id][3], info[last_id][0],
+                                                         info[last_id][5], info[last_id][6]))
+                    atlase_html = atlase_html.replace("[rinda_noq]", trQ.format(a[0], a[1], a[2], a[3],
+                                                                    a[4], a[5], a[6], a[7], a[8],
+                                                                    a[9], a[10], a[11], a[12], a[13], a[14], a[15], a[16], a[17]) + "\n[rinda_noq]")
+                    first_insert = False
+
+                last = a[-1]
+                last_id += 1
+
+        atlase_html = atlase_html.replace("[rinda_noq]", "")
+
+        with open(os.path.join(html_dir, f"atlase_{last}.html"), "w", encoding='utf-8') as ft:
+            ft.write(atlase_html)
 # --------------------------------------------------------------------------------------
 
         with open(os.path.join(html_dir, "tbody_res_no_qual_masters.txt"), "r") as f:

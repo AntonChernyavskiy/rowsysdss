@@ -1,0 +1,35 @@
+<tr>
+	<th colspan="7">
+		<div class="raceInfo">
+			<table>
+				<tr>
+					<th style="font-size: 13px;" colspan="3">STARTLIST</th>
+				</tr>
+				<tr>
+					<th>{} - {}</th>
+					<td>{}</td>
+					<th>{} - {}</th>
+				</tr>
+				<tr>
+					<td>race {}</td>
+					<th style="text-align: center">{} | {}</th>
+				</tr>
+			</table>
+		</div>
+	</th>
+</tr>
+<tr>
+	<th colspan="7">
+		<div class="raceHeaders">
+			<table class="rText">
+				<tr>
+					<th style="width: 17.73mm">Lane</td>
+					<th style="width: 10mm;"></td>
+					<th style="width: 40mm">Team</td>
+					<th style="width: 81.11mm;">Athletes</td>
+					<th style="width: 31.16mm">HANDICAP</td>
+				</tr>
+			</table>
+		</div>
+	</th>
+</tr>

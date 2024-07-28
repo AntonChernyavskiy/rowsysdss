@@ -1,0 +1,16 @@
+<tr style="border-bottom: 1px solid black; padding-bottom: 50px;">
+    <td style="width: 6mm">{}</td>
+    <td style="width: 12mm;">{}</td>
+    <td style="width: 10mm">{}</td>
+    <td style="width: 17mm;">{}</td>
+    <td style="width: 11mm">{}</td>
+    <td style="width:10mm; border-right: 2px solid black;">{}</td>
+    <td style="width: 23mm">{}<br><b>{}</b><br>{}</td>
+    <td style="width: 23mm">{}<br><b>{}</b><br>{}</td>
+    <td style="width: 23mm">{}<br><b>{}</b><br>{}</td>
+    <td style="width: 23mm">{}<br><b>{}</b><br>{}</td>
+    <td style="width: 23mm">{}<br><b>{}</b><br>{}</td>
+    <td style="width: 23mm">{}<br><b>{}</b><br>{}</td>
+    <td style="width: 23mm">{}<br><b>{}</b><br>{}</td>
+    <td style="width: 21mm">{}</td>
+</tr>
