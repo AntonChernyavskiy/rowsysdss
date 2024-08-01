@@ -1,0 +1,13 @@
+<tr class="rTextTbl" style="border-bottom: 1px solid lightgray">
+    <td style="width: 17.73mm">{}</td>
+    <td style="width: 2.91mm"></td>
+    <td style="width: 10mm;">{}</td>
+    <td style="width:45mm; text-align: left"><b>{}</b><br><t style="font-family: calibri light">{}</t></td>
+    <td style="width: 8.15mm;"></td>
+    <td style="width: 20mm;"><b>{}</b><br>{}<br><t style="font-size: 7px"><i>{} {}</i></t></td>
+    <td style="width: 20mm;"><b>{}</b><br>{}<br><t style="font-size: 7px"><i>{} {}</i></t></td>
+    <td style="width: 20mm;"><b>{}</b><br>{}<br><t style="font-size: 7px"><i>{} {}</i></t></td>
+    <td style="width: 20mm;"><b>{}</b><br>{}<br><t style="font-size: 7px"><i>{} {}</i></t></td>
+    <td style="width: 20mm;"><b>{}</b><br>{}<br><t style="font-size: 7px"><i>{} {}</i></t></td>
+    <td style="width: 12.96mm">{}<br>&#8203<br>&#8203</td>
+</tr>
