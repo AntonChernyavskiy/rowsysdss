@@ -1,16 +1,15 @@
 <tr style="border-bottom: 1px solid black; padding-bottom: 50px;">
-    <td style="width: 6mm">{}</td>
-    <td style="width: 12mm;">{}</td>
-    <td style="width: 10mm">{}</td>
-    <td style="width: 17mm;">{}</td>
-    <td style="width: 11mm">{}</td>
-    <td style="width:10mm; border-right: 2px solid black;">{}</td>
-    <td style="width: 23mm">{}<br><b>{}</b><br>{}</td>
-    <td style="width: 23mm">{}<br><b>{}</b><br>{}</td>
-    <td style="width: 23mm">{}<br><b>{}</b><br>{}</td>
-    <td style="width: 23mm">{}<br><b>{}</b><br>{}</td>
-    <td style="width: 23mm">{}<br><b>{}</b><br>{}</td>
-    <td style="width: 23mm">{}<br><b>{}</b><br>{}</td>
-    <td style="width: 23mm">{}<br><b>{}</b><br>{}</td>
-    <td style="width: 21mm">{}</td>
+    <td class="border-solid" style="width: 6mm; vertical-align: middle;">{}</td>
+    <td class="border-solid" style="width: 12mm; vertical-align: middle;">{}</td>
+    <td class="border-solid" style="width: 10mm; vertical-align: middle;">{}</td>
+    <td class="border-solid" style="width: 17mm; vertical-align: middle;">{}</td>
+    <td class="border-solid" style="width: 11mm; vertical-align: middle;">{}</td>
+    <td class="border-solid" style="width: 10mm; border-right: 2px solid black; vertical-align: middle;">{}</td>
+    <td class="border-dashed" style="width: 40mm; vertical-align: middle;">{}<br><b>{}</b><br>{}</td>
+    <td class="border-dashed" style="width: 40mm; vertical-align: middle;">{}<br><b>{}</b><br>{}</td>
+    <td class="border-dashed" style="width: 0mm; vertical-align: middle;">{}<br><b>{}</b><br>{}</td>
+    <td class="border-dashed" style="width: 0mm; vertical-align: middle;">{}<br><b>{}</b><br>{}</td>
+    <td class="border-dashed" style="width: 0mm; vertical-align: middle;">{}<br><b>{}</b><br>{}</td>
+    <td class="border-dashed" style="width: 0mm; vertical-align: middle;">{}<br><b>{}</b><br>{}</td>
+    <td class="border-solid" style="width: 21mm; vertical-align: middle;">{}</td>
 </tr>
