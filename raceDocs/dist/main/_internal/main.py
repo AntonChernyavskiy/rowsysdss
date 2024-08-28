@@ -9,7 +9,6 @@ from kivy.app import App
 from kivy.uix.boxlayout import BoxLayout
 from kivy.uix.label import Label
 from kivy.uix.textinput import TextInput
-from kivy.uix.filechooser import FileChooserListView
 from kivy.uix.popup import Popup
 from kivy.uix.checkbox import CheckBox
 from kivy.uix.scrollview import ScrollView
@@ -20,6 +19,33 @@ from kivy.metrics import dp
 from kivy.uix.dropdown import DropDown
 from kivy.uix.behaviors import ButtonBehavior
 from kivy.uix.button import Button
+from kivy.utils import platform
+
+from kivy.uix.filechooser import FileChooserListView
+from win32file import GetFileAttributesExW, FILE_ATTRIBUTE_HIDDEN
+import pywintypes
+
+def get_documents_path():
+    if platform == 'win':
+        return os.path.join(os.path.expanduser('~'), 'Documents')
+    elif platform == 'linux' or platform == 'macosx':
+        return os.path.join(os.path.expanduser('~'), 'Documents')
+    else:
+        return os.path.expanduser('~')  # На случай, если платформа не Windows, Linux или macOS
+
+def get_default_folder():
+    documents_path = get_documents_path()
+    default_folder = os.path.join(documents_path, 'rowSysDocs')
+    if not os.path.exists(default_folder):
+        os.makedirs(default_folder)
+    return default_folder
+class CustomFileChooser(FileChooserListView):
+    def is_hidden(self, fn):
+        try:
+            return GetFileAttributesExW(fn)[0] & FILE_ATTRIBUTE_HIDDEN
+        except pywintypes.error as e:
+            # Игнорируем ошибку, возвращаем False для системных файлов
+            return False
 
 class DriveButton(Button, ButtonBehavior):
     def __init__(self, **kwargs):
@@ -163,6 +189,9 @@ class RaceApp(BoxLayout):
     def show_export_popup(self, instance):
         content = BoxLayout(orientation='vertical')
 
+        # Устанавливаем путь по умолчанию
+        default_folder = get_default_folder()
+
         file_name_input = TextInput(hint_text='Enter file name', multiline=False)
         content.add_widget(file_name_input)
 
@@ -174,10 +203,10 @@ class RaceApp(BoxLayout):
         )
         content.add_widget(file_spinner)
 
-        file_chooser = FileChooserListView()
+        file_chooser = FileChooserListView(path=default_folder)
         content.add_widget(file_chooser)
 
-        export_btn = Button(text='Export', size_hint=(1, 0.2), height=dp(44))
+        export_btn = Button(text='Export', size_hint=(1, None), height=dp(44))
         export_btn.bind(on_press=lambda x: self.print_files(file_name_input.text, file_spinner.text, file_chooser.path))
         content.add_widget(export_btn)
 
@@ -193,8 +222,16 @@ class RaceApp(BoxLayout):
         dropdown.bind(on_select=lambda instance, x: setattr(drive_button, 'text', x))
         content.add_widget(drive_button)
 
+        # Добавляем кнопку для восстановления пути по умолчанию
+        reset_path_button = Button(text='Reset to Default Path', size_hint=(1, None), height=dp(44))
+        reset_path_button.bind(on_press=lambda x: self.reset_to_default_path(file_chooser, default_folder))
+        content.add_widget(reset_path_button)
+
         popup = Popup(title='Export File', content=content, size_hint=(0.8, 0.8))
         popup.open()
+
+    def reset_to_default_path(self, file_chooser, default_folder):
+        file_chooser.path = default_folder
 
     def print_files(self, file_name, selected_file, folder_path):
         try:
@@ -278,14 +315,25 @@ class RaceApp(BoxLayout):
                 input_file_path_url = input_file_path.replace('\\', '/').replace(' ', '%20')
                 input_file_path_url = f"file:///{input_file_path_url}"
 
+                print(f"Input file path URL: {input_file_path_url}")  # Debugging URL
+
                 cmd = [
                     chrome_path,
                     "--headless",
                     "--disable-gpu",
+                    "--no-sandbox",  # Added --no-sandbox for potential fix
                     f"--print-to-pdf={output_file_path}",
                     input_file_path_url
                 ]
+
+                # Debug the command
+                print(f"Running command: {' '.join(cmd)}")
+
                 result = subprocess.run(cmd, capture_output=True, text=True)
+
+                # Debugging outputs
+                print("stdout:", result.stdout)
+                print("stderr:", result.stderr)
 
                 if result.returncode != 0:
                     error_msg = f"Command failed with exit code {result.returncode}: {result.stderr}"
@@ -682,6 +730,10 @@ class RaceApp(BoxLayout):
 
                         entry_data.append([f'<img src="flags/{flag_list.get(str(fl["CrewAbbrev"][j]), "default_flag")}" style="max-width: 6mm">',
                                               fl["Crew"][j], fl["Stroke"][j].replace("/", ", "), en])
+
+        atlase.sort(key=lambda x: x[13] if x[13] is not None else -float('inf'), reverse=True)
+        for index, row in enumerate(atlase, start=1):
+            row[0] = str(index)
 
         start_data.sort(key=lambda x: (int(x[5]), int(x[0])))
         start_data_master.sort(key=lambda x: (int(x[6]), int(x[0])))
