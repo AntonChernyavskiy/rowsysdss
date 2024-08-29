@@ -21,6 +21,7 @@ from kivy.uix.dropdown import DropDown
 from kivy.uix.behaviors import ButtonBehavior
 from kivy.uix.button import Button
 from kivy.utils import platform
+from ftplib import FTP_TLS
 
 from kivy.uix.filechooser import FileChooserListView
 from win32file import GetFileAttributesExW, FILE_ATTRIBUTE_HIDDEN
@@ -82,32 +83,58 @@ class RaceApp(BoxLayout):
         self.shift_down = False
         self.last_active_checkbox = None
 
-        # File where presets will be saved
-        self.data_file = 'competition_presets.json'
+        self.ftp_profiles_file = 'ftp_profiles.json'
+        self.data_file = 'competition_data.json'  # Добавляем атрибут data_file
+        self.current_profile = None
+        self.ftp_connected = False
 
-        # Top Section: Update File Button
+        # Верхняя часть: Подключение к FTP
+        self.ftp_layout = BoxLayout(orientation='horizontal', size_hint_y=None, height=50, padding=10, spacing=10)
+
+        self.ftp_server_input = TextInput(hint_text='FTP Server Address', multiline=False, size_hint_x=0.2)
+        self.ftp_username_input = TextInput(hint_text='FTP Username', multiline=False, size_hint_x=0.2)
+        self.ftp_password_input = TextInput(hint_text='FTP Password', password=True, multiline=False, size_hint_x=0.2)
+
+        self.ftp_profiles_spinner = Spinner(
+            text='Profiles',
+            values=list(self.load_ftp_profiles().keys()),
+            size_hint_x=0.2,
+            height=40
+        )
+        self.ftp_profiles_spinner.bind(text=self.on_profile_selected)
+
+        self.connect_disconnect_btn = Button(text='Connect', size_hint_x=0.2)
+        self.connect_disconnect_btn.bind(on_press=self.connect_disconnect_ftp)
+
+        self.ftp_layout.add_widget(self.ftp_server_input)
+        self.ftp_layout.add_widget(self.ftp_username_input)
+        self.ftp_layout.add_widget(self.ftp_password_input)
+        self.ftp_layout.add_widget(self.ftp_profiles_spinner)
+        self.ftp_layout.add_widget(self.connect_disconnect_btn)
+
+        self.add_widget(self.ftp_layout)
+
+        # Средняя часть: Кнопка обновления файла и ScrollView для событий
         self.file_chooser_btn = Button(text='Update file', size_hint_y=None, height=40)
         self.file_chooser_btn.bind(on_press=self.choose_file)
         self.add_widget(self.file_chooser_btn)
 
-        # Middle Section: ScrollView for Events
         self.event_layout = GridLayout(cols=1, size_hint_y=None)
         self.event_layout.bind(minimum_height=self.event_layout.setter('height'))
         self.scroll_view = ScrollView(size_hint=(1, None), size=(Window.width, Window.height * 0.5))
         self.scroll_view.add_widget(self.event_layout)
         self.add_widget(self.scroll_view)
 
-        # Below ScrollView: Competition Name & Competition Date
-        self.comp_layout = BoxLayout(orientation='horizontal', size_hint_y=None, height=50)
+        # Нижняя часть: Название и дата соревнования, кнопки сохранения/загрузки и кнопка печати файлов
+        self.bottom_layout = BoxLayout(orientation='horizontal', size_hint_y=None, height=50, padding=10, spacing=10)
+
+        self.comp_layout = BoxLayout(orientation='horizontal', size_hint_x=0.4)
         self.comp_name = TextInput(hint_text='Competition Name', multiline=False, size_hint_x=0.5)
         self.comp_date = TextInput(hint_text='Competition Date', multiline=False, size_hint_x=0.5)
         self.comp_layout.add_widget(self.comp_name)
         self.comp_layout.add_widget(self.comp_date)
-        self.add_widget(self.comp_layout)
 
-        # Section: Save and Load Buttons in one row
-        self.save_load_layout = BoxLayout(orientation='horizontal', size_hint_y=None, height=40)
-
+        self.save_load_layout = BoxLayout(orientation='horizontal', size_hint_x=0.3)
         self.save_btn = Button(text='Save Data', size_hint_x=0.5)
         self.save_btn.bind(on_press=self.save_competition_data)
         self.save_load_layout.add_widget(self.save_btn)
@@ -116,12 +143,15 @@ class RaceApp(BoxLayout):
         self.load_btn.bind(on_press=self.load_competition_data)
         self.save_load_layout.add_widget(self.load_btn)
 
-        self.add_widget(self.save_load_layout)
+        self.bottom_buttons_layout = BoxLayout(orientation='horizontal', size_hint_y=None, height=40)
+        self.bottom_buttons_layout.add_widget(self.comp_layout)
+        self.bottom_buttons_layout.add_widget(self.save_load_layout)
 
-        # Bottom Section: Print Files Button
-        self.print_btn = Button(text='Print Files', size_hint_y=None, height=40)
+        self.print_btn = Button(text='Print Files', size_hint_x=0.3, size_hint_y=None, height=40)
         self.print_btn.bind(on_press=self.show_export_popup)
-        self.add_widget(self.print_btn)
+        self.bottom_buttons_layout.add_widget(self.print_btn)
+
+        self.add_widget(self.bottom_buttons_layout)
 
         self.file_path = ''
         self.df = None
@@ -131,16 +161,81 @@ class RaceApp(BoxLayout):
         Window.bind(on_key_down=self.shift_pressed)
         Window.bind(on_key_up=self.shift_unpressed)
 
+    def load_ftp_profiles(self):
+        try:
+            with open(self.ftp_profiles_file, 'r') as f:
+                profiles = json.load(f)
+            return profiles
+        except FileNotFoundError:
+            return {}
+
+    def on_profile_selected(self, spinner, text):
+        profiles = self.load_ftp_profiles()
+        if text in profiles:
+            profile = profiles[text]
+            self.ftp_server_input.text = profile.get('server', '')
+            self.ftp_username_input.text = profile.get('username', '')
+            self.current_profile = text
+
+    def connect_disconnect_ftp(self, instance):
+        if not self.ftp_connected:
+            self.connect_to_ftp()
+        else:
+            self.disconnect_from_ftp()
+
+    def save_ftp_profiles(self, profiles):
+        with open(self.ftp_profiles_file, 'w') as f:
+            json.dump(profiles, f)
+
+    def connect_to_ftp(self):
+        server = self.ftp_server_input.text
+        username = self.ftp_username_input.text
+        password = self.ftp_password_input.text
+        if server and username:
+            try:
+                self.ftps = FTP_TLS(server)
+                self.ftps.login(user=username, passwd=password)
+                self.ftps.prot_p()  # Переключаемся на защищенное соединение
+                self.ftp_connected = True
+                self.connect_disconnect_btn.text = 'Disconnect'
+                self.save_ftp_profile()
+                print(f"Connected to FTPS server as {username}")
+                popup = Popup(title='Connection Successful', content=Label(text=f'Connected as {username}'), size_hint=(0.6, 0.4))
+                popup.open()
+            except Exception as e:
+                popup = Popup(title='Error', content=Label(text=f'Error connecting to FTPS: {str(e)}'), size_hint=(0.6, 0.4))
+                popup.open()
+                print(f"Error connecting to FTPS: {str(e)}")
+        else:
+            popup = Popup(title='Error', content=Label(text='Please enter server address and username'), size_hint=(0.6, 0.4))
+            popup.open()
+
+    def disconnect_from_ftp(self):
+        if self.ftp_connected:
+            self.ftps.quit()
+            self.ftp_connected = False
+            self.connect_disconnect_btn.text = 'Connect'
+            print("Disconnected from FTPS server")
+
+    def save_ftp_profile(self):
+        server = self.ftp_server_input.text
+        username = self.ftp_username_input.text
+        profiles = self.load_ftp_profiles()
+        profiles[username] = {'server': server, 'username': username}
+        self.save_ftp_profiles(profiles)
+        self.ftp_profiles_spinner.values = list(profiles.keys())
+        self.ftp_profiles_spinner.text = username
+
     def shift_pressed(self, window, key, scancode, codepoint, modifier):
         if 'shift' in modifier:
             self.shift_down = True
 
     def shift_unpressed(self, window, key, scancode):
-        if key == 304:  # Left Shift key code
+        if key == 304:  # Код клавиши Left Shift
             self.shift_down = False
 
     def save_competition_data(self, instance):
-        # Prompt user for a preset name
+        # Запрашиваем у пользователя имя пресета
         content = BoxLayout(orientation='vertical', padding=10)
         content.add_widget(Label(text='Enter preset name:', size_hint_y=None, height=40))
         preset_name_input = TextInput(multiline=False)
@@ -187,10 +282,10 @@ class RaceApp(BoxLayout):
                 with open(self.data_file, 'r') as f:
                     presets = json.load(f)
 
-                # Main layout for the popup
+                # Основной макет для всплывающего окна
                 content = BoxLayout(orientation='vertical', spacing=10, padding=(10, 20))
 
-                # Spinner for selecting a preset
+                # Спиннер для выбора пресета
                 content.add_widget(Label(text='Select a preset:', size_hint_y=None, height=30))
                 preset_spinner = Spinner(
                     text='Select Preset',
@@ -200,11 +295,11 @@ class RaceApp(BoxLayout):
                 )
                 content.add_widget(preset_spinner)
 
-                # Label to preview the selected preset's details
+                # Метка для предварительного просмотра деталей выбранного пресета
                 preset_details_label = Label(text='', size_hint_y=None, height=60, valign='top')
                 content.add_widget(preset_details_label)
 
-                # Horizontal layout for the buttons
+                # Горизонтальный макет для кнопок
                 button_layout = BoxLayout(orientation='horizontal', size_hint_y=None, height=50, spacing=20)
                 load_btn = Button(text='Load', size_hint_x=0.5)
                 cancel_btn = Button(text='Cancel', size_hint_x=0.5)
