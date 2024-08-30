@@ -1165,6 +1165,8 @@ class RaceApp(BoxLayout):
                     os.remove(pdf)
             else:
                 print("Intermediate files retained.")
+                if os.path.exists(merged_output_path):
+                    os.remove(merged_output_path)
 
             if open_in_chrome:
                 file_to_open = merged_output_path if os.path.exists(merged_output_path) else temp_pdf_files
