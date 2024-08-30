@@ -76,6 +76,7 @@ class EventDetailPopup(Popup):
 
         self.content = layout
 
+
 class RaceApp(BoxLayout):
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
@@ -90,30 +91,36 @@ class RaceApp(BoxLayout):
         self.current_path = ''
 
         # Верхняя часть: Подключение к FTP
-        self.ftp_layout = BoxLayout(orientation='horizontal', size_hint_y=None, height=50, padding=10, spacing=10)
+        self.ftp_layout = BoxLayout(orientation='horizontal', size_hint_y=None, height=50)
 
-        self.ftp_server_input = TextInput(hint_text='FTP Server Address', multiline=False, size_hint_x=0.25)
-        self.ftp_username_input = TextInput(hint_text='FTP Username', multiline=False, size_hint_x=0.25)
-        self.ftp_password_input = TextInput(hint_text='FTP Password', password=True, multiline=False, size_hint_x=0.25)
+        self.ftp_input_layout = BoxLayout(orientation='horizontal', size_hint_y=None, height=50)
+        self.ftp_server_input = TextInput(hint_text='FTP Server Address', multiline=False, size_hint_x=0.33)
+        self.ftp_username_input = TextInput(hint_text='FTP Username', multiline=False, size_hint_x=0.33)
+        self.ftp_password_input = TextInput(hint_text='FTP Password', password=True, multiline=False, size_hint_x=0.33)
+        self.ftp_input_layout.add_widget(self.ftp_server_input)
+        self.ftp_input_layout.add_widget(self.ftp_username_input)
+        self.ftp_input_layout.add_widget(self.ftp_password_input)
+        self.ftp_layout.add_widget(self.ftp_input_layout)
 
         self.ftp_profiles_spinner = Spinner(
             text='Profiles',
             values=list(self.load_ftp_profiles().keys()),
-            size_hint_x=0.15,
+            size_hint_x=0.2,
             height=40
         )
         self.ftp_profiles_spinner.bind(text=self.on_profile_selected)
-
-        self.connect_disconnect_btn = Button(text='Connect', size_hint_x=0.15, height=40)
+        self.connect_disconnect_btn = Button(text='Connect', size_hint_x=0.2, height=40)
         self.connect_disconnect_btn.bind(on_press=self.connect_disconnect_ftp)
 
-        self.ftp_layout.add_widget(self.ftp_server_input)
-        self.ftp_layout.add_widget(self.ftp_username_input)
-        self.ftp_layout.add_widget(self.ftp_password_input)
         self.ftp_layout.add_widget(self.ftp_profiles_spinner)
         self.ftp_layout.add_widget(self.connect_disconnect_btn)
 
         self.add_widget(self.ftp_layout)
+
+        # Добавляем пространство между FTP и кнопкой Update File
+        self.space_between_ftp_and_update = Label(size_hint_y=None,
+                                                  height=20)  # Можно настроить высоту по необходимости
+        self.add_widget(self.space_between_ftp_and_update)
 
         # Новый ScrollView для отображения кнопок FTP файлов (увеличенное пространство)
         self.ftp_file_list_layout = GridLayout(cols=1, size_hint_y=None)
@@ -127,31 +134,32 @@ class RaceApp(BoxLayout):
         self.file_chooser_btn.bind(on_press=self.choose_file)
         self.add_widget(self.file_chooser_btn)
 
-        self.file_list_layout = GridLayout(cols=1, size_hint_y=None)
-        self.file_list_layout.bind(minimum_height=self.file_list_layout.setter('height'))
-        self.file_scroll_view = ScrollView(size_hint=(1, 0.2))
-        self.file_scroll_view.add_widget(self.file_list_layout)
-        self.add_widget(self.file_scroll_view)
+        # Список заездов
+        self.event_layout = GridLayout(cols=1, size_hint_y=None)
+        self.event_layout.bind(minimum_height=self.event_layout.setter('height'))
+        self.event_scroll_view = ScrollView(size_hint=(1, 0.2))
+        self.event_scroll_view.add_widget(self.event_layout)
+        self.add_widget(self.event_scroll_view)
 
         # Нижняя часть: Название и дата соревнования, кнопки сохранения/загрузки и кнопка печати файлов
-        self.bottom_buttons_layout = BoxLayout(orientation='horizontal', size_hint_y=None, height=50, padding=10, spacing=10)
+        self.bottom_buttons_layout = BoxLayout(orientation='horizontal', size_hint_y=None, height=50)
 
-        self.comp_layout = BoxLayout(orientation='horizontal', size_hint_x=0.5)
+        self.comp_layout = BoxLayout(orientation='horizontal', size_hint_y=None, height=50)
         self.comp_name = TextInput(hint_text='Competition Name', multiline=False, size_hint_x=0.5)
         self.comp_date = TextInput(hint_text='Competition Date', multiline=False, size_hint_x=0.5)
         self.comp_layout.add_widget(self.comp_name)
         self.comp_layout.add_widget(self.comp_date)
 
-        self.save_load_layout = BoxLayout(orientation='horizontal', size_hint_x=0.5)
+        self.save_load_layout = BoxLayout(orientation='horizontal', size_hint_y=None, height=50)
         self.save_btn = Button(text='Save Data', size_hint_x=0.5)
         self.save_btn.bind(on_press=self.save_competition_data)
         self.save_load_layout.add_widget(self.save_btn)
 
-        self.load_btn = Button(text='Load Data', size_hint_x=0.5)
+        self.load_btn = Button(text='Load Data', size_hint_y=None, height=50)
         self.load_btn.bind(on_press=self.load_competition_data)
         self.save_load_layout.add_widget(self.load_btn)
 
-        self.print_btn = Button(text='Print Files', size_hint_x=0.5)
+        self.print_btn = Button(text='Print Files', size_hint_y=None, height=50)
         self.print_btn.bind(on_press=self.show_export_popup)
 
         self.bottom_buttons_layout.add_widget(self.comp_layout)
@@ -159,13 +167,6 @@ class RaceApp(BoxLayout):
         self.bottom_buttons_layout.add_widget(self.print_btn)
 
         self.add_widget(self.bottom_buttons_layout)
-
-        # Пространство для отображения событий
-        self.event_layout = GridLayout(cols=1, size_hint_y=None)
-        self.event_layout.bind(minimum_height=self.event_layout.setter('height'))
-        self.event_scroll_view = ScrollView(size_hint=(1, 0.2))
-        self.event_scroll_view.add_widget(self.event_layout)
-        self.add_widget(self.event_scroll_view)
 
         self.file_path = ''
         self.df = None
@@ -325,25 +326,22 @@ class RaceApp(BoxLayout):
             self.show_event_details(label.index)
 
     def update_file_list(self, *args):
-        self.file_list_layout.clear_widgets()
-
+        self.ftp_file_list_layout.clear_widgets()
         try:
-            if os.path.exists('heatsheet.csv'):
-                self.df = pd.read_csv('heatsheet.csv')
-                for i, row in self.df.iterrows():
-                    event_name = row.get('Event Name', f'Event {i + 1}')
-                    checkbox = CheckBox()
-                    label = Label(text=event_name, size_hint_y=None, height=40)
-                    layout = BoxLayout(orientation='horizontal', size_hint_y=None, height=40)
-                    layout.add_widget(checkbox)
-                    layout.add_widget(label)
-                    self.file_list_layout.add_widget(layout)
+            self.ftps.cwd(self.current_path)
+            files = self.ftps.nlst()
 
-                    self.event_checkboxes.append(checkbox)
-                    checkbox.bind(active=lambda checkbox, value, idx=i: self.on_checkbox_active(value, idx, checkbox))
-            else:
-                label = Label(text='No heatsheet.csv file found.', size_hint_y=None, height=40)
-                self.file_list_layout.add_widget(label)
+            for file in files:
+                if self.is_directory(file):
+                    btn = Button(text=file, size_hint_y=None, height=40)
+                    btn.bind(on_press=self.on_directory_selected)
+                    self.ftp_file_list_layout.add_widget(btn)
+                else:
+                    label = Label(text=file, size_hint_y=None, height=40)
+                    self.ftp_file_list_layout.add_widget(label)
+
+        except Exception as e:
+            print(f"Error retrieving file list: {str(e)}")
 
         except Exception as e:
             print(f"Error loading heatsheet.csv: {str(e)}")
@@ -449,41 +447,77 @@ class RaceApp(BoxLayout):
         popup.open()
 
     def load_competition_data(self, instance):
-        if not os.path.exists(self.data_file):
-            popup = Popup(title='Error', content=Label(text='No saved data found'),
-                          size_hint=(0.6, 0.4))
-            popup.open()
-            return
+        if os.path.exists(self.data_file):
+            try:
+                with open(self.data_file, 'r') as f:
+                    presets = json.load(f)
 
-        content = BoxLayout(orientation='vertical', padding=10)
-        content.add_widget(Label(text='Select preset to load:', size_hint_y=None, height=40))
-        presets_spinner = Spinner(values=[], size_hint_y=None, height=40)
-        content.add_widget(presets_spinner)
+                # Main layout for the popup
+                content = BoxLayout(orientation='vertical', spacing=10, padding=(10, 20))
 
-        with open(self.data_file, 'r') as f:
-            presets = json.load(f)
+                # Spinner for selecting a preset
+                content.add_widget(Label(text='Select a preset:', size_hint_y=None, height=30))
+                preset_spinner = Spinner(
+                    text='Select Preset',
+                    values=list(presets.keys()),
+                    size_hint_y=None,
+                    height=40
+                )
+                content.add_widget(preset_spinner)
 
-        presets_spinner.values = list(presets.keys())
+                # Label to preview the selected preset's details
+                preset_details_label = Label(text='', size_hint_y=None, height=60, valign='top')
+                content.add_widget(preset_details_label)
 
-        load_btn = Button(text='Load', size_hint_y=None, height=40)
-        content.add_widget(load_btn)
+                # Horizontal layout for the buttons
+                button_layout = BoxLayout(orientation='horizontal', size_hint_y=None, height=50, spacing=20)
+                load_btn = Button(text='Load', size_hint_x=0.5)
+                cancel_btn = Button(text='Cancel', size_hint_x=0.5)
 
-        popup = Popup(title='Load Preset', content=content, size_hint=(0.6, 0.4))
+                button_layout.add_widget(load_btn)
+                button_layout.add_widget(cancel_btn)
 
-        def on_load(btn_instance):
-            selected_preset = presets_spinner.text
-            if selected_preset and selected_preset in presets:
-                data = presets[selected_preset]
-                self.comp_name.text = data.get('competition_name', '')
-                self.comp_date.text = data.get('competition_date', '')
+                content.add_widget(button_layout)
 
-                popup.dismiss()
-                popup = Popup(title='Success', content=Label(text='Data loaded successfully'),
-                              size_hint=(0.6, 0.4))
+                popup = Popup(title='Load Preset', content=content, size_hint=(0.6, 0.5))
+
+                def on_spinner_select(spinner, text):
+                    if text in presets:
+                        data = presets[text]
+                        comp_name = data.get('competition_name', '')
+                        comp_date = data.get('competition_date', '')
+                        preset_details_label.text = f"Competition Name: {comp_name}\nCompetition Date: {comp_date}"
+                    else:
+                        preset_details_label.text = ''
+
+                preset_spinner.bind(text=on_spinner_select)
+
+                def on_load(btn_instance):
+                    preset_name = preset_spinner.text
+                    if preset_name in presets:
+                        data = presets[preset_name]
+                        self.comp_name.text = data.get('competition_name', '')
+                        self.comp_date.text = data.get('competition_date', '')
+                        popup.dismiss()
+                        success_popup = Popup(title='Success', content=Label(text='Preset loaded successfully!'),
+                                              size_hint=(0.6, 0.4))
+                        success_popup.open()
+
+                def on_cancel(btn_instance):
+                    popup.dismiss()
+
+                load_btn.bind(on_press=on_load)
+                cancel_btn.bind(on_press=on_cancel)
+
                 popup.open()
-
-        load_btn.bind(on_press=on_load)
-        popup.open()
+            except Exception as e:
+                error_popup = Popup(title='Error', content=Label(text=f'Error loading data: {str(e)}'),
+                                    size_hint=(0.6, 0.4))
+                error_popup.open()
+        else:
+            error_popup = Popup(title='Error', content=Label(text='No saved presets found.'),
+                                size_hint=(0.6, 0.4))
+            error_popup.open()
 
     def eventSelection(self, checkbox, value):
         index = next(idx for idx, (cb, _) in enumerate(self.event_checkboxes) if cb == checkbox)
