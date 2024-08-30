@@ -28,6 +28,56 @@ from kivy.uix.filechooser import FileChooserListView
 from win32file import GetFileAttributesExW, FILE_ATTRIBUTE_HIDDEN
 import pywintypes
 
+
+class FileChooserPopup(Popup):
+    def __init__(self, is_ftp=False, **kwargs):
+        super().__init__(**kwargs)
+        self.is_ftp = is_ftp
+        self.title = 'Select File'
+        self.size_hint = (0.8, 0.8)
+        self.auto_dismiss = True
+
+        # Initialize selected_file
+        self.selected_file = None
+
+        # Determine the default path
+        self.default_path = os.path.join(
+            os.path.expanduser("~"), 'Documents', 'rowSysDocs'
+        )
+
+        # Ensure the default path exists; if not, fallback to user's Documents folder
+        if not os.path.exists(self.default_path):
+            self.default_path = os.path.expanduser("~Documents")
+
+        # Create layout for popup content
+        layout = BoxLayout(orientation='vertical')
+        self.file_chooser = FileChooserListView()
+        self.file_chooser.path = self.default_path
+        layout.add_widget(self.file_chooser)
+
+        # Add a button to confirm file selection
+        select_button = Button(text='Select', size_hint_y=None, height=40)
+        select_button.bind(on_press=self.on_file_selected)
+        layout.add_widget(select_button)
+
+        self.content = layout
+
+    def on_file_selected(self, instance):
+        selected = self.file_chooser.selection
+        if selected:
+            self.selected_file = selected[0]
+        else:
+            self.selected_file = None
+        self.dismiss()
+
+    def on_file_selected(self, instance):
+        selected = self.file_chooser.selection
+        if selected:
+            self.selected_file = selected[0]
+        else:
+            self.selected_file = None
+        self.dismiss()
+
 def get_documents_path():
     if platform == 'win':
         return os.path.join(os.path.expanduser('~'), 'Documents')
@@ -90,10 +140,11 @@ class RaceApp(BoxLayout):
         self.current_profile = None
         self.ftp_connected = False
         self.current_path = ''
+        self.documents_path = os.path.expanduser("~/Documents")  # Path to Documents folder
+        self.current_local_path = os.path.join(self.documents_path, 'rowSysDocs')
 
-        # Верхняя часть: Подключение к FTP
+        # Top section: FTP Connection
         self.ftp_layout = BoxLayout(orientation='horizontal', size_hint_y=None, height=50)
-
         self.ftp_input_layout = BoxLayout(orientation='horizontal', size_hint_y=None, height=50)
         self.ftp_server_input = TextInput(hint_text='FTP Server Address', multiline=False, size_hint_x=0.33)
         self.ftp_username_input = TextInput(hint_text='FTP Username', multiline=False, size_hint_x=0.33)
@@ -118,35 +169,52 @@ class RaceApp(BoxLayout):
 
         self.add_widget(self.ftp_layout)
 
-        # Добавляем пространство между FTP и кнопкой Update File
-        self.space_between_ftp_and_update = Label(size_hint_y=None,
-                                                  height=20)  # Можно настроить высоту по необходимости
+        # Space between FTP and Update File button
+        self.space_between_ftp_and_update = Label(size_hint_y=None, height=20)
         self.add_widget(self.space_between_ftp_and_update)
 
-        # self.back_btn = Button(text='Back', size_hint_x=0.2, height=40)
-        # self.back_btn.bind(on_press=self.go_to_parent_directory)
-        # self.ftp_layout.add_widget(self.back_btn)
+        # Main horizontal layout
+        self.main_layout = BoxLayout(orientation='horizontal', size_hint_y=None, height=500)  # Adjust height as needed
+        self.local_file_list_layout = GridLayout(cols=1, size_hint_y=None)
+        self.local_file_list_layout.bind(minimum_height=self.local_file_list_layout.setter('height'))
+        self.local_file_scroll_view = ScrollView(size_hint=(0.5, 1))  # 50% width, 100% height
+        self.local_file_scroll_view.add_widget(self.local_file_list_layout)
+        self.main_layout.add_widget(self.local_file_scroll_view)
 
-        # Новый ScrollView для отображения кнопок FTP файлов (увеличенное пространство)
         self.ftp_file_list_layout = GridLayout(cols=1, size_hint_y=None)
         self.ftp_file_list_layout.bind(minimum_height=self.ftp_file_list_layout.setter('height'))
-        self.ftp_file_scroll_view = ScrollView(size_hint=(1, 0.5))
+        self.ftp_file_scroll_view = ScrollView(size_hint=(0.5, 1))  # 50% width, 100% height
         self.ftp_file_scroll_view.add_widget(self.ftp_file_list_layout)
-        self.add_widget(self.ftp_file_scroll_view)
+        self.main_layout.add_widget(self.ftp_file_scroll_view)
 
-        # Средняя часть: Кнопка обновления файла и ScrollView для отображения файла heatsheet.csv
+        self.add_widget(self.main_layout)
+
+        # Button layout
+        button_layout = BoxLayout(orientation='horizontal', size_hint_y=None, height=50)  # Adjust size_hint_y as needed
+
+        # Upload button
+        upload_btn = Button(text='Upload to FTP', size_hint_x=0.5, height=50)
+        upload_btn.bind(on_press=self.upload_to_ftp)
+
+        # Add buttons to button layout
+        button_layout.add_widget(upload_btn)
+
+        # Add button layout to main layout
+        self.add_widget(button_layout)
+
+        # Middle section: Update File button
         self.file_chooser_btn = Button(text='Update File', size_hint_y=None, height=40)
         self.file_chooser_btn.bind(on_press=self.choose_file)
         self.add_widget(self.file_chooser_btn)
 
-        # Список заездов
+        # List of events
         self.event_layout = GridLayout(cols=1, size_hint_y=None)
         self.event_layout.bind(minimum_height=self.event_layout.setter('height'))
         self.event_scroll_view = ScrollView(size_hint=(1, 0.2))
         self.event_scroll_view.add_widget(self.event_layout)
         self.add_widget(self.event_scroll_view)
 
-        # Нижняя часть: Название и дата соревнования, кнопки сохранения/загрузки и кнопка печати файлов
+        # Bottom section: Competition name/date, save/load buttons, print button
         self.bottom_buttons_layout = BoxLayout(orientation='horizontal', size_hint_y=None, height=50)
 
         self.comp_layout = BoxLayout(orientation='horizontal', size_hint_y=None, height=50)
@@ -160,19 +228,20 @@ class RaceApp(BoxLayout):
         self.save_btn.bind(on_press=self.save_competition_data)
         self.save_load_layout.add_widget(self.save_btn)
 
-        self.load_btn = Button(text='Load Data', size_hint_y=None, height=50)
+        self.load_btn = Button(text='Load Data', size_hint_x=0.5, height=50)
         self.load_btn.bind(on_press=self.load_competition_data)
         self.save_load_layout.add_widget(self.load_btn)
 
-        self.print_btn = Button(text='Print Files', size_hint_y=None, height=50)
-        self.print_btn.bind(on_press=self.show_export_popup)
-
         self.bottom_buttons_layout.add_widget(self.comp_layout)
         self.bottom_buttons_layout.add_widget(self.save_load_layout)
+
+        self.print_btn = Button(text='Print Files', size_hint_x=0.5, height=50)
+        self.print_btn.bind(on_press=self.show_export_popup)
         self.bottom_buttons_layout.add_widget(self.print_btn)
 
         self.add_widget(self.bottom_buttons_layout)
 
+        # Other initialization
         self.file_path = ''
         self.df = None
         self.selected_events = []
@@ -181,84 +250,176 @@ class RaceApp(BoxLayout):
         Window.bind(on_key_down=self.shift_pressed)
         Window.bind(on_key_up=self.shift_unpressed)
 
-    def show_event_details(self, index):
+        # Load initial local directory
+        self.list_local_directory(self.current_local_path)
+
+    def upload_to_ftp(self, instance):
+        """Handle uploading a file from local directory to FTP server."""
+        # Open file chooser popup
+        file_chooser = FileChooserPopup()
+        file_chooser.bind(on_dismiss=self.upload_file)
+        file_chooser.open()
+
+    def upload_file(self, instance):
+        """Upload the selected file to the FTP server."""
+        file_path = instance.selected_file
+        if file_path:
+            try:
+                file_name = os.path.basename(file_path)
+                with open(file_path, 'rb') as file:
+                    self.ftps.storbinary(f'STOR {file_name}', file)
+                print(f"File {file_name} uploaded successfully.")
+                # Notify the user
+                self.show_popup('File Uploaded', f'File {file_name} uploaded successfully!')
+            except Exception as e:
+                print(f"Error uploading file: {str(e)}")
+                self.show_popup('Error', f'Error uploading file: {str(e)}')
+
+    def download_file(self, instance):
+        """Download the selected file from the FTP server."""
+        file_name = instance.selected_file
+        if file_name:
+            try:
+                file_content = self.download_file_from_ftp(file_name)
+                local_file_path = os.path.join(self.documents_path, file_name)
+                with open(local_file_path, 'wb') as file:
+                    file.write(file_content)
+                print(f"File {file_name} downloaded successfully.")
+                # Notify the user
+                self.show_popup('File Downloaded', f'File {file_name} downloaded successfully!')
+            except Exception as e:
+                print(f"Error downloading file: {str(e)}")
+                self.show_popup('Error', f'Error downloading file: {str(e)}')
+
+    def download_file_from_ftp(self, file_name):
+        """Download a file from FTP server."""
+        from io import BytesIO
+        if not hasattr(self, 'ftps'):
+            raise AttributeError("FTP connection has not been established.")
+
+        buffer = BytesIO()
+        self.ftps.retrbinary(f"RETR {file_name}", buffer.write)
+        buffer.seek(0)
+        return buffer.getvalue()
+
+    def show_popup(self, title, message):
+        """Show a popup message."""
+        content = BoxLayout(orientation='vertical', padding=20, spacing=10)
+        message_label = Label(text=message, font_size='18sp', size_hint_y=None, height=40)
+        content.add_widget(message_label)
+        popup = Popup(title=title, content=content, size_hint=(0.8, 0.6), auto_dismiss=True)
+        popup.open()
+
+    def list_local_directory(self, path):
+        """List files and directories in the local directory."""
+        self.local_file_list_layout.clear_widgets()  # Очистка виджетов, которые были ранее
         try:
-            # Загрузка данных из `results.csv`
-            results_df = pd.read_csv('C:\\Users\\Admin\\Documents\\raceDocs\\results.csv')
-            print("Results DataFrame:\n", results_df)
-            print("Unique Events in Results DataFrame:\n", results_df["Event"].unique())
+            # Добавляем кнопку "Назад", если не в корневой директории
+            if os.path.abspath(path) != os.path.abspath(os.sep):
+                btn = Button(text='..', size_hint_y=None, height=40)
+                btn.bind(on_press=self.go_to_parent_local_directory)
+                self.local_file_list_layout.add_widget(btn)
 
-            # Убедитесь, что `results_df` содержит нужные данные
-            event_row = self.df.loc[index]
-            event_num = event_row.get('EventNum', '')
-            event = event_row.get('Event', '')
-            title = f"{event_num} - {event}"
-
-            # Извлечение значения после третьего пробела
-            event_parts = event.split(' ')
-            if len(event_parts) >= 3:
-                event_to_search = ' '.join(event_parts[1:]).strip()  # Значение после второго пробела
-            else:
-                event_to_search = event.strip()
-
-            results_df['Event'] = results_df['Event'].str.strip()
-            print("Event Cleaned for Filtering:", event_to_search)
-
-            # Фильтрация данных
-            filtered_results_df = results_df[results_df['Event'] == event_to_search]
-
-            # Заменяем NaN на пробелы
-            filtered_results_df = filtered_results_df.fillna(' ')
-
-            # Применяем split по точке в столбце `Place` и берем первый элемент
-            if 'Place' in filtered_results_df.columns:
-                filtered_results_df['Place'] = filtered_results_df['Place'].apply(lambda x: str(x).split('.')[0])
-
-            # Оставляем только нужные столбцы
-            columns_to_keep = ['Place', 'Crew', 'Bow', 'Stroke', '500m', '1000m', '1500m', 'RawTime', 'PenaltyCode',
-                               'AdjTime', 'Delta', 'Rank', 'Qual']
-            filtered_results_df = filtered_results_df[columns_to_keep]
-
-            # Отладка: вывод отфильтрованных данных
-            print("Filtered Results DataFrame:\n", filtered_results_df)
-
-            # Создание содержимого для Popup
-            content = BoxLayout(orientation='vertical', padding=10)
-
-            # Добавляем заголовок события
-            content.add_widget(Label(text=title, font_size='20sp', size_hint_y=None, height=40))
-
-            if filtered_results_df.empty:
-                content.add_widget(Label(text='No results found for this event.', size_hint_y=None, height=40))
-            else:
-                # Создание таблицы
-                table_layout = GridLayout(cols=len(filtered_results_df.columns), spacing=10, size_hint_y=None)
-                table_layout.bind(minimum_height=table_layout.setter('height'))
-
-                # Добавление заголовков таблицы
-                for column in filtered_results_df.columns:
-                    header_label = Label(text=column, bold=True, size_hint_y=None, height=40)
-                    table_layout.add_widget(header_label)
-
-                # Добавление строк таблицы
-                for _, row in filtered_results_df.iterrows():
-                    for value in row:
-                        cell_label = Label(text=str(value), size_hint_y=None, height=30)
-                        table_layout.add_widget(cell_label)
-
-                # Создание ScrollView и добавление таблицы в него
-                scroll_view = ScrollView(size_hint=(1, 1))
-                scroll_view.add_widget(table_layout)
-                content.add_widget(scroll_view)
-
-            # Открытие Popup с таблицей
-            popup = Popup(title='Event Results', content=content, size_hint=(0.9, 0.9))
-            popup.open()
+            files = os.listdir(path)
+            for file in files:
+                full_path = os.path.join(path, file)
+                if os.path.isdir(full_path):
+                    btn = Button(text=file, size_hint_y=None, height=40)
+                    btn.bind(on_press=self.on_local_directory_selected)
+                    self.local_file_list_layout.add_widget(btn)
+                else:
+                    btn = Button(text=file, size_hint_y=None, height=40)
+                    btn.bind(on_press=self.on_local_file_selected)
+                    self.local_file_list_layout.add_widget(btn)
         except Exception as e:
-            # Обработка ошибок
-            popup = Popup(title='Error', content=Label(text=f'Error displaying event details: {str(e)}'),
-                          size_hint=(0.6, 0.4))
+            print(f"Error retrieving local directory list: {str(e)}")
+
+    def on_local_file_selected(self, instance):
+        file_name = instance.text
+        file_path = os.path.join(self.current_local_path, file_name)
+
+        # Show loading popup first
+        loading_popup = Popup(
+            title='Opening File',
+            content=Label(text=f'Opening {file_name}... Please wait.'),
+            size_hint=(0.6, 0.3)
+        )
+        loading_popup.open()
+
+        try:
+            # Open the file with the default application
+            self.open_file(file_path)
+
+            # Close the loading popup
+            loading_popup.dismiss()
+
+            # Notify the user with a styled popup
+            content = BoxLayout(orientation='vertical', padding=20, spacing=10)
+
+            # Add success message
+            success_label = Label(
+                text=f'File {file_name} opened successfully!',
+                font_size='18sp',
+                size_hint_y=None,
+                height=40
+            )
+            content.add_widget(success_label)
+
+            # Add 'Open Again' button
+            open_again_btn = Button(
+                text='Open Again',
+                size_hint_y=None,
+                height=50,
+                background_color=(0.2, 0.6, 1, 1),
+                color=(1, 1, 1, 1),
+                font_size='16sp'
+            )
+            open_again_btn.bind(on_press=lambda x: self.on_local_file_selected(instance))
+            content.add_widget(open_again_btn)
+
+            # Create and open the popup
+            popup = Popup(
+                title='File Opened',
+                content=content,
+                size_hint=(0.8, 0.6),
+                auto_dismiss=True
+            )
             popup.open()
+
+        except Exception as e:
+            # Close the loading popup
+            loading_popup.dismiss()
+
+            # Show error popup
+            error_content = BoxLayout(orientation='vertical', padding=20, spacing=10)
+            error_label = Label(
+                text=f'Error opening file: {str(e)}',
+                font_size='18sp',
+                size_hint_y=None,
+                height=40
+            )
+            error_content.add_widget(error_label)
+            error_popup = Popup(
+                title='Error',
+                content=error_content,
+                size_hint=(0.6, 0.4),
+                auto_dismiss=True
+            )
+            error_popup.open()
+
+    def on_local_directory_selected(self, instance):
+        selected_dir = instance.text
+        if self.current_local_path == self.documents_path:
+            self.current_local_path = os.path.join(self.documents_path, selected_dir)
+        else:
+            self.current_local_path = os.path.join(self.current_local_path, selected_dir)
+        self.list_local_directory(self.current_local_path)
+
+    def go_to_parent_local_directory(self, instance):
+        if self.current_local_path != self.documents_path:
+            parent_path = os.path.dirname(self.current_local_path)
+            self.current_local_path = parent_path
+            self.list_local_directory(self.current_local_path)
 
     def connect_disconnect_ftp(self, instance):
         if not self.ftp_connected:
@@ -452,7 +613,11 @@ class RaceApp(BoxLayout):
             )
             error_popup.open()
 
-    def open_file(file_path):
+    def open_file(self, file_path):
+        import platform
+        import subprocess
+        import os
+
         system = platform.system()
         if system == 'Windows':
             os.startfile(file_path)
@@ -519,6 +684,85 @@ class RaceApp(BoxLayout):
             profile = profiles[text]
             self.ftp_server_input.text = profile.get('server', '')
             self.ftp_username_input.text = profile.get('username', '')
+
+    def show_event_details(self, index):
+        try:
+            # Загрузка данных из `results.csv`
+            results_df = pd.read_csv('C:\\Users\\Admin\\Documents\\raceDocs\\results.csv')
+            print("Results DataFrame:\n", results_df)
+            print("Unique Events in Results DataFrame:\n", results_df["Event"].unique())
+
+            # Убедитесь, что `results_df` содержит нужные данные
+            event_row = self.df.loc[index]
+            event_num = event_row.get('EventNum', '')
+            event = event_row.get('Event', '')
+            title = f"{event_num} - {event}"
+
+            # Извлечение значения после третьего пробела
+            event_parts = event.split(' ')
+            if len(event_parts) >= 3:
+                event_to_search = ' '.join(event_parts[1:]).strip()  # Значение после второго пробела
+            else:
+                event_to_search = event.strip()
+
+            results_df['Event'] = results_df['Event'].str.strip()
+            print("Event Cleaned for Filtering:", event_to_search)
+
+            # Фильтрация данных
+            filtered_results_df = results_df[results_df['Event'] == event_to_search]
+
+            # Заменяем NaN на пробелы
+            filtered_results_df = filtered_results_df.fillna(' ')
+
+            # Применяем split по точке в столбце `Place` и берем первый элемент
+            if 'Place' in filtered_results_df.columns:
+                filtered_results_df['Place'] = filtered_results_df['Place'].apply(lambda x: str(x).split('.')[0])
+
+            # Оставляем только нужные столбцы
+            columns_to_keep = ['Place', 'Crew', 'Bow', 'Stroke', '500m', '1000m', '1500m', 'RawTime', 'PenaltyCode',
+                               'AdjTime', 'Delta', 'Rank', 'Qual']
+            filtered_results_df = filtered_results_df[columns_to_keep]
+
+            # Отладка: вывод отфильтрованных данных
+            print("Filtered Results DataFrame:\n", filtered_results_df)
+
+            # Создание содержимого для Popup
+            content = BoxLayout(orientation='vertical', padding=10)
+
+            # Добавляем заголовок события
+            content.add_widget(Label(text=title, font_size='20sp', size_hint_y=None, height=40))
+
+            if filtered_results_df.empty:
+                content.add_widget(Label(text='No results found for this event.', size_hint_y=None, height=40))
+            else:
+                # Создание таблицы
+                table_layout = GridLayout(cols=len(filtered_results_df.columns), spacing=10, size_hint_y=None)
+                table_layout.bind(minimum_height=table_layout.setter('height'))
+
+                # Добавление заголовков таблицы
+                for column in filtered_results_df.columns:
+                    header_label = Label(text=column, bold=True, size_hint_y=None, height=40)
+                    table_layout.add_widget(header_label)
+
+                # Добавление строк таблицы
+                for _, row in filtered_results_df.iterrows():
+                    for value in row:
+                        cell_label = Label(text=str(value), size_hint_y=None, height=30)
+                        table_layout.add_widget(cell_label)
+
+                # Создание ScrollView и добавление таблицы в него
+                scroll_view = ScrollView(size_hint=(1, 1))
+                scroll_view.add_widget(table_layout)
+                content.add_widget(scroll_view)
+
+            # Открытие Popup с таблицей
+            popup = Popup(title='Event Results', content=content, size_hint=(0.9, 0.9))
+            popup.open()
+        except Exception as e:
+            # Обработка ошибок
+            popup = Popup(title='Error', content=Label(text=f'Error displaying event details: {str(e)}'),
+                          size_hint=(0.6, 0.4))
+            popup.open()
 
     def shift_pressed(self, window, key, scancode, codepoint, modifier):
         if 'shift' in modifier:
