@@ -1,6 +1,7 @@
 import os
 import json
 import subprocess
+import platform
 import datetime
 import pandas as pd
 import glob
@@ -121,6 +122,10 @@ class RaceApp(BoxLayout):
         self.space_between_ftp_and_update = Label(size_hint_y=None,
                                                   height=20)  # Можно настроить высоту по необходимости
         self.add_widget(self.space_between_ftp_and_update)
+
+        # self.back_btn = Button(text='Back', size_hint_x=0.2, height=40)
+        # self.back_btn.bind(on_press=self.go_to_parent_directory)
+        # self.ftp_layout.add_widget(self.back_btn)
 
         # Новый ScrollView для отображения кнопок FTP файлов (увеличенное пространство)
         self.ftp_file_list_layout = GridLayout(cols=1, size_hint_y=None)
@@ -325,11 +330,25 @@ class RaceApp(BoxLayout):
         if label.collide_point(*touch.pos):
             self.show_event_details(label.index)
 
+    def go_to_parent_directory(self, instance):
+        if self.current_path != '/':
+            parent_path = '/'.join(self.current_path.rstrip('/').split('/')[:-1])
+            if parent_path == '':
+                parent_path = '/'
+            self.current_path = parent_path
+            self.update_file_list()
+
     def update_file_list(self, *args):
         self.ftp_file_list_layout.clear_widgets()
         try:
             self.ftps.cwd(self.current_path)
             files = self.ftps.nlst()
+
+            # Add Back button if not in the root directory
+            if self.current_path != '/':
+                btn = Button(text='..', size_hint_y=None, height=40)
+                btn.bind(on_press=self.go_to_parent_directory)
+                self.ftp_file_list_layout.add_widget(btn)
 
             for file in files:
                 if self.is_directory(file):
@@ -337,16 +356,122 @@ class RaceApp(BoxLayout):
                     btn.bind(on_press=self.on_directory_selected)
                     self.ftp_file_list_layout.add_widget(btn)
                 else:
-                    label = Label(text=file, size_hint_y=None, height=40)
-                    self.ftp_file_list_layout.add_widget(label)
+                    btn = Button(text=file, size_hint_y=None, height=40)
+                    btn.bind(on_press=self.on_file_selected)
+                    self.ftp_file_list_layout.add_widget(btn)
 
         except Exception as e:
             print(f"Error retrieving file list: {str(e)}")
 
+    def on_file_selected(self, instance):
+        file_name = instance.text
+
+        # Show loading popup first
+        loading_popup = Popup(
+            title='Downloading File',
+            content=Label(text=f'Downloading {file_name}... Please wait.'),
+            size_hint=(0.6, 0.3)
+        )
+        loading_popup.open()
+
+        try:
+            # Simulate file download
+            file_content = self.download_file(file_name)
+
+            # Save the PDF to a local file
+            local_file_path = os.path.join(os.path.expanduser("~"), file_name)
+            with open(local_file_path, 'wb') as f:
+                f.write(file_content)
+
+            # Close the loading popup
+            loading_popup.dismiss()
+
+            # Notify the user with a styled popup
+            content = BoxLayout(orientation='vertical', padding=20, spacing=10)
+
+            # Add success message
+            success_label = Label(
+                text=f'File {file_name} downloaded successfully!',
+                font_size='18sp',
+                size_hint_y=None,
+                height=40
+            )
+            content.add_widget(success_label)
+
+            # Add 'Open PDF' button
+            open_btn = Button(
+                text='Open PDF',
+                size_hint_y=None,
+                height=50,
+                background_color=(0.2, 0.6, 1, 1),
+                color=(1, 1, 1, 1),
+                font_size='16sp'
+            )
+            open_btn.bind(on_press=lambda x: self.open_file(local_file_path))
+            content.add_widget(open_btn)
+
+            # Add 'Download Again' button
+            download_again_btn = Button(
+                text='Download Again',
+                size_hint_y=None,
+                height=50,
+                background_color=(0.8, 0.2, 0.2, 1),
+                color=(1, 1, 1, 1),
+                font_size='16sp'
+            )
+            download_again_btn.bind(on_press=lambda x: self.on_file_selected(instance))
+            content.add_widget(download_again_btn)
+
+            # Create and open the popup
+            popup = Popup(
+                title='File Downloaded',
+                content=content,
+                size_hint=(0.8, 0.6),
+                auto_dismiss=True
+            )
+            popup.open()
+
         except Exception as e:
-            print(f"Error loading heatsheet.csv: {str(e)}")
-            label = Label(text=f"Error loading heatsheet.csv: {str(e)}", size_hint_y=None, height=40)
-            self.file_list_layout.add_widget(label)
+            # Close the loading popup
+            loading_popup.dismiss()
+
+            # Show error popup
+            error_content = BoxLayout(orientation='vertical', padding=20, spacing=10)
+            error_label = Label(
+                text=f'Error opening file: {str(e)}',
+                font_size='18sp',
+                size_hint_y=None,
+                height=40
+            )
+            error_content.add_widget(error_label)
+            error_popup = Popup(
+                title='Error',
+                content=error_content,
+                size_hint=(0.6, 0.4),
+                auto_dismiss=True
+            )
+            error_popup.open()
+
+    def open_file(file_path):
+        system = platform.system()
+        if system == 'Windows':
+            os.startfile(file_path)
+        elif system == 'Darwin':  # macOS
+            subprocess.call(['open', file_path])
+        elif system == 'Linux':
+            subprocess.call(['xdg-open', file_path])
+        else:
+            print("Unsupported OS")
+
+    def download_file(self, file_name):
+        from io import BytesIO
+
+        file_stream = BytesIO()
+        self.ftps.retrbinary(f'RETR {file_name}', file_stream.write)
+        file_stream.seek(0)
+
+        # Return the binary content directly
+        return file_stream.getvalue()
 
     def is_directory(self, filename):
         return '.' not in filename
