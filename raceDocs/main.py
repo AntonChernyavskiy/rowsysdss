@@ -28,17 +28,20 @@ from kivy.uix.filechooser import FileChooserListView
 from win32file import GetFileAttributesExW, FILE_ATTRIBUTE_HIDDEN
 import pywintypes
 
+from kivy.graphics import Color, Rectangle
+from kivy.properties import ListProperty
+
 
 class FileChooserPopup(Popup):
     def __init__(self, is_ftp=False, **kwargs):
         super().__init__(**kwargs)
         self.is_ftp = is_ftp
-        self.title = 'Select File'
+        self.title = 'Select Files'
         self.size_hint = (0.8, 0.8)
         self.auto_dismiss = True
 
-        # Initialize selected_file
-        self.selected_file = None
+        # Initialize selected_files as an empty list
+        self.selected_files = []
 
         # Determine the default path
         self.default_path = os.path.join(
@@ -51,8 +54,13 @@ class FileChooserPopup(Popup):
 
         # Create layout for popup content
         layout = BoxLayout(orientation='vertical')
-        self.file_chooser = FileChooserListView()
-        self.file_chooser.path = self.default_path
+
+        # Enable multiselect in FileChooserListView
+        self.file_chooser = FileChooserListView(
+            multiselect=True,
+            path=self.default_path,
+            size_hint_y=0.9
+        )
         layout.add_widget(self.file_chooser)
 
         # Add a button to confirm file selection
@@ -63,19 +71,7 @@ class FileChooserPopup(Popup):
         self.content = layout
 
     def on_file_selected(self, instance):
-        selected = self.file_chooser.selection
-        if selected:
-            self.selected_file = selected[0]
-        else:
-            self.selected_file = None
-        self.dismiss()
-
-    def on_file_selected(self, instance):
-        selected = self.file_chooser.selection
-        if selected:
-            self.selected_file = selected[0]
-        else:
-            self.selected_file = None
+        self.selected_files = self.file_chooser.selection
         self.dismiss()
 
 def get_documents_path():
@@ -254,26 +250,28 @@ class RaceApp(BoxLayout):
         self.list_local_directory(self.current_local_path)
 
     def upload_to_ftp(self, instance):
-        """Handle uploading a file from local directory to FTP server."""
+        """Handle uploading files from local directory to FTP server."""
         # Open file chooser popup
         file_chooser = FileChooserPopup()
-        file_chooser.bind(on_dismiss=self.upload_file)
+        file_chooser.bind(on_dismiss=self.upload_files)
         file_chooser.open()
 
-    def upload_file(self, instance):
-        """Upload the selected file to the FTP server."""
-        file_path = instance.selected_file
-        if file_path:
-            try:
-                file_name = os.path.basename(file_path)
-                with open(file_path, 'rb') as file:
-                    self.ftps.storbinary(f'STOR {file_name}', file)
-                print(f"File {file_name} uploaded successfully.")
-                # Notify the user
-                self.show_popup('File Uploaded', f'File {file_name} uploaded successfully!')
-            except Exception as e:
-                print(f"Error uploading file: {str(e)}")
-                self.show_popup('Error', f'Error uploading file: {str(e)}')
+    def upload_files(self, instance):
+        """Upload selected files to FTP server."""
+        file_paths = instance.selected_files
+        if file_paths:
+            for file_path in file_paths:
+                try:
+                    file_name = os.path.basename(file_path)
+                    with open(file_path, 'rb') as file:
+                        self.ftps.storbinary(f'STOR {file_name}', file)
+                    print(f"File {file_name} uploaded successfully.")
+                    # Notify the user about each successful upload
+                    self.show_popup('File Uploaded', f'File {file_name} uploaded successfully!')
+                except Exception as e:
+                    print(f"Error uploading file: {file_name}, {str(e)}")
+                    # Notify the user about the error
+                    self.show_popup('Error', f'Error uploading file: {file_name}, {str(e)}')
 
     def download_file(self, instance):
         """Download the selected file from the FTP server."""
