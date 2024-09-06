@@ -23,7 +23,7 @@ from kivy.uix.behaviors import ButtonBehavior
 from kivy.uix.button import Button
 from kivy.utils import platform
 from ftplib import FTP_TLS
-
+import webbrowser
 from kivy.uix.filechooser import FileChooserListView
 from win32file import GetFileAttributesExW, FILE_ATTRIBUTE_HIDDEN
 import pywintypes
@@ -188,13 +188,6 @@ class RaceApp(BoxLayout):
         # Button layout
         button_layout = BoxLayout(orientation='horizontal', size_hint_y=None, height=50)  # Adjust size_hint_y as needed
 
-        # Upload button
-        upload_btn = Button(text='Upload to FTP', size_hint_x=0.5, height=50)
-        upload_btn.bind(on_press=self.upload_to_ftp)
-
-        # Add buttons to button layout
-        button_layout.add_widget(upload_btn)
-
         # Add button layout to main layout
         self.add_widget(button_layout)
 
@@ -248,6 +241,24 @@ class RaceApp(BoxLayout):
 
         # Load initial local directory
         self.list_local_directory(self.current_local_path)
+
+    def open_file_in_browser(self, file_path, is_local, popup):
+        """Open the file in the default web browser."""
+        try:
+            if is_local:
+                # If the file is local, use a local file path
+                file_url = f'file://{file_path}'
+            else:
+                # For FTP, we may need to construct a URL
+                # Assuming the FTP server is accessible via HTTP/S protocol
+                ftp_server = self.ftp_server_input.text
+                file_url = f'http://{ftp_server}/{file_path.lstrip("/")}'
+
+            webbrowser.open(file_url)
+            popup.dismiss()  # Close the popup after opening the file
+            self.show_popup('Success', f'Opened {file_path} in browser')
+        except Exception as e:
+            self.show_popup('Error', f'Error opening {file_path} in browser: {str(e)}')
 
     def upload_to_ftp(self, instance):
         """Handle uploading files from local directory to FTP server."""
@@ -333,77 +344,122 @@ class RaceApp(BoxLayout):
             print(f"Error retrieving local directory list: {str(e)}")
 
     def on_local_file_selected(self, instance):
+        """Handle file selection from the local directory."""
         file_name = instance.text
         file_path = os.path.join(self.current_local_path, file_name)
 
-        # Show loading popup first
-        loading_popup = Popup(
-            title='Opening File',
-            content=Label(text=f'Opening {file_name}... Please wait.'),
-            size_hint=(0.6, 0.3)
-        )
-        loading_popup.open()
+        # Create a popup for file interaction
+        self.show_file_interaction_popup(file_name, file_path, is_local=True)
+
+    def show_file_interaction_popup(self, file_name, file_path, is_local):
+        """Show popup for file interaction: download, delete, rename, move, open in browser."""
+        content = BoxLayout(orientation='vertical', padding=20, spacing=10)
+
+        # Add buttons for different actions
+        download_btn = Button(text='Download', size_hint_y=None, height=50)
+        delete_btn = Button(text='Delete', size_hint_y=None, height=50)
+        rename_btn = Button(text='Rename', size_hint_y=None, height=50)
+        move_btn = Button(text='Move to Opposite Folder', size_hint_y=None, height=50)
+        open_in_browser_btn = Button(text='Open in Browser', size_hint_y=None, height=50)
+
+        content.add_widget(Label(text=f'File: {file_name}', size_hint_y=None, height=40))
+        content.add_widget(download_btn)
+        content.add_widget(delete_btn)
+        content.add_widget(rename_btn)
+        content.add_widget(move_btn)
+        content.add_widget(open_in_browser_btn)
+
+        popup = Popup(title='File Actions', content=content, size_hint=(0.8, 0.6), auto_dismiss=True)
+        popup.open()
+
+        # Bind buttons to their respective functions
+        download_btn.bind(on_press=lambda x: self.download_file(file_name, is_local, popup))
+        delete_btn.bind(on_press=lambda x: self.delete_file(file_path, is_local, popup))
+        rename_btn.bind(on_press=lambda x: self.rename_file(file_path, is_local, popup))
+        move_btn.bind(on_press=lambda x: self.move_file(file_name, is_local, popup))
+        open_in_browser_btn.bind(on_press=lambda x: self.open_file_in_browser(file_path, is_local, popup))
+
+    def download_file(self, file_name, is_local, popup):
+        """Download the selected file."""
+        if is_local:
+            # Handle local file download (e.g., open the file or copy to a new location)
+            self.show_popup('Download', f'File {file_name} downloaded from local storage.')
+        else:
+            # Handle FTP file download
+            self.download_file_from_ftp(file_name)
+            self.show_popup('Download', f'File {file_name} downloaded from FTP.')
+
+        popup.dismiss()
+
+    def delete_file(self, file_path, is_local, popup):
+        """Delete the selected file."""
+        try:
+            if is_local:
+                os.remove(file_path)
+            else:
+                self.ftps.delete(file_path)
+
+            self.show_popup('Deleted', f'File {file_path} deleted successfully.')
+        except Exception as e:
+            self.show_popup('Error', f'Error deleting file: {str(e)}')
+
+        popup.dismiss()
+
+    def rename_file(self, file_path, is_local, popup):
+        """Rename the selected file."""
+        content = BoxLayout(orientation='vertical', padding=20, spacing=10)
+        new_name_input = TextInput(hint_text='Enter new name', multiline=False)
+        rename_btn = Button(text='Rename', size_hint_y=None, height=50)
+        content.add_widget(new_name_input)
+        content.add_widget(rename_btn)
+
+        rename_popup = Popup(title='Rename File', content=content, size_hint=(0.8, 0.6), auto_dismiss=True)
+        rename_popup.open()
+
+        rename_btn.bind(
+            on_press=lambda x: self.perform_rename(file_path, new_name_input.text, is_local, rename_popup, popup))
+
+    def perform_rename(self, file_path, new_name, is_local, rename_popup, original_popup):
+        """Perform renaming of the file."""
+        if not new_name:
+            self.show_popup('Error', 'File name cannot be empty.')
+            return
+
+        new_path = os.path.join(os.path.dirname(file_path), new_name)
 
         try:
-            # Open the file with the default application
-            self.open_file(file_path)
+            if is_local:
+                os.rename(file_path, new_path)
+            else:
+                # FTP rename
+                self.ftps.rename(file_path, new_name)
 
-            # Close the loading popup
-            loading_popup.dismiss()
-
-            # Notify the user with a styled popup
-            content = BoxLayout(orientation='vertical', padding=20, spacing=10)
-
-            # Add success message
-            success_label = Label(
-                text=f'File {file_name} opened successfully!',
-                font_size='18sp',
-                size_hint_y=None,
-                height=40
-            )
-            content.add_widget(success_label)
-
-            # Add 'Open Again' button
-            open_again_btn = Button(
-                text='Open Again',
-                size_hint_y=None,
-                height=50,
-                background_color=(0.2, 0.6, 1, 1),
-                color=(1, 1, 1, 1),
-                font_size='16sp'
-            )
-            open_again_btn.bind(on_press=lambda x: self.on_local_file_selected(instance))
-            content.add_widget(open_again_btn)
-
-            # Create and open the popup
-            popup = Popup(
-                title='File Opened',
-                content=content,
-                size_hint=(0.8, 0.6),
-                auto_dismiss=True
-            )
-            popup.open()
-
+            self.show_popup('Renamed', f'File renamed to {new_name}.')
+            rename_popup.dismiss()
+            original_popup.dismiss()
         except Exception as e:
-            # Close the loading popup
-            loading_popup.dismiss()
+            self.show_popup('Error', f'Error renaming file: {str(e)}')
 
-            # Show error popup
-            error_content = BoxLayout(orientation='vertical', padding=20, spacing=10)
-            error_label = Label(
-                text=f'Error opening file: {str(e)}',
-                font_size='18sp',
-                size_hint_y=None,
-                height=40
-            )
-            error_content.add_widget(error_label)
-            error_popup = Popup(
-                title='Error',
-                content=error_content,
-                size_hint=(0.6, 0.4),
-                auto_dismiss=True
-            )
-            error_popup.open()
+    def move_file(self, file_name, is_local, popup):
+        """Move the file between local and FTP folders."""
+        try:
+            if is_local:
+                # Move file from local to FTP
+                file_path = os.path.join(self.current_local_path, file_name)
+                with open(file_path, 'rb') as file:
+                    self.ftps.storbinary(f'STOR {file_name}', file)
+                self.show_popup('Moved', f'File {file_name} moved to FTP.')
+            else:
+                # Move file from FTP to local
+                file_content = self.download_file_from_ftp(file_name)
+                local_file_path = os.path.join(self.current_local_path, file_name)
+                with open(local_file_path, 'wb') as file:
+                    file.write(file_content)
+                self.show_popup('Moved', f'File {file_name} moved to local.')
+
+            popup.dismiss()
+        except Exception as e:
+            self.show_popup('Error', f'Error moving file: {str(e)}')
 
     def on_local_directory_selected(self, instance):
         selected_dir = instance.text
@@ -524,92 +580,141 @@ class RaceApp(BoxLayout):
 
     def on_file_selected(self, instance):
         file_name = instance.text
+        file_path = self.file_path  # Используем напрямую переданный путь к файлу
+        is_local = True  # Или логика для определения, является ли файл локальным
 
-        # Show loading popup first
-        loading_popup = Popup(
-            title='Downloading File',
-            content=Label(text=f'Downloading {file_name}... Please wait.'),
-            size_hint=(0.6, 0.3)
+        # Create the content for the popup
+        content = BoxLayout(orientation='vertical', padding=20, spacing=10)
+
+        # Label with the file name
+        file_label = Label(text=f'File: {file_name}', font_size='18sp', size_hint_y=None, height=40)
+        content.add_widget(file_label)
+
+        # Button to download the file
+        download_btn = Button(
+            text='Download',
+            size_hint_y=None,
+            height=50,
+            background_color=(0.2, 0.6, 1, 1),
+            color=(1, 1, 1, 1),
+            font_size='16sp'
         )
-        loading_popup.open()
+        download_btn.bind(on_press=lambda x: self.download_file_popup_action(file_name))
+        content.add_widget(download_btn)
 
+        # Button to delete the file
+        delete_btn = Button(
+            text='Delete',
+            size_hint_y=None,
+            height=50,
+            background_color=(0.8, 0.2, 0.2, 1),
+            color=(1, 1, 1, 1),
+            font_size='16sp'
+        )
+        delete_btn.bind(on_press=lambda x: self.delete_file_popup_action(file_name))
+        content.add_widget(delete_btn)
+
+        # Button to rename the file
+        rename_btn = Button(
+            text='Rename',
+            size_hint_y=None,
+            height=50,
+            background_color=(0.5, 0.5, 0.5, 1),
+            color=(1, 1, 1, 1),
+            font_size='16sp'
+        )
+        rename_btn.bind(on_press=lambda x: self.rename_file_popup_action(file_name))
+        content.add_widget(rename_btn)
+
+        # Button to move the file
+        move_btn = Button(
+            text='Move',
+            size_hint_y=None,
+            height=50,
+            background_color=(0.2, 0.8, 0.2, 1),
+            color=(1, 1, 1, 1),
+            font_size='16sp'
+        )
+        move_btn.bind(on_press=lambda x: self.move_file_popup_action(file_name))
+        content.add_widget(move_btn)
+
+        # Button to open the file in browser
+        open_in_browser_btn = Button(
+            text='Open in Browser',
+            size_hint_y=None,
+            height=50,
+            background_color=(0.2, 0.6, 0.8, 1),
+            color=(1, 1, 1, 1),
+            font_size='16sp'
+        )
+        open_in_browser_btn.bind(on_press=lambda x: self.open_file_in_browser(file_path, is_local, popup))
+        content.add_widget(open_in_browser_btn)
+
+        # Create and open the popup
+        popup = Popup(
+            title='File Actions',
+            content=content,
+            size_hint=(0.8, 0.6),
+            auto_dismiss=True
+        )
+        popup.open()
+
+    def download_file_popup_action(self, file_name):
+        """Download the file from the FTP server."""
         try:
-            # Simulate file download
-            file_content = self.download_file(file_name)
-
-            # Save the PDF to a local file
-            local_file_path = os.path.join(os.path.expanduser("~"), file_name)
+            local_file_path = os.path.join(self.documents_path, file_name)
             with open(local_file_path, 'wb') as f:
-                f.write(file_content)
-
-            # Close the loading popup
-            loading_popup.dismiss()
-
-            # Notify the user with a styled popup
-            content = BoxLayout(orientation='vertical', padding=20, spacing=10)
-
-            # Add success message
-            success_label = Label(
-                text=f'File {file_name} downloaded successfully!',
-                font_size='18sp',
-                size_hint_y=None,
-                height=40
-            )
-            content.add_widget(success_label)
-
-            # Add 'Open PDF' button
-            open_btn = Button(
-                text='Open PDF',
-                size_hint_y=None,
-                height=50,
-                background_color=(0.2, 0.6, 1, 1),
-                color=(1, 1, 1, 1),
-                font_size='16sp'
-            )
-            open_btn.bind(on_press=lambda x: self.open_file(local_file_path))
-            content.add_widget(open_btn)
-
-            # Add 'Download Again' button
-            download_again_btn = Button(
-                text='Download Again',
-                size_hint_y=None,
-                height=50,
-                background_color=(0.8, 0.2, 0.2, 1),
-                color=(1, 1, 1, 1),
-                font_size='16sp'
-            )
-            download_again_btn.bind(on_press=lambda x: self.on_file_selected(instance))
-            content.add_widget(download_again_btn)
-
-            # Create and open the popup
-            popup = Popup(
-                title='File Downloaded',
-                content=content,
-                size_hint=(0.8, 0.6),
-                auto_dismiss=True
-            )
-            popup.open()
-
+                self.ftps.retrbinary(f'RETR {file_name}', f.write)
+            self.show_popup('Success', f'{file_name} downloaded successfully!')
         except Exception as e:
-            # Close the loading popup
-            loading_popup.dismiss()
+            self.show_popup('Error', f'Error downloading {file_name}: {str(e)}')
 
-            # Show error popup
-            error_content = BoxLayout(orientation='vertical', padding=20, spacing=10)
-            error_label = Label(
-                text=f'Error opening file: {str(e)}',
-                font_size='18sp',
-                size_hint_y=None,
-                height=40
-            )
-            error_content.add_widget(error_label)
-            error_popup = Popup(
-                title='Error',
-                content=error_content,
-                size_hint=(0.6, 0.4),
-                auto_dismiss=True
-            )
-            error_popup.open()
+    def delete_file_popup_action(self, file_name):
+        """Delete the file from the FTP server."""
+        try:
+            self.ftps.delete(file_name)
+            self.show_popup('Success', f'{file_name} deleted successfully!')
+            self.update_file_list()  # Refresh FTP file list after deletion
+        except Exception as e:
+            self.show_popup('Error', f'Error deleting {file_name}: {str(e)}')
+
+    def rename_file_popup_action(self, file_name):
+        """Open a dialog to rename the file."""
+        rename_content = BoxLayout(orientation='vertical', padding=20, spacing=10)
+
+        rename_input = TextInput(text=file_name, multiline=False, size_hint_y=None, height=40)
+        rename_content.add_widget(rename_input)
+
+        rename_btn = Button(text='Rename', size_hint_y=None, height=50)
+        rename_btn.bind(on_press=lambda x: self.perform_file_rename(file_name, rename_input.text))
+        rename_content.add_widget(rename_btn)
+
+        rename_popup = Popup(
+            title='Rename File',
+            content=rename_content,
+            size_hint=(0.6, 0.4),
+            auto_dismiss=True
+        )
+        rename_popup.open()
+
+    def perform_file_rename(self, old_name, new_name):
+        """Rename the file on the FTP server."""
+        try:
+            self.ftps.rename(old_name, new_name)
+            self.show_popup('Success', f'File renamed to {new_name}')
+            self.update_file_list()  # Refresh FTP file list after renaming
+        except Exception as e:
+            self.show_popup('Error', f'Error renaming file: {str(e)}')
+
+    def move_file_popup_action(self, file_name):
+        """Download the file from FTP and move it locally."""
+        try:
+            # Move file from FTP to local
+            self.download_file_popup_action(file_name)
+            self.show_popup('Success', f'{file_name} moved successfully!')
+            self.update_file_list()  # Refresh FTP file list
+        except Exception as e:
+            self.show_popup('Error', f'Error moving file: {str(e)}')
 
     def open_file(self, file_path):
         import platform
@@ -625,16 +730,6 @@ class RaceApp(BoxLayout):
             subprocess.call(['xdg-open', file_path])
         else:
             print("Unsupported OS")
-
-    def download_file(self, file_name):
-        from io import BytesIO
-
-        file_stream = BytesIO()
-        self.ftps.retrbinary(f'RETR {file_name}', file_stream.write)
-        file_stream.seek(0)
-
-        # Return the binary content directly
-        return file_stream.getvalue()
 
     def is_directory(self, filename):
         return '.' not in filename

@@ -1,8 +1,0 @@
-<tr class="rTextTbl" style="border-bottom: 1px solid lightgray">
-	<td style="width: 17.73mm">{}</td>
-	<td style="width: 10mm;">{}</td>
-	<td style="width: 40mm"><b>{}</b></td>
-	<td style="width: 51.11mm;">{}</td>
-	<td style="width: 31.16mm">{}</td>
-	<td style="width: 30mm">{}</td>
-</tr>
