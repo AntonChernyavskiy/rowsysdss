@@ -136,10 +136,9 @@ class RaceApp(BoxLayout):
         self.current_profile = None
         self.ftp_connected = False
         self.current_path = ''
-        self.documents_path = os.path.expanduser("~/Documents")  # Path to Documents folder
+        self.documents_path = os.path.expanduser("~/Documents")
         self.current_local_path = os.path.join(self.documents_path, 'rowSysDocs')
 
-        # Top section: FTP Connection
         self.ftp_layout = BoxLayout(orientation='horizontal', size_hint_y=None, height=50)
         self.ftp_input_layout = BoxLayout(orientation='horizontal', size_hint_y=None, height=50)
         self.ftp_server_input = TextInput(hint_text='FTP Server Address', multiline=False, size_hint_x=0.33)
@@ -165,52 +164,48 @@ class RaceApp(BoxLayout):
 
         self.add_widget(self.ftp_layout)
 
-        # Space between FTP and Update File button
         self.space_between_ftp_and_update = Label(size_hint_y=None, height=20)
         self.add_widget(self.space_between_ftp_and_update)
 
-        # Main horizontal layout
-        self.main_layout = BoxLayout(orientation='horizontal', size_hint_y=None, height=500)  # Adjust height as needed
+        self.main_layout = BoxLayout(orientation='horizontal', size_hint_y=None, height=500)
         self.local_file_list_layout = GridLayout(cols=1, size_hint_y=None)
         self.local_file_list_layout.bind(minimum_height=self.local_file_list_layout.setter('height'))
-        self.local_file_scroll_view = ScrollView(size_hint=(0.5, 1))  # 50% width, 100% height
+        self.local_file_scroll_view = ScrollView(size_hint=(0.5, 1))
         self.local_file_scroll_view.add_widget(self.local_file_list_layout)
         self.main_layout.add_widget(self.local_file_scroll_view)
 
         self.ftp_file_list_layout = GridLayout(cols=1, size_hint_y=None)
         self.ftp_file_list_layout.bind(minimum_height=self.ftp_file_list_layout.setter('height'))
-        self.ftp_file_scroll_view = ScrollView(size_hint=(0.5, 1))  # 50% width, 100% height
+        self.ftp_file_scroll_view = ScrollView(size_hint=(0.5, 1))
         self.ftp_file_scroll_view.add_widget(self.ftp_file_list_layout)
         self.main_layout.add_widget(self.ftp_file_scroll_view)
 
         self.add_widget(self.main_layout)
 
-        # Button layout
-        button_layout = BoxLayout(orientation='horizontal', size_hint_y=None, height=50)  # Adjust size_hint_y as needed
-
-        # Add button layout to main layout
-        self.add_widget(button_layout)
-
-        # Middle section: Update File button
+        button_layout = BoxLayout(orientation='horizontal', size_hint_y=None, height=50)
         self.file_chooser_btn = Button(text='Update File', size_hint_y=None, height=40)
+        self.file_chooser_btn.bind(on_press=self.update_file)
+        self.add_widget(self.file_chooser_btn)
+
+        self.file_chooser_btn = Button(text='Select File', size_hint_y=None, height=40)
         self.file_chooser_btn.bind(on_press=self.choose_file)
         self.add_widget(self.file_chooser_btn)
 
-        # List of events
         self.event_layout = GridLayout(cols=1, size_hint_y=None)
         self.event_layout.bind(minimum_height=self.event_layout.setter('height'))
         self.event_scroll_view = ScrollView(size_hint=(1, 0.2))
         self.event_scroll_view.add_widget(self.event_layout)
         self.add_widget(self.event_scroll_view)
 
-        # Bottom section: Competition name/date, save/load buttons, print button
         self.bottom_buttons_layout = BoxLayout(orientation='horizontal', size_hint_y=None, height=50)
 
         self.comp_layout = BoxLayout(orientation='horizontal', size_hint_y=None, height=50)
         self.comp_name = TextInput(hint_text='Competition Name', multiline=False, size_hint_x=0.5)
         self.comp_date = TextInput(hint_text='Competition Date', multiline=False, size_hint_x=0.5)
+        self.regatta_code = TextInput(hint_text='Ragatta code', multiline=False, size_hint_x=0.5)
         self.comp_layout.add_widget(self.comp_name)
         self.comp_layout.add_widget(self.comp_date)
+        self.comp_layout.add_widget(self.regatta_code)
 
         self.save_load_layout = BoxLayout(orientation='horizontal', size_hint_y=None, height=50)
         self.save_btn = Button(text='Save Data', size_hint_x=0.5)
@@ -224,13 +219,16 @@ class RaceApp(BoxLayout):
         self.bottom_buttons_layout.add_widget(self.comp_layout)
         self.bottom_buttons_layout.add_widget(self.save_load_layout)
 
+        self.edit_heat = Button(text='Edit heatsheet', size_hint_x=0.5)
+        self.edit_heat.bind(on_press=self.edit_heatsheet)
+        self.save_load_layout.add_widget(self.edit_heat)
+
         self.print_btn = Button(text='Print Files', size_hint_x=0.5, height=50)
         self.print_btn.bind(on_press=self.show_export_popup)
         self.bottom_buttons_layout.add_widget(self.print_btn)
 
         self.add_widget(self.bottom_buttons_layout)
 
-        # Other initialization
         self.file_path = ''
         self.df = None
         self.selected_events = []
@@ -239,8 +237,103 @@ class RaceApp(BoxLayout):
         Window.bind(on_key_down=self.shift_pressed)
         Window.bind(on_key_up=self.shift_unpressed)
 
-        # Load initial local directory
         self.list_local_directory(self.current_local_path)
+
+    def edit_heatsheet(self, instance):
+        try:
+            self.widget_map = {}  # Dictionary to map (row_idx, col_name) to TextInput widget
+            heatsheet_df = pd.read_csv('C:\\Users\\Admin\\Documents\\raceDocs\\heatsheet.csv')
+            title = 'Heatsheet Details'
+
+            content = BoxLayout(orientation='vertical', padding=10)
+            content.add_widget(Label(text=title, font_size='20sp', size_hint_y=None, height=40))
+
+            if heatsheet_df.empty:
+                content.add_widget(Label(text='No heatsheet data found.', size_hint_y=None, height=40))
+            else:
+                table_layout = GridLayout(cols=len(heatsheet_df.columns), spacing=10, size_hint_y=None)
+                table_layout.bind(minimum_height=table_layout.setter('height'))
+
+                for column in heatsheet_df.columns:
+                    header_label = Label(text=column, bold=True, size_hint_y=None, height=40)
+                    table_layout.add_widget(header_label)
+
+                def on_focus(instance, value):
+                    if not value:  # When the TextInput loses focus
+                        row_idx = instance.row_idx
+                        col_name = instance.col_name
+                        self.widget_map[(row_idx, col_name)] = instance
+
+                for idx, row in heatsheet_df.iterrows():
+                    for col in heatsheet_df.columns:
+                        cell_value = str(row[col])
+                        editable_cell = TextInput(text=cell_value, multiline=False, size_hint_y=None, height=30)
+                        editable_cell.row_idx = idx
+                        editable_cell.col_name = col
+                        editable_cell.bind(focus=on_focus)
+                        table_layout.add_widget(editable_cell)
+                        self.widget_map[(idx, col)] = editable_cell
+
+                scroll_view = ScrollView(size_hint=(1, 1))
+                scroll_view.add_widget(table_layout)
+                content.add_widget(scroll_view)
+
+            self.save_button = Button(text='Save Changes', size_hint_y=None, height=40)
+            self.save_button.bind(on_press=self.save_heatsheet_changes)
+            content.add_widget(self.save_button)
+
+            self.popup = Popup(title='Heatsheet Details', content=content, size_hint=(0.9, 0.9))
+            self.popup.open()
+
+        except Exception as e:
+            error_popup = Popup(title='Error', content=Label(text=f'Error displaying heatsheet details: {str(e)}'),
+                                size_hint=(0.6, 0.4))
+            error_popup.open()
+
+    def save_heatsheet_changes(self, instance):
+        try:
+            # Load the current heatsheet data
+            heatsheet_df = pd.read_csv('C:\\Users\\Admin\\Documents\\raceDocs\\heatsheet.csv', encoding='utf-8')
+
+            # Update the DataFrame with changes from TextInput widgets
+            for (row_idx, col_name), widget in self.widget_map.items():
+                heatsheet_df.at[row_idx, col_name] = widget.text
+
+            # Replace any NaN values with a single space
+            heatsheet_df = heatsheet_df.fillna(' ')
+
+            # Save the updated DataFrame to CSV
+            heatsheet_df.to_csv('C:\\Users\\Admin\\Documents\\raceDocs\\heatsheet.csv', index=False, encoding='utf-8')
+
+            # Read the file again to ensure all 'nan' strings are replaced with a space
+            with open('C:\\Users\\Admin\\Documents\\raceDocs\\heatsheet.csv', 'r', encoding='utf-8') as file:
+                file_content = file.read()
+
+            # Replace 'nan' with a single space
+            file_content = file_content.replace('nan', ' ')
+
+            # Write the corrected content back to the file
+            with open('C:\\Users\\Admin\\Documents\\raceDocs\\heatsheet.csv', 'w', encoding='utf-8') as file:
+                file.write(file_content)
+
+            # Close the popup
+            self.popup.dismiss()
+        except Exception as e:
+            error_popup = Popup(title='Error', content=Label(text=f'Error saving heatsheet changes: {str(e)}'),
+                                size_hint=(0.6, 0.4))
+            error_popup.open()
+
+    def find_widget_at(self, row_idx, col_name):
+        # Helper function to find the TextInput widget for a specific cell
+        for widget in self.children:
+            if isinstance(widget, ScrollView):
+                for child in widget.children:
+                    if isinstance(child, GridLayout):
+                        for subwidget in child.children:
+                            if isinstance(subwidget,
+                                          TextInput) and subwidget.row_idx == row_idx and subwidget.col_name == col_name:
+                                return subwidget
+        return None
 
     def open_file_in_browser(self, file_path, is_local, popup):
         """Open the file in the default web browser."""
@@ -509,13 +602,82 @@ class RaceApp(BoxLayout):
                           size_hint=(0.6, 0.4))
             popup.open()
 
+    def update_file(self, instance):
+        import requests
+
+        # Get regatta code from the text input
+        regatta_code = self.regatta_code.text.strip()
+
+        if not regatta_code:
+            # Handle the case where regatta_code is empty
+            error_popup = Popup(title='Error', content=Label(text='Regatta code is empty.'),
+                                size_hint=(0.6, 0.4))
+            error_popup.open()
+            return
+
+        # Form the URLs using the regatta code
+        results_url = f'https://www.crewtimer.com/results?asfile=true&regatta=r{regatta_code}'
+        heatsheet_url = f'https://www.crewtimer.com/heatsheet?asfile=true&regatta=r{regatta_code}'
+
+        documents_folder = os.path.expanduser("~/Documents/raceDocs/")
+        temp_results_path = 'temp_results.csv'
+        temp_heatsheet_path = 'temp_heatsheet.csv'
+        results_path = os.path.join(documents_folder, 'results.csv')
+        heatsheet_path = os.path.join(documents_folder, 'heatsheet.csv')
+
+        # Download and save the files
+        response = requests.get(results_url)
+        if response.status_code == 200:
+            with open(temp_results_path, 'wb') as file:
+                file.write(response.content)
+        else:
+            error_popup = Popup(title='Error',
+                                content=Label(text=f'Failed to download results. Status code: {response.status_code}'),
+                                size_hint=(0.6, 0.4))
+            error_popup.open()
+            return
+
+        response = requests.get(heatsheet_url)
+        if response.status_code == 200:
+            with open(temp_heatsheet_path, 'wb') as file:
+                file.write(response.content)
+        else:
+            error_popup = Popup(title='Error', content=Label(
+                text=f'Failed to download heatsheet. Status code: {response.status_code}'),
+                                size_hint=(0.6, 0.4))
+            error_popup.open()
+            return
+
+        # Process the results file
+        res = pd.read_csv(temp_results_path)
+        res["Qual"] = ""
+        res["Rank"] = ""
+        res.to_csv(temp_results_path, index=False)
+
+        # Process the heatsheet file
+        heat = pd.read_csv(temp_heatsheet_path)
+        heat["Prog"] = ""
+        heat.to_csv(temp_heatsheet_path, index=False)
+
+        # Update existing files if they exist
+        if os.path.exists(results_path):
+            f_res = pd.read_csv(results_path)
+            res["Qual"] = f_res["Qual"]
+            res["Rank"] = f_res["Rank"]
+            res.to_csv(results_path, index=False)
+
+        if os.path.exists(heatsheet_path):
+            f_heat = pd.read_csv(heatsheet_path)
+            heat["Prog"] = f_heat["Prog"]
+            heat.to_csv(heatsheet_path, index=False)
+
     def choose_file(self, instance):
         file_path = "C:\\Users\\Admin\\Documents\\raceDocs\\heatsheet.csv"
         try:
             self.df = pd.read_csv(file_path, skip_blank_lines=True, na_filter=True)
             self.df = self.df[self.df["Event"].notna()]
             self.df = self.df.reset_index()
-            self.file_chooser_btn.text = f'Update file'
+            self.file_chooser_btn.text = f'Select file'
             self.showEvents()
         except Exception as e:
             popup = Popup(title='Error', content=Label(text=f'Error loading file: {str(e)}'), size_hint=(0.6, 0.4))
@@ -780,79 +942,99 @@ class RaceApp(BoxLayout):
 
     def show_event_details(self, index):
         try:
-            # Загрузка данных из `results.csv`
+            # Читаем данные из CSV
             results_df = pd.read_csv('C:\\Users\\Admin\\Documents\\raceDocs\\results.csv')
-            print("Results DataFrame:\n", results_df)
-            print("Unique Events in Results DataFrame:\n", results_df["Event"].unique())
-
-            # Убедитесь, что `results_df` содержит нужные данные
             event_row = self.df.loc[index]
             event_num = event_row.get('EventNum', '')
             event = event_row.get('Event', '')
             title = f"{event_num} - {event}"
 
-            # Извлечение значения после третьего пробела
             event_parts = event.split(' ')
             if len(event_parts) >= 3:
-                event_to_search = ' '.join(event_parts[1:]).strip()  # Значение после второго пробела
+                event_to_search = ' '.join(event_parts[1:]).strip()
             else:
                 event_to_search = event.strip()
 
             results_df['Event'] = results_df['Event'].str.strip()
-            print("Event Cleaned for Filtering:", event_to_search)
 
-            # Фильтрация данных
-            filtered_results_df = results_df[results_df['Event'] == event_to_search]
+            # Копируем данные для фильтрации
+            filtered_results_df = results_df[results_df['Event'] == event_to_search].fillna(' ')
 
-            # Заменяем NaN на пробелы
-            filtered_results_df = filtered_results_df.fillna(' ')
-
-            # Применяем split по точке в столбце `Place` и берем первый элемент
             if 'Place' in filtered_results_df.columns:
                 filtered_results_df['Place'] = filtered_results_df['Place'].apply(lambda x: str(x).split('.')[0])
 
-            # Оставляем только нужные столбцы
             columns_to_keep = ['Place', 'Crew', 'Bow', 'Stroke', '500m', '1000m', '1500m', 'RawTime', 'PenaltyCode',
                                'AdjTime', 'Delta', 'Rank', 'Qual']
             filtered_results_df = filtered_results_df[columns_to_keep]
 
-            # Отладка: вывод отфильтрованных данных
-            print("Filtered Results DataFrame:\n", filtered_results_df)
+            # Сохраняем копию для сравнения изменений
+            original_filtered_df = filtered_results_df.copy()
 
-            # Создание содержимого для Popup
+            # Список для хранения изменений
+            changes = []
+
             content = BoxLayout(orientation='vertical', padding=10)
-
-            # Добавляем заголовок события
             content.add_widget(Label(text=title, font_size='20sp', size_hint_y=None, height=40))
 
             if filtered_results_df.empty:
                 content.add_widget(Label(text='No results found for this event.', size_hint_y=None, height=40))
             else:
-                # Создание таблицы
                 table_layout = GridLayout(cols=len(filtered_results_df.columns), spacing=10, size_hint_y=None)
                 table_layout.bind(minimum_height=table_layout.setter('height'))
 
-                # Добавление заголовков таблицы
                 for column in filtered_results_df.columns:
                     header_label = Label(text=column, bold=True, size_hint_y=None, height=40)
                     table_layout.add_widget(header_label)
 
-                # Добавление строк таблицы
-                for _, row in filtered_results_df.iterrows():
-                    for value in row:
-                        cell_label = Label(text=str(value), size_hint_y=None, height=30)
-                        table_layout.add_widget(cell_label)
+                # Функция для сохранения изменений при потере фокуса
+                def on_focus(instance, value):
+                    if not value:  # Когда TextInput теряет фокус
+                        row_idx = instance.row_idx
+                        col_name = instance.col_name
 
-                # Создание ScrollView и добавление таблицы в него
+                        # Проверяем, изменилось ли значение
+                        new_value = instance.text
+                        original_value = original_filtered_df.at[row_idx, col_name]
+                        if new_value != original_value:
+                            # Сохраняем изменения в список
+                            changes.append((row_idx, col_name, new_value))
+                            filtered_results_df.at[row_idx, col_name] = new_value
+
+                for idx, row in filtered_results_df.iterrows():
+                    for col in filtered_results_df.columns:
+                        cell_value = str(row[col])
+                        editable_cell = TextInput(text=cell_value, multiline=False, size_hint_y=None, height=30)
+                        editable_cell.row_idx = idx
+                        editable_cell.col_name = col
+                        editable_cell.bind(focus=on_focus)
+                        table_layout.add_widget(editable_cell)
+
                 scroll_view = ScrollView(size_hint=(1, 1))
                 scroll_view.add_widget(table_layout)
                 content.add_widget(scroll_view)
 
-            # Открытие Popup с таблицей
+            # Кнопка для сохранения изменений
+            save_button = Button(text='Save Changes', size_hint_y=None, height=40)
+            content.add_widget(save_button)
+
+            # Функция сохранения изменений
+            def save_changes(instance):
+                if changes:
+                    for row_idx, col_name, new_value in changes:
+                        # Обновляем только изменённые ячейки в оригинальном DataFrame
+                        results_df.loc[results_df.index == filtered_results_df.index[row_idx], col_name] = new_value
+
+                    # Сохраняем обновлённый DataFrame
+                    results_df.to_csv('C:\\Users\\Admin\\Documents\\raceDocs\\results.csv', index=False)
+
+                popup.dismiss()
+
+            save_button.bind(on_press=save_changes)
+
             popup = Popup(title='Event Results', content=content, size_hint=(0.9, 0.9))
             popup.open()
+
         except Exception as e:
-            # Обработка ошибок
             popup = Popup(title='Error', content=Label(text=f'Error displaying event details: {str(e)}'),
                           size_hint=(0.6, 0.4))
             popup.open()
@@ -880,7 +1062,8 @@ class RaceApp(BoxLayout):
             if preset_name:
                 data = {
                     'competition_name': self.comp_name.text,
-                    'competition_date': self.comp_date.text
+                    'competition_date': self.comp_date.text,
+                    'regatta_code': self.regatta_code.text  # Add regatta_code here
                 }
                 try:
                     if os.path.exists(self.data_file):
@@ -896,14 +1079,14 @@ class RaceApp(BoxLayout):
 
                     popup.dismiss()
 
-                    popup = Popup(title='Success', content=Label(text='Data saved successfully'),
-                                  size_hint=(0.6, 0.4))
-                    popup.open()
+                    success_popup = Popup(title='Success', content=Label(text='Data saved successfully'),
+                                          size_hint=(0.6, 0.4))
+                    success_popup.open()
                 except Exception as e:
                     popup.dismiss()
-                    popup = Popup(title='Error', content=Label(text=f'Error saving data: {str(e)}'),
-                                  size_hint=(0.6, 0.4))
-                    popup.open()
+                    error_popup = Popup(title='Error', content=Label(text=f'Error saving data: {str(e)}'),
+                                        size_hint=(0.6, 0.4))
+                    error_popup.open()
 
         save_btn.bind(on_press=on_save)
         popup.open()
@@ -948,7 +1131,12 @@ class RaceApp(BoxLayout):
                         data = presets[text]
                         comp_name = data.get('competition_name', '')
                         comp_date = data.get('competition_date', '')
-                        preset_details_label.text = f"Competition Name: {comp_name}\nCompetition Date: {comp_date}"
+                        regatta_code = data.get('regatta_code', '')  # Get regatta_code here
+                        preset_details_label.text = (
+                            f"Competition Name: {comp_name}\n"
+                            f"Competition Date: {comp_date}\n"
+                            f"Regatta Code: {regatta_code}"
+                        )
                     else:
                         preset_details_label.text = ''
 
@@ -960,6 +1148,7 @@ class RaceApp(BoxLayout):
                         data = presets[preset_name]
                         self.comp_name.text = data.get('competition_name', '')
                         self.comp_date.text = data.get('competition_date', '')
+                        self.regatta_code.text = data.get('regatta_code', '')  # Load regatta_code here
                         popup.dismiss()
                         success_popup = Popup(title='Success', content=Label(text='Preset loaded successfully!'),
                                               size_hint=(0.6, 0.4))
