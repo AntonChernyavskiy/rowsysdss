@@ -605,7 +605,6 @@ class RaceApp(BoxLayout):
     def update_file(self, instance):
         import requests
 
-        # Get regatta code from the text input
         regatta_code = self.regatta_code.text.strip()
 
         if not regatta_code:
@@ -648,27 +647,35 @@ class RaceApp(BoxLayout):
             error_popup.open()
             return
 
-        # Process the results file
+        # Process the results file and ensure the 'Qual' and 'Rank' columns are of string type
         res = pd.read_csv(temp_results_path)
         res["Qual"] = ""
         res["Rank"] = ""
+        res = res.astype({"Qual": "str", "Rank": "str"})  # Ensure the columns are of string type
         res.to_csv(temp_results_path, index=False)
 
-        # Process the heatsheet file
+        # Process the heatsheet file and ensure the 'Prog' column is of string type
         heat = pd.read_csv(temp_heatsheet_path)
         heat["Prog"] = ""
+        heat = heat.astype({"Prog": "str"})  # Ensure the column is of string type
+
+        # Remove the row containing "Abbrev" and all rows below it
+        index_abbrev = heat[heat.apply(lambda row: row.astype(str).str.contains("Abbrev").any(), axis=1)].index
+        if len(index_abbrev) > 0:
+            heat = heat[:index_abbrev[0]]  # Keep only rows above "Abbrev"
+
         heat.to_csv(temp_heatsheet_path, index=False)
 
         # Update existing files if they exist
         if os.path.exists(results_path):
             f_res = pd.read_csv(results_path)
-            res["Qual"] = f_res["Qual"]
-            res["Rank"] = f_res["Rank"]
+            res["Qual"] = f_res["Qual"].astype("str")  # Ensure the existing data is also of string type
+            res["Rank"] = f_res["Rank"].astype("str")
             res.to_csv(results_path, index=False)
 
         if os.path.exists(heatsheet_path):
             f_heat = pd.read_csv(heatsheet_path)
-            heat["Prog"] = f_heat["Prog"]
+            heat["Prog"] = f_heat["Prog"].astype("str")  # Ensure the existing data is also of string type
             heat.to_csv(heatsheet_path, index=False)
 
     def choose_file(self, instance):
