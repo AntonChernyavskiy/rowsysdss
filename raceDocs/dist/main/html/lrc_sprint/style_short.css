@@ -1,0 +1,20 @@
+table {
+    border-collapse: collapse;
+    width: 100%;
+}
+th, td {
+    padding: 5px;
+    text-align: center;
+}
+.rText th, .rText td {
+    border-bottom: 1px solid black;
+}
+.compInfo {
+    text-align: left;
+}
+.border-solid {
+    border-bottom: 2px solid #E8E8E8;
+}
+.border-dashed {
+    border-bottom: 2px dashed #E8E8E8;
+}
