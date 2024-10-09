@@ -6,9 +6,9 @@
                                     <td style="width:45mm; text-align: left"><b>{}</b><br><t style="font-family: calibri light">{}</t></td>
                                     <td style="width: 6.29mm;"></td>
                                     <td style="width: 20mm;"><b></b><br><br><t style="font-size: 7px"><i></i></t></td>
-                                    <td style="width: 20mm; font-size: 10px"><b>{}</b> {}<br><i>{}</i><br><t style="font-size: 7px"><i></i></t></td>                              
-                                    <td style="width: 20mm; font-size: 10px"><b>{}</b><br><br><t style="font-size: 7px"><i>{}</i></t></td>
-                                    <td style="width: 20mm; font-size: 10px"><b>{}</b><br><i>{}</i><br><t style="font-size: 7px"><i></i></t></td>
+                                    <td style="width: 20mm; font-size: 10px">{} {}<br>{}<br><t></t></td>                              
+                                    <td style="width: 20mm; font-size: 10px">{}<br><t>{}</t></td>
+                                    <td style="width: 20mm; font-size: 10px">{}<br>{}<br><t></t></td>
                                 </tr>
 <tr style="border-bottom: 1px solid LightGray; background-color: WhiteSmoke">
     <td style="width: 17.73mm"></td>

@@ -28,9 +28,6 @@ from kivy.uix.filechooser import FileChooserListView
 from win32file import GetFileAttributesExW, FILE_ATTRIBUTE_HIDDEN
 import pywintypes
 
-from kivy.graphics import Color, Rectangle
-from kivy.properties import ListProperty
-
 
 class FileChooserPopup(Popup):
     def __init__(self, is_ftp=False, **kwargs):
@@ -182,10 +179,16 @@ class RaceApp(BoxLayout):
 
         self.add_widget(self.main_layout)
 
-        button_layout = BoxLayout(orientation='horizontal', size_hint_y=None, height=50)
-        self.file_chooser_btn = Button(text='Update File', size_hint_y=None, height=40)
-        self.file_chooser_btn.bind(on_press=self.update_file)
-        self.add_widget(self.file_chooser_btn)
+        button_layout = BoxLayout(orientation='horizontal', size_hint_y=None, height=40)
+        self.update_results_btn = Button(text='Update Results', size_hint_x=0.5, height=40)
+        self.update_results_btn.bind(on_press=self.update_file)
+        button_layout.add_widget(self.update_results_btn)
+
+        self.update_heatsheet_btn = Button(text='Update Heatsheet', size_hint_x=0.5, height=40)
+        self.update_heatsheet_btn.bind(on_press=self.update_heatsheet)
+        button_layout.add_widget(self.update_heatsheet_btn)
+
+        self.add_widget(button_layout)
 
         self.file_chooser_btn = Button(text='Select File', size_hint_y=None, height=40)
         self.file_chooser_btn.bind(on_press=self.choose_file)
@@ -608,23 +611,19 @@ class RaceApp(BoxLayout):
         regatta_code = self.regatta_code.text.strip()
 
         if not regatta_code:
-            # Handle the case where regatta_code is empty
             error_popup = Popup(title='Error', content=Label(text='Regatta code is empty.'),
                                 size_hint=(0.6, 0.4))
             error_popup.open()
             return
 
-        # Form the URLs using the regatta code
+        # Формируем URL для результатов
         results_url = f'https://www.crewtimer.com/results?asfile=true&regatta=r{regatta_code}'
-        heatsheet_url = f'https://www.crewtimer.com/heatsheet?asfile=true&regatta=r{regatta_code}'
 
         documents_folder = os.path.expanduser("~/Documents/raceDocs/")
         temp_results_path = 'temp_results.csv'
-        temp_heatsheet_path = 'temp_heatsheet.csv'
         results_path = os.path.join(documents_folder, 'results.csv')
-        heatsheet_path = os.path.join(documents_folder, 'heatsheet.csv')
 
-        # Download and save the files
+        # Загрузка файла
         response = requests.get(results_url)
         if response.status_code == 200:
             with open(temp_results_path, 'wb') as file:
@@ -636,6 +635,43 @@ class RaceApp(BoxLayout):
             error_popup.open()
             return
 
+        # Обработка файла результатов
+        res = pd.read_csv(temp_results_path)
+        res["Qual"] = ""
+        res["Rank"] = ""
+        res.to_csv(temp_results_path, index=False)
+
+        # Обновляем существующие файлы, если они есть
+        if os.path.exists(results_path):
+            f_res = pd.read_csv(results_path)
+            res["Qual"] = f_res["Qual"]
+            res["Rank"] = f_res["Rank"]
+            res.to_csv(results_path, index=False)
+
+        # Окно подтверждения успешной загрузки
+        success_popup = Popup(title='Success',
+                              content=Label(text='Results file successfully downloaded and updated.'),
+                              size_hint=(0.6, 0.4))
+        success_popup.open()
+
+    def update_heatsheet(self, instance):
+        import requests
+
+        regatta_code = self.regatta_code.text.strip()
+
+        if not regatta_code:
+            # Handle the case where regatta_code is empty
+            error_popup = Popup(title='Error', content=Label(text='Regatta code is empty.'),
+                                size_hint=(0.6, 0.4))
+            error_popup.open()
+            return
+
+        heatsheet_url = f'https://www.crewtimer.com/heatsheet?asfile=true&regatta=r{regatta_code}'
+
+        documents_folder = os.path.expanduser("~/Documents/raceDocs/")
+        temp_heatsheet_path = 'temp_heatsheet.csv'
+        heatsheet_path = os.path.join(documents_folder, 'heatsheet.csv')
+
         response = requests.get(heatsheet_url)
         if response.status_code == 200:
             with open(temp_heatsheet_path, 'wb') as file:
@@ -646,13 +682,6 @@ class RaceApp(BoxLayout):
                                 size_hint=(0.6, 0.4))
             error_popup.open()
             return
-
-        # Process the results file and ensure the 'Qual' and 'Rank' columns are of string type
-        res = pd.read_csv(temp_results_path)
-        res["Qual"] = ""
-        res["Rank"] = ""
-        res = res.astype({"Qual": "str", "Rank": "str"})  # Ensure the columns are of string type
-        res.to_csv(temp_results_path, index=False)
 
         # Process the heatsheet file and ensure the 'Prog' column is of string type
         heat = pd.read_csv(temp_heatsheet_path)
@@ -666,17 +695,16 @@ class RaceApp(BoxLayout):
 
         heat.to_csv(temp_heatsheet_path, index=False)
 
-        # Update existing files if they exist
-        if os.path.exists(results_path):
-            f_res = pd.read_csv(results_path)
-            res["Qual"] = f_res["Qual"].astype("str")  # Ensure the existing data is also of string type
-            res["Rank"] = f_res["Rank"].astype("str")
-            res.to_csv(results_path, index=False)
-
         if os.path.exists(heatsheet_path):
             f_heat = pd.read_csv(heatsheet_path)
             heat["Prog"] = f_heat["Prog"].astype("str")  # Ensure the existing data is also of string type
             heat.to_csv(heatsheet_path, index=False)
+
+        # Окно подтверждения успешной загрузки
+        success_popup = Popup(title='Success',
+                              content=Label(text='Heatsheet file successfully downloaded and updated.'),
+                              size_hint=(0.6, 0.4))
+        success_popup.open()
 
     def choose_file(self, instance):
         file_path = "C:\\Users\\Admin\\Documents\\raceDocs\\heatsheet.csv"
@@ -1670,12 +1698,13 @@ class RaceApp(BoxLayout):
                 ])
 
         def format_time(seconds):
-            """Format seconds into mm:ss.00."""
+            """Format time as mm:ss.00 if more than a minute, otherwise as ss.00."""
             if seconds is None:
                 return ""
-            minutes = int(seconds // 60)
-            seconds = seconds % 60
-            return f"{minutes:02}:{seconds:05.2f}"
+            minutes, sec = divmod(seconds, 60)
+            if minutes > 0:
+                return f"{int(minutes)}:{sec:05.2f}"
+            return f"{sec:05.2f}"
 
         def time_to_seconds(time_str):
             """Convert a time string in mm:ss.00 or s.00 format to seconds."""
@@ -1717,6 +1746,9 @@ class RaceApp(BoxLayout):
             # Calculate rank
             rank = sum(t < current_time for t in sorted_times) + 1
             delta = current_time - min(sorted_times) if sorted_times else None
+            if delta is not None and delta == 0:
+                return f"({rank})", ""
+
             delta_str = format_time(delta)
             delta_str = f"+ {delta_str}"
 
@@ -1732,7 +1764,7 @@ class RaceApp(BoxLayout):
             split_seconds = current_seconds - prev_seconds
             split_time_str = format_time(split_seconds)
 
-            return f"500m: {split_time_str}", " "
+            return f"{split_time_str}", " "
 
         # Determine columns to check for missing data
         time_columns = ["500m", "1000m", "1500m"]
@@ -1777,10 +1809,12 @@ class RaceApp(BoxLayout):
                         else:
                             modeltime = None
 
-                        print(f"Processing row {j}, event number {en}")
-                        print(f"500m time: {fl['500m'][j]}")
-                        print(f"1000m time: {fl['1000m'][j]}")
-                        print(f"1500m time: {fl['1500m'][j]}")
+                        # Calculating ranks, deltas, and splits
+                        m1000split, _ = split_time(fl["500m"][j], fl["1000m"][j]) if columns_with_data["1000m"] else (
+                        "", "")
+                        m1500split, _ = split_time(fl["1000m"][j], fl["1500m"][j]) if columns_with_data["1500m"] else (
+                        "", "")
+                        mFinsplit, _ = split_time(fl["1500m"][j], fl["AdjTime"][j])
 
                         m500rank, m500delta = rank_and_delta("500m", fl, j, str(en))
                         m1000rank, m1000delta = rank_and_delta("1000m", fl, j, str(en)) if columns_with_data[
@@ -1788,31 +1822,61 @@ class RaceApp(BoxLayout):
                         m1500rank, m1500delta = rank_and_delta("1500m", fl, j, str(en)) if columns_with_data[
                             "1500m"] else ("", "")
 
-                        m1000split, _ = split_time(fl["500m"][j], fl["1000m"][j]) if columns_with_data["1000m"] else (
-                        "500m: ", " ")
-                        m1500split, _ = split_time(fl["1000m"][j], fl["1500m"][j]) if columns_with_data["1500m"] else (
-                        "500m: ", " ")
-                        mFinsplit, _ = split_time(fl["1500m"][j], fl["AdjTime"][j])
+                        # Remove "+ 00:00.00" from delta values
+                        if m500delta == "+ 00:00.00":
+                            m500delta = ""
+                        if m1000delta == "+ 00:00.00":
+                            m1000delta = ""
+                        if m1500delta == "+ 00:00.00":
+                            m1500delta = ""
+                        if mFinsplit == "+ 00:00.00":
+                            mFinsplit = ""
 
-                        data.append([str(fl["Place"][j]).split(sep=".")[0],
-                            str(fl["Bow"][j]).split(sep=".")[0],
+                        # If delta is empty, move split to delta and clear split
+                        if m500delta == "":
+                            m500delta = m500split
+                            m500split = ""
+                        if m1000delta == "":
+                            m1000delta = m1000split
+                            m1000split = ""
+                        if m1500delta == "":
+                            m1500delta = m1500split
+                            m1500split = ""
+                        if mFinsplit == "":
+                            mFinsplit = fl["Delta"][j]
+                            fl["Delta"][j] = ""
+
+                        # Append row data
+                        data.append([
+                            str(fl["Place"][j]).split(sep=".")[0],
+                            str(fl["Bow"][j]) if "[" in str(fl["Bow"][j]) else str(fl["Bow"][j]).split(sep=".")[0],
                             f'<img src="flags/{flag_list.get(str(fl["CrewAbbrev"][j]), "default_flag")}" style="max-width: 6mm">',
-                            fl["Crew"][j], fl["Stroke"][j].replace("/", "<br>"), format_time(time_to_seconds(fl["500m"][j])) if columns_with_data["500m"] else "",
-                            m500rank, m500delta, format_time(time_to_seconds(fl["1000m"][j])) if columns_with_data["1000m"] else "",
-                            m1000rank, m1000delta, m1000split, format_time(time_to_seconds(fl["1500m"][j])) if columns_with_data["1500m"] else "",
-                            m1500rank, m1500delta, m1500split, fl["AdjTime"][j],
-                            f'+ {format_time(time_to_seconds(fl["Delta"][j]))}' if fl["Delta"][j] else '', mFinsplit, fl["Qual"][j], coach_list.get(fl["Stroke"][j]), en])
+                            fl["Crew"][j], fl["Stroke"][j].replace("/", "<br>"),
+                            format_time(time_to_seconds(fl["500m"][j])) if columns_with_data["500m"] else "",
+                            m500rank, m500delta,
+                            format_time(time_to_seconds(fl["1000m"][j])) if columns_with_data["1000m"] else "",
+                            m1000rank, m1000delta, m1000split,
+                            format_time(time_to_seconds(fl["1500m"][j])) if columns_with_data["1500m"] else "",
+                            m1500rank, m1500delta, m1500split,
+                            fl["AdjTime"][j],
+                            f'+ {format_time(time_to_seconds(fl["Delta"][j]))}' if fl["Delta"][j] else "",
+                            mFinsplit, fl["Qual"][j], coach_list.get(fl["Stroke"][j]), en
+                        ])
 
                         dataQ.append([str(fl["Place"][j]).split(sep=".")[0], f"({str(fl["Rank"][j]).split(sep=".")[0]})",
-                                        str(fl["Bow"][j]).split(sep=".")[0],
+                                        str(fl["Bow"][j]) if "[" in str(fl["Bow"][j]) else str(fl["Bow"][j]).split(sep=".")[0],
                                         f'<img src="flags/{flag_list.get(str(fl["CrewAbbrev"][j]), "default_flag")}" style="max-width: 6mm">',
                                         fl["Crew"][j], fl["Stroke"][j].replace("/", "<br>"), format_time(time_to_seconds(fl["500m"][j])) if columns_with_data["500m"] else "",
-                                        m500rank, m500delta, format_time(time_to_seconds(fl["1000m"][j])) if columns_with_data["1000m"] else "",
-                                        m1000rank, m1000delta, m1000split, format_time(time_to_seconds(fl["1500m"][j])) if columns_with_data["1500m"] else "",
-                                        m1500rank, m1500delta, m1500split, fl["AdjTime"][j],
-                                        f'+ {format_time(time_to_seconds(fl["Delta"][j]))}' if fl["Delta"][j] else '', mFinsplit, coach_list.get(fl["Stroke"][j]), en])
+                                        m500rank, m500delta,
+                                        format_time(time_to_seconds(fl["1000m"][j])) if columns_with_data["1000m"] else "",
+                                        m1000rank, m1000delta, m1000split,
+                                        format_time(time_to_seconds(fl["1500m"][j])) if columns_with_data["1500m"] else "",
+                                        m1500rank, m1500delta, m1500split,
+                                        fl["AdjTime"][j],
+                                        f'+ {format_time(time_to_seconds(fl["Delta"][j]))}' if fl["Delta"][j] else "",
+                                        mFinsplit, coach_list.get(fl["Stroke"][j]), en])
 
-                        atlase.append([str(fl["Place"][j]).split(sep=".")[0], str(fl["Bow"][j]).split(sep=".")[0],
+                        atlase.append([str(fl["Place"][j]).split(sep=".")[0], str(fl["Bow"][j]) if "[" in str(fl["Bow"][j]) else str(fl["Bow"][j]).split(sep=".")[0],
                                        f'<img src="flags/{flag_list.get(str(fl["CrewAbbrev"][j]), "default_flag")}" style="max-width: 6mm">',
                                        fl["Crew"][j], fl["Stroke"][j].replace("/", "<br>"), fl["AdjTime"][j],
                                        fl["Delta"][j], " ",
@@ -1820,39 +1884,50 @@ class RaceApp(BoxLayout):
                                        " ", modeltime, " ", " ",
                                        " ", en])
 
-                        dataMaster.append([str(fl["Place"][j]).split(sep=".")[0], str(fl["Bow"][j]).split(sep=".")[0],
+                        dataMaster.append([str(fl["Place"][j]).split(sep=".")[0], str(fl["Bow"][j]) if "[" in str(fl["Bow"][j]) else str(fl["Bow"][j]).split(sep=".")[0],
                                            f'<img src="flags/{flag_list.get(str(fl["CrewAbbrev"][j]), "default_flag")}" style="max-width: 6mm">',
                                            fl["Crew"][j],
                                            fl["Stroke"][j].replace("/", "<br>"), format_time(time_to_seconds(fl["1500m"][j])) if columns_with_data["1500m"] else "",
-                                           m1500rank, m1500delta, fl["RawTime"][j], mFinsplit, fl["AdjTime"][j],
-                                           f'+ {format_time(time_to_seconds(fl["Delta"][j]))}' if fl["Delta"][j] else '',
+                                        m1500rank, m1500delta, fl["RawTime"][j], mFinsplit, fl["AdjTime"][j],
+                                           f'+ {format_time(time_to_seconds(fl["Delta"][j]))}' if fl["Delta"][j] else "",
                                            fl["Qual"][j], masterFun(str(fl["PenaltyCode"][j])), en])
 
                         dataMasterQ.append([str(fl["Place"][j]).split(sep=".")[0], f"({str(fl["Rank"][j]).split(sep=".")[0]})",
-                             str(fl["Bow"][j]).split(sep=".")[0],
+                             str(fl["Bow"][j]) if "[" in str(fl["Bow"][j]) else str(fl["Bow"][j]).split(sep=".")[0],
                              f'<img src="flags/{flag_list.get(str(fl["CrewAbbrev"][j]), "default_flag")}" style="max-width: 6mm">',
                              fl["Crew"][j], fl["Stroke"][j].replace("/", "<br>"), format_time(time_to_seconds(fl["1500m"][j])) if columns_with_data["1500m"] else "",
-                             m1500rank, m1500delta, fl["RawTime"][j], mFinsplit, fl["AdjTime"][j],
-                             f'+ {format_time(time_to_seconds(fl["Delta"][j]))}' if fl["Delta"][j] else '', masterFun(str(fl["PenaltyCode"][j])), en])
+                                        m1500rank, m1500delta, fl["RawTime"][j], mFinsplit, fl["AdjTime"][j],
+                                           f'+ {format_time(time_to_seconds(fl["Delta"][j]))}' if fl["Delta"][j] else "", masterFun(str(fl["PenaltyCode"][j])), en])
 
-                        start_data.append([str(fl["Bow"][j]).split(sep=".")[0],
+                        start_data.append([str(fl["Bow"][j]) if "[" in str(fl["Bow"][j]) else str(fl["Bow"][j]).split(sep=".")[0],
                                            f'<img src="flags/{flag_list.get(str(fl["CrewAbbrev"][j]), "default_flag")}" style="max-width: 6mm">',
                                            fl["Crew"][j], fl["Stroke"][j].replace("/", ", "), coach_list.get(fl["Stroke"][j]), en])
 
-                        start_data_master.append([str(fl["Bow"][j]).split(sep=".")[0],
+                        start_data_master.append([str(fl["Bow"][j]) if "[" in str(fl["Bow"][j]) else str(fl["Bow"][j]).split(sep=".")[0],
                                            f'<img src="flags/{flag_list.get(str(fl["CrewAbbrev"][j]), "default_flag")}" style="max-width: 6mm">',
                                            fl["Crew"][j], fl["Stroke"][j].replace("/", "<br>"),
                                            masterFun(str(fl["PenaltyCode"][j])), coach_list.get(fl["Stroke"][j]), en])
 
                         entry_data.append([f'<img src="flags/{flag_list.get(str(fl["CrewAbbrev"][j]), "default_flag")}" style="max-width: 6mm">',
                                               fl["Crew"][j], fl["Stroke"][j].replace("/", ", "), en])
-
+        print("666")
         atlase.sort(key=lambda x: x[13] if x[13] is not None else -float('inf'), reverse=True)
         for index, row in enumerate(atlase, start=1):
             row[0] = str(index)
+        print("333")
+        import re
 
-        start_data.sort(key=lambda x: (int(x[5]), int(x[0])))
-        start_data_master.sort(key=lambda x: (int(x[6]), int(x[0])))
+        def extract_number(value):
+            value_str = str(value)  # Преобразуем в строку
+            match = re.search(r'\d+', value_str)  # Ищем числовые значения
+            return int(
+                match.group()) if match else 999999  # Если нашли число, возвращаем его, иначе возвращаем большое значение
+
+        # Применяем функцию к данным
+        start_data.sort(key=lambda x: (extract_number(x[5]), extract_number(x[0])))
+        start_data_master.sort(key=lambda x: (extract_number(x[6]), extract_number(x[0])))
+        
+        print("444")
         current_date = datetime.datetime.now().strftime('%Y-%m-%d')
         current_time = datetime.datetime.now().strftime('%H:%M:%S')
 
@@ -1885,7 +1960,7 @@ class RaceApp(BoxLayout):
 
         with open(os.path.join(html_dir, "race_headerFIRST.txt"), "r") as f:
             infOne = f.read()
-
+        print("111")
         last = ''
         last_id = 0
         first_insert = True
@@ -1939,6 +2014,7 @@ class RaceApp(BoxLayout):
         html = html.replace("[prog_sys]", "")
         with open(os.path.join(html_dir, f"log_{last}.html"), "w", encoding='utf-8') as ft:
             ft.write(html)
+        print("222")
 #--------------------------------------------------------------------------------------
         with open(os.path.join(html_dir, "tbody_res_with_qual_masters.txt"), "r") as f:
             trMast = f.read()
@@ -2459,6 +2535,7 @@ class RaceApp(BoxLayout):
         start_short = start_short.replace("[short_rinda]", "")
         with open(os.path.join(html_dir, f"start_short_log.html"), "w", encoding='utf-8') as ft:
             ft.write(start_short)
+
 
         end = datetime.datetime.now()
         print("End: ", end)
