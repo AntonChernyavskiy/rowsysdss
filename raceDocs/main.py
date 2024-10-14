@@ -27,7 +27,7 @@ import webbrowser
 from kivy.uix.filechooser import FileChooserListView
 from win32file import GetFileAttributesExW, FILE_ATTRIBUTE_HIDDEN
 import pywintypes
-
+import math
 
 class FileChooserPopup(Popup):
     def __init__(self, is_ftp=False, **kwargs):
@@ -734,7 +734,7 @@ class RaceApp(BoxLayout):
             self.df = pd.read_csv(file_path, skip_blank_lines=True, na_filter=True)
             self.df = self.df[self.df["Event"].notna()]
             self.df = self.df.reset_index()
-            self.file_chooser_btn.text = f'Select file'
+            self.file_chooser_btn.text = f'Select File'
             self.showEvents()
         except Exception as e:
             popup = Popup(title='Error', content=Label(text=f'Error loading file: {str(e)}'), size_hint=(0.6, 0.4))
@@ -1323,8 +1323,9 @@ class RaceApp(BoxLayout):
         # File type spinner
         file_spinner = Spinner(
             text='Select File',
-            values=('Results', 'Results (no qual)', 'Master results', 'Master results (no qual)', 'Startlists',
-                    'Master startlists', 'Short startlists', 'Entry list by event', 'Atlase'),
+            values=('ENTRY LIST','MASTER RESULTS WITH NO QUAL', 'MASTER RESULTS WITH NO QUAL (START TIME)', 'MASTER RESULTS WITH QUAL', 'MASTER RESULTS WITH QUAL (START TIME)',
+                    'MASTER STARTLIST', 'RESULTS WITH NO QUAL', 'RESULTS WITH NO QUAL (START TIME)', 'RESULTS WITH QUAL', 'RESULTS WITH QUAL (START TIME)',
+                    'SHORT STARTLIST', 'STARTLIST', 'TEST RACE'),
             size_hint_y=None,
             height=dp(44)
         )
@@ -1416,7 +1417,7 @@ class RaceApp(BoxLayout):
                 cat_list[row["Category"]] = row["EventNum"]
 
             temp_pdf_files = []
-            start_short_log_handled = False
+            html_short_startlists_log_handled = False
             for ev in selected_event_nums:
                 event_row = self.df[self.df['EventNum'] == int(ev)].iloc[0]
                 event_name = event_row['Event'].split()[1]  # Extract name after first space
@@ -1425,28 +1426,37 @@ class RaceApp(BoxLayout):
                 # Get event number from category name
                 ev_num = cat_list.get(event_name)
 
-                if selected_file == 'Results':
+                if selected_file == 'RESULTS WITH QUAL':
                     html_file = f"log_{ev}.html"
-                elif selected_file == 'Results (no qual)':
+                elif selected_file == 'RESULTS WITH NO QUAL':
                     html_file = f"log_noq_{ev}.html"
-                elif selected_file == 'Master results':
+                elif selected_file == 'MASTER RESULTS WITH QUAL':
                     html_file = f"log_mast_{ev}.html"
-                elif selected_file == 'Master results (no qual)':
+                elif selected_file == 'MASTER RESULTS WITH NO QUAL':
                     html_file = f"log_noq_master_{ev}.html"
-                elif selected_file == 'Startlists':
+                elif selected_file == 'STARTLIST':
                     html_file = f"start_log_{ev}.html"
-                elif selected_file == 'Master startlists':
+                elif selected_file == 'MASTER STARTLIST':
                     html_file = f"start_log_master_{ev}.html"
-                elif selected_file == 'Entry list by event':
+                elif selected_file == 'ENTRY LIST':
                     html_file = f"entry_by_events_log_{ev}.html"
-                elif selected_file == 'Short startlists':
-                    if not start_short_log_handled:
-                        html_file = "start_short_log.html"
-                        start_short_log_handled = True
+                elif selected_file == 'SHORT STARTLIST':
+                    if not html_short_startlists_log_handled:
+                        html_file = "html_short_startlists_log.html"
+                        html_short_startlists_log_handled = True
                     else:
                         continue
-                elif selected_file == 'Atlase':
+                elif selected_file == 'TEST RACE':
                     html_file = f"atlase_{ev}.html"
+
+                elif selected_file == 'MASTER RESULTS WITH NO QUAL (START TIME)':
+                    html_file = f"log_noq_master_wthStart_{ev}.html"
+                elif selected_file == 'MASTER RESULTS WITH QUAL (START TIME)':
+                    html_file = f"log_mast_wthStart_{ev}.html"
+                elif selected_file == 'RESULTS WITH NO QUAL (START TIME)':
+                    html_file = f"log_noq_wthStart_{ev}.html"
+                elif selected_file == 'RESULTS WITH QUAL (START TIME)':
+                    html_file = f"log_wthStart_{ev}.html"
                 else:
                     raise ValueError("Invalid file selection")
 
@@ -1516,8 +1526,8 @@ class RaceApp(BoxLayout):
                     subprocess.Popen([chrome_path, file_to_open])
 
             html_files = glob.glob(os.path.join(html_dir, '*.html'))
-            exceptions = {'res_no_qual.html', 'res_with_qual.html', 'start_lists.html', 'entry_lists.html',
-                          'start_lists_short.html', 'atlase.html'}
+            exceptions = {'body_r_noQual.html', 'body_r_withQual.html', 'main_s.html', 'main_entries.html',
+                          'main_s_short.html', 'main_atlase.html'}
             for html_file_path in html_files:
                 if os.path.basename(html_file_path) not in exceptions:
                     os.remove(html_file_path)
@@ -1591,44 +1601,57 @@ class RaceApp(BoxLayout):
         for index, row in fll.iterrows():
             flag_list[row["Shortcut"]] = row["Flag"]
 
-        with open("html/res_with_qual.html", "r") as f:
-            html = f.read()
+        with open("html/body_r_withQual.html", "r") as f:
+            html_results_withQual = f.read()
 
-        with open("html/res_no_qual.html", "r") as f:
-            htmlQ = f.read()
+        with open("html/body_r_withQual.html", "r") as f:
+            html_results_withQual_wthStart = f.read()
 
-        with open("html/start_lists.html", "r") as f:
-            start_html = f.read()
+        with open("html/body_r_noQual.html", "r") as f:
+            html_results_noQual = f.read()
+        with open("html/body_r_noQual.html", "r") as f:
+            html_results_noQual_wthStart = f.read()
 
-        with open("html/res_with_qual.html", "r") as f:
-            htmlMaster = f.read()
+        with open("html/main_s.html", "r") as f:
+            html_startlists = f.read()
 
-        with open("html/res_no_qual.html", "r") as f:
-            htmlMasterQ = f.read()
+        with open("html/body_r_withQual.html", "r") as f:
+            html_master_withQual = f.read()
+        with open("html/body_r_withQual.html", "r") as f:
+            html_master_withQual_wthStart = f.read()
 
-        with open("html/start_lists.html", "r") as f:
-            start_htmlMaster = f.read()
+        with open("html/body_r_noQual.html", "r") as f:
+            html_master_noQual = f.read()
+        with open("html/body_r_noQual.html", "r") as f:
+            html_master_noQual_wthStart = f.read()
 
-        with open("html/entry_lists.html", "r") as f:
-            entry_html = f.read()
+        with open("html/main_s.html", "r") as f:
+            html_startlists_master = f.read()
 
-        with open("html/start_lists_short.html", "r") as f:
-            start_short = f.read()
+        with open("html/main_entries.html", "r") as f:
+            html_entries = f.read()
 
-        with open("html/atlase.html", "r") as f:
-            atlase_html = f.read()
+        with open("html/main_s_short.html", "r") as f:
+            html_short_startlists = f.read()
+
+        with open("html/main_atlase.html", "r") as f:
+            html_atlase = f.read()
 
         start = datetime.datetime.now()
         print("Start: ", start)
 
         info = []
         infoShort = []
-        data = []
-        dataQ = []
+        res_withQual = []
+        res_withQual_start = []
+        res_noQual = []
+        res_noQual_start = []
         atlase = []
 
-        dataMaster = []
-        dataMasterQ = []
+        res_withQual_master = []
+        res_withQual_master_start = []
+        res_noQual_master = []
+        res_noQual_master_start = []
 
         start_data = []
         start_data_master = []
@@ -1667,7 +1690,7 @@ class RaceApp(BoxLayout):
                     df["Day"][i],
                     df["Start"][i],
                     cat_list[df["Event"][i].split()[1]],
-                    df["Prog"][i]
+                    df["Prog"][i] if df["Prog"][i] and not math.isnan(df["Prog"][i]) else " "
                 ])
 
                 def safe_split(value):
@@ -1715,7 +1738,7 @@ class RaceApp(BoxLayout):
                     f'<img src="flags/{flag_list.get(lane6_split[0], "none.jpg")}" style="max-width: 6mm; max-height: 6mm">',
                     aff_list.get(lane6_split[lane6_indices[0]], " "),
                     surnameCheck(lane6_split[lane6_indices[1]]),
-                    df["Prog"][i],
+                    df["Prog"][i] if df["Prog"][i] and not math.isnan(df["Prog"][i]) else " ",
                     en
                 ])
 
@@ -1738,15 +1761,12 @@ class RaceApp(BoxLayout):
                         minutes, seconds = map(float, parts)
                         return minutes * 60 + seconds
                     except ValueError:
-                        print(f"Error converting time: {time_str}")
                         return None
                 elif len(parts) == 1:  # s.00 format
                     try:
                         return float(parts[0])
                     except ValueError:
-                        print(f"Error converting time: {time_str}")
                         return None
-            print(f"Invalid time format: {time_str}")
             return None
 
         def rank_and_delta(time_column, df, index, event_num):
@@ -1800,8 +1820,6 @@ class RaceApp(BoxLayout):
         columns_with_data = {col: len(valid_indices[col]) == len(fl.index) for col in time_columns}
         columns_with_data["Finish"] = True  # Always include Finish
 
-        # Process data
-        data = []
         for j, en in enumerate(fl["EventNum"]):
             if str(en) in selected_event_nums:
                 if fl["Crew"][j] != "Empty":
@@ -1868,8 +1886,10 @@ class RaceApp(BoxLayout):
                             mFinsplit = fl["Delta"][j]
                             fl["Delta"][j] = ""
 
-                        # Append row data
-                        data.append([
+                        bow_value = str(fl["Bow"][j])
+                        bow_display = bow_value.split()[0] if " " in bow_value else bow_value
+
+                        res_withQual.append([
                             str(fl["Place"][j]).split(sep=".")[0],
                             str(fl["Bow"][j]) if "[" in str(fl["Bow"][j]) else str(fl["Bow"][j]).split(sep=".")[0],
                             f'<img src="flags/{flag_list.get(str(fl["CrewAbbrev"][j]), "default_flag")}" style="max-width: 6mm">',
@@ -1885,7 +1905,23 @@ class RaceApp(BoxLayout):
                             mFinsplit, fl["Qual"][j], coach_list.get(fl["Stroke"][j]), en
                         ])
 
-                        dataQ.append([str(fl["Place"][j]).split(sep=".")[0], f"({str(fl["Rank"][j]).split(sep=".")[0]})",
+                        res_withQual_start.append([
+                            str(fl["Place"][j]).split(sep=".")[0],
+                            bow_display,
+                            f'<img src="flags/{flag_list.get(str(fl["CrewAbbrev"][j]), "default_flag")}" style="max-width: 6mm">',
+                            fl["Crew"][j], fl["Stroke"][j].replace("/", "<br>"),
+                            " ",
+                            " ", " ",
+                            " ",
+                            " ", " ", " ",
+                            fl["Start"][j],
+                            " ", " ", " ",
+                            fl["AdjTime"][j],
+                            f'+ {format_time(time_to_seconds(fl["Delta"][j]))}' if fl["Delta"][j] else "",
+                            mFinsplit, fl["Qual"][j], coach_list.get(fl["Stroke"][j]), en
+                        ])
+
+                        res_noQual.append([str(fl["Place"][j]).split(sep=".")[0], f"({str(fl["Rank"][j]).split(sep=".")[0]})",
                                         str(fl["Bow"][j]) if "[" in str(fl["Bow"][j]) else str(fl["Bow"][j]).split(sep=".")[0],
                                         f'<img src="flags/{flag_list.get(str(fl["CrewAbbrev"][j]), "default_flag")}" style="max-width: 6mm">',
                                         fl["Crew"][j], fl["Stroke"][j].replace("/", "<br>"), format_time(time_to_seconds(fl["500m"][j])) if columns_with_data["500m"] else "",
@@ -1898,15 +1934,26 @@ class RaceApp(BoxLayout):
                                         f'+ {format_time(time_to_seconds(fl["Delta"][j]))}' if fl["Delta"][j] else "",
                                         mFinsplit, coach_list.get(fl["Stroke"][j]), en])
 
-                        atlase.append([str(fl["Place"][j]).split(sep=".")[0], str(fl["Bow"][j]) if "[" in str(fl["Bow"][j]) else str(fl["Bow"][j]).split(sep=".")[0],
-                                       f'<img src="flags/{flag_list.get(str(fl["CrewAbbrev"][j]), "default_flag")}" style="max-width: 6mm">',
-                                       fl["Crew"][j], fl["Stroke"][j].replace("/", "<br>"), fl["AdjTime"][j],
-                                       fl["Delta"][j], " ",
-                                       " ", fl["Qual"][j], " ", " ",
-                                       " ", modeltime, " ", " ",
-                                       " ", en])
+                        res_noQual_start.append(
+                            [str(fl["Place"][j]).split(sep=".")[0], f"({str(fl["Rank"][j]).split(sep=".")[0]})",
+                             bow_display,
+                             f'<img src="flags/{flag_list.get(str(fl["CrewAbbrev"][j]), "default_flag")}" style="max-width: 6mm">',
+                             fl["Crew"][j], fl["Stroke"][j].replace("/", "<br>"),
+                             " ",
+                             " ", " ",
+                             " ",
+                             " ", " ", " ",
+                             fl["Start"][j],
+                             " ", " ", " ",
+                             fl["AdjTime"][j],
+                             f'+ {format_time(time_to_seconds(fl["Delta"][j]))}' if fl["Delta"][j] else "",
+                             mFinsplit, coach_list.get(fl["Stroke"][j]), en])
 
-                        dataMaster.append([str(fl["Place"][j]).split(sep=".")[0], str(fl["Bow"][j]) if "[" in str(fl["Bow"][j]) else str(fl["Bow"][j]).split(sep=".")[0],
+                        atlase.append([str(fl["Place"][j]).split(sep=".")[0], bow_display,
+                                       f'<img src="flags/{flag_list.get(str(fl["CrewAbbrev"][j]), "default_flag")}" style="max-width: 6mm">',
+                                       fl["Crew"][j], fl["Stroke"][j].replace("/", "<br>"), fl["Start"][j], fl["AdjTime"][j], fl["Qual"][j], modeltime, en])
+
+                        res_withQual_master.append([str(fl["Place"][j]).split(sep=".")[0], str(fl["Bow"][j]) if "[" in str(fl["Bow"][j]) else str(fl["Bow"][j]).split(sep=".")[0],
                                            f'<img src="flags/{flag_list.get(str(fl["CrewAbbrev"][j]), "default_flag")}" style="max-width: 6mm">',
                                            fl["Crew"][j],
                                            fl["Stroke"][j].replace("/", "<br>"), format_time(time_to_seconds(fl["1500m"][j])) if columns_with_data["1500m"] else "",
@@ -1914,12 +1961,31 @@ class RaceApp(BoxLayout):
                                            f'+ {format_time(time_to_seconds(fl["Delta"][j]))}' if fl["Delta"][j] else "",
                                            fl["Qual"][j], masterFun(str(fl["PenaltyCode"][j])), en])
 
-                        dataMasterQ.append([str(fl["Place"][j]).split(sep=".")[0], f"({str(fl["Rank"][j]).split(sep=".")[0]})",
+                        res_withQual_master_start.append([str(fl["Place"][j]).split(sep=".")[0],
+                                                            bow_display,
+                                                            f'<img src="flags/{flag_list.get(str(fl["CrewAbbrev"][j]), "default_flag")}" style="max-width: 6mm">',
+                                                            fl["Crew"][j],
+                                                            fl["Stroke"][j].replace("/", "<br>"),
+                                                            fl["Start"][j],
+                                                            " ", " ", fl["RawTime"][j], mFinsplit, fl["AdjTime"][j],
+                             f'+ {format_time(time_to_seconds(fl["Delta"][j]))}' if fl["Delta"][j] else "",
+                                                            fl["Qual"][j], masterFun(str(fl["PenaltyCode"][j])), en])
+
+                        res_noQual_master.append([str(fl["Place"][j]).split(sep=".")[0], f"({str(fl["Rank"][j]).split(sep=".")[0]})",
                              str(fl["Bow"][j]) if "[" in str(fl["Bow"][j]) else str(fl["Bow"][j]).split(sep=".")[0],
                              f'<img src="flags/{flag_list.get(str(fl["CrewAbbrev"][j]), "default_flag")}" style="max-width: 6mm">',
                              fl["Crew"][j], fl["Stroke"][j].replace("/", "<br>"), format_time(time_to_seconds(fl["1500m"][j])) if columns_with_data["1500m"] else "",
                                         m1500rank, m1500delta, fl["RawTime"][j], mFinsplit, fl["AdjTime"][j],
                                            f'+ {format_time(time_to_seconds(fl["Delta"][j]))}' if fl["Delta"][j] else "", masterFun(str(fl["PenaltyCode"][j])), en])
+
+                        res_noQual_master_start.append([str(fl["Place"][j]).split(sep=".")[0], f"({str(fl["Rank"][j]).split(sep=".")[0]})",
+                             bow_display,
+                             f'<img src="flags/{flag_list.get(str(fl["CrewAbbrev"][j]), "default_flag")}" style="max-width: 6mm">',
+                             fl["Crew"][j], fl["Stroke"][j].replace("/", "<br>"),
+                             fl["Start"][j],
+                             " ", " ", fl["RawTime"][j], mFinsplit, fl["AdjTime"][j],
+                             f'+ {format_time(time_to_seconds(fl["Delta"][j]))}' if fl["Delta"][j] else "",
+                             masterFun(str(fl["PenaltyCode"][j])), en])
 
                         start_data.append([str(fl["Bow"][j]) if "[" in str(fl["Bow"][j]) else str(fl["Bow"][j]).split(sep=".")[0],
                                            f'<img src="flags/{flag_list.get(str(fl["CrewAbbrev"][j]), "default_flag")}" style="max-width: 6mm">',
@@ -1932,7 +1998,8 @@ class RaceApp(BoxLayout):
 
                         entry_data.append([f'<img src="flags/{flag_list.get(str(fl["CrewAbbrev"][j]), "default_flag")}" style="max-width: 6mm">',
                                               fl["Crew"][j], fl["Stroke"][j].replace("/", ", "), en])
-        atlase.sort(key=lambda x: x[13] if x[13] is not None else -float('inf'), reverse=True)
+
+        atlase.sort(key=lambda x: x[8] if x[8] is not None else -float('inf'), reverse=True)
         for index, row in enumerate(atlase, start=1):
             row[0] = str(index)
         import re
@@ -1950,149 +2017,217 @@ class RaceApp(BoxLayout):
         current_date = datetime.datetime.now().strftime('%Y-%m-%d')
         current_time = datetime.datetime.now().strftime('%H:%M:%S')
 
-        html = html.format(compName=self.comp_name.text, compDates=self.comp_date.text, cDate=current_date,
+        html_results_withQual = html_results_withQual.format(compName=self.comp_name.text, compDates=self.comp_date.text, cDate=current_date,
                            cTime=current_time)
-        htmlQ = htmlQ.format(compName=self.comp_name.text, compDates=self.comp_date.text, cDate=current_date,
+        html_results_withQual_wthStart = html_results_withQual_wthStart.format(compName=self.comp_name.text, compDates=self.comp_date.text, cDate=current_date,
                            cTime=current_time)
-        htmlMaster = htmlMaster.format(compName=self.comp_name.text, compDates=self.comp_date.text, cDate=current_date,
+
+        html_results_noQual = html_results_noQual.format(compName=self.comp_name.text, compDates=self.comp_date.text, cDate=current_date,
                            cTime=current_time)
-        htmlMasterQ = htmlMasterQ.format(compName=self.comp_name.text, compDates=self.comp_date.text, cDate=current_date,
+        html_results_noQual_wthStart = html_results_noQual_wthStart.format(compName=self.comp_name.text, compDates=self.comp_date.text,
+                                                         cDate=current_date,
+                                                         cTime=current_time)
+
+        html_master_withQual = html_master_withQual.format(compName=self.comp_name.text, compDates=self.comp_date.text, cDate=current_date,
+                           cTime=current_time)
+        html_master_withQual_wthStart = html_master_withQual_wthStart.format(compName=self.comp_name.text, compDates=self.comp_date.text,
+                                                           cDate=current_date,
+                                                           cTime=current_time)
+        html_master_noQual = html_master_noQual.format(compName=self.comp_name.text, compDates=self.comp_date.text, cDate=current_date,
                              cTime=current_time)
-        start_html = start_html.format(compName=self.comp_name.text, compDates=self.comp_date.text, cDate=current_date,
+        html_master_noQual_wthStart = html_master_noQual_wthStart.format(compName=self.comp_name.text, compDates=self.comp_date.text,
+                                                       cDate=current_date,
+                                                       cTime=current_time)
+
+        html_startlists = html_startlists.format(compName=self.comp_name.text, compDates=self.comp_date.text, cDate=current_date,
                                        cTime=current_time)
-        start_htmlMaster = start_htmlMaster.format(compName=self.comp_name.text, compDates=self.comp_date.text, cDate=current_date,
+        html_startlists_master = html_startlists_master.format(compName=self.comp_name.text, compDates=self.comp_date.text, cDate=current_date,
                                        cTime=current_time)
-        entry_html = entry_html.format(compName=self.comp_name.text, compDates=self.comp_date.text, cDate=current_date,
+        html_entries = html_entries.format(compName=self.comp_name.text, compDates=self.comp_date.text, cDate=current_date,
                                                    cTime=current_time)
-        start_short = start_short.format(compName=self.comp_name.text, compDates=self.comp_date.text, cDate=current_date,
+        html_short_startlists = html_short_startlists.format(compName=self.comp_name.text, compDates=self.comp_date.text, cDate=current_date,
                                        cTime=current_time)
-        atlase_html = atlase_html.format(compName=self.comp_name.text, compDates=self.comp_date.text,
+        html_atlase = html_atlase.format(compName=self.comp_name.text, compDates=self.comp_date.text,
                                          cDate=current_date, cTime=current_time)
 
         html_dir = os.path.join(os.path.dirname(__file__), 'html')
 
-        with open(os.path.join(html_dir, "tbody_res_with_qual.txt"), "r") as f:
-            tr = f.read()
 
-        with open(os.path.join(html_dir, "race_header.txt"), "r") as f:
-            inf = f.read()
-
-        with open(os.path.join(html_dir, "race_headerFIRST.txt"), "r") as f:
-            infOne = f.read()
+        with open(os.path.join(html_dir, "body_r_usualWithQual.txt"), "r") as f:
+            bodyInfo = f.read()
+        with open(os.path.join(html_dir, "header_r_usualWithQual.txt"), "r") as f:
+            headerInfo = f.read()
 
         last = ''
         last_id = 0
         first_insert = True
-        for j, a in enumerate(data):
+        for j, a in enumerate(res_withQual):
             if a[-1] == last:
-                html = html.replace("[rinda]",
-                                    tr.format(a[0], a[1], a[2], a[3], a[4], a[5], a[6], a[7], a[8], a[9], a[10], a[11], a[12], a[13], a[14], a[15], a[16], a[17], a[18], a[19], a[20]) + "\n[rinda]")
+                html_results_withQual = html_results_withQual.replace("[rinda]",
+                                    bodyInfo.format(a[0], a[1], a[2], a[3], a[4], a[5], a[6], a[7], a[8], a[9], a[10], a[11], a[12], a[13], a[14], a[15], a[16], a[17], a[18], a[19], a[20]) + "\n[rinda]")
                 last = a[-1]
             else:
                 if not first_insert:
-                    html = html.replace("[rinda]", "")
+                    html_results_withQual = html_results_withQual.replace("[rinda]", "")
                     last_prog = info[last_id-1][8]
-                    html = html.replace("[prog_sys]", last_prog)
-                    html = html.replace("[prog_sys]", "")
+                    html_results_withQual = html_results_withQual.replace("[prog_sys]", last_prog)
+                    html_results_withQual = html_results_withQual.replace("[prog_sys]", "")
                     with open(os.path.join(html_dir, f"log_{last}.html"), "w", encoding='utf-8') as ft:
-                        ft.write(html)
+                        ft.write(html_results_withQual)
 
-                    with open(os.path.join(html_dir, "res_with_qual.html"), "r") as f:
-                        html = f.read()
+                    with open(os.path.join(html_dir, "body_r_withQual.html"), "r") as f:
+                        html_results_withQual = f.read()
 
-                    html = html.format(compName=self.comp_name.text, compDates=self.comp_date.text, cDate=current_date,
+                    html_results_withQual = html_results_withQual.format(compName=self.comp_name.text, compDates=self.comp_date.text, cDate=current_date,
                                        cTime=current_time)
 
-                    with open(os.path.join(html_dir, "tbody_res_with_qual.txt"), "r") as f:
-                        tr = f.read()
+                    with open(os.path.join(html_dir, "body_r_usualWithQual.txt"), "r") as f:
+                        bodyInfo = f.read()
 
-                    with open(os.path.join(html_dir, "race_header.txt"), "r") as f:
-                        inf = f.read()
+                    with open(os.path.join(html_dir, "header_r_usualWithQual.txt"), "r") as f:
+                        headerInfo = f.read()
 
-                    with open(os.path.join(html_dir, "race_headerFIRST.txt"), "r") as f:
-                        infOne = f.read()
-
-                    html = html.replace("[rinda]", tr.format(a[0], a[1], a[2], a[3], a[4], a[5],
+                    html_results_withQual = html_results_withQual.replace("[rinda]", bodyInfo.format(a[0], a[1], a[2], a[3], a[4], a[5],
                                                              a[6], a[7], a[8], a[9], a[10], a[11], a[12], a[13], a[14], a[15], a[16], a[17], a[18], a[19], a[20]) + "\n[rinda]")
-                    html = html.replace("[header]", infOne.format(info[last_id][7], info[last_id][2], info[last_id][1],
+                    html_results_withQual = html_results_withQual.replace("[header]", headerInfo.format(info[last_id][7], info[last_id][2], info[last_id][1],
                                                                   info[last_id][4], info[last_id][3], info[last_id][0],
                                                                   info[last_id][5], info[last_id][6]))
                 else:
-                    html = html.replace("[header]", infOne.format(info[last_id][7], info[last_id][2], info[last_id][1],
+                    html_results_withQual = html_results_withQual.replace("[header]", headerInfo.format(info[last_id][7], info[last_id][2], info[last_id][1],
                                                                   info[last_id][4], info[last_id][3], info[last_id][0],
                                                                   info[last_id][5], info[last_id][6]))
-                    html = html.replace("[rinda]", tr.format(a[0], a[1], a[2], a[3], a[4], a[5],
+                    html_results_withQual = html_results_withQual.replace("[rinda]", bodyInfo.format(a[0], a[1], a[2], a[3], a[4], a[5],
                                                              a[6], a[7], a[8], a[9], a[10], a[11], a[12], a[13], a[14], a[15], a[16], a[17], a[18], a[19], a[20]) + "\n[rinda]")
                     first_insert = False
 
                 last = a[-1]
                 last_id += 1
-        html = html.replace("[rinda]", "")
+
+        html_results_withQual = html_results_withQual.replace("[rinda]", "")
         last_prog = info[last_id-1][8]
-        html = html.replace("[prog_sys]", last_prog)
-        html = html.replace("[prog_sys]", "")
+        html_results_withQual = html_results_withQual.replace("[prog_sys]", last_prog)
+        html_results_withQual = html_results_withQual.replace("[prog_sys]", "")
         with open(os.path.join(html_dir, f"log_{last}.html"), "w", encoding='utf-8') as ft:
-            ft.write(html)
-#--------------------------------------------------------------------------------------
-        with open(os.path.join(html_dir, "tbody_res_with_qual_masters.txt"), "r") as f:
-            trMast = f.read()
-
-        with open(os.path.join(html_dir, "race_header_master.txt"), "r") as f:
-            infMast = f.read()
-
-        with open(os.path.join(html_dir, "race_headerFIRST_master.txt"), "r") as f:
-            infOneMast = f.read()
+            ft.write(html_results_withQual)
+#--------------------------------------------------------------------------------------------------
+        with open(os.path.join(html_dir, "body_r_usualWithQual.txt"), "r") as f:
+            bodyInfo = f.read()
+        with open(os.path.join(html_dir, "header_r_usualWithQual_wthStart.txt"), "r") as f:
+            headerInfo = f.read()
 
         last = ''
         last_id = 0
         first_insert = True
-        for j, a in enumerate(dataMaster):
+        for j, a in enumerate(res_withQual_start):
             if a[-1] == last:
-                htmlMaster = htmlMaster.replace("[rinda]",
-                                                trMast.format(a[0], a[1], a[2], a[3], a[4], a[5], a[6], a[7], a[8],
+                html_results_withQual_wthStart = html_results_withQual_wthStart.replace("[rinda]",
+                                    bodyInfo.format(a[0], a[1], a[2], a[3], a[4], a[5], a[6], a[7], a[8], a[9], a[10],
+                                                    a[11], a[12], a[13], a[14], a[15], a[16], a[17], a[18], a[19],
+                                                    a[20]) + "\n[rinda]")
+                last = a[-1]
+            else:
+                if not first_insert:
+                    html_results_withQual_wthStart = html_results_withQual_wthStart.replace("[rinda]", "")
+                    last_prog = info[last_id - 1][8]
+                    html_results_withQual_wthStart = html_results_withQual_wthStart.replace("[prog_sys]", last_prog)
+                    html_results_withQual_wthStart = html_results_withQual_wthStart.replace("[prog_sys]", "")
+                    with open(os.path.join(html_dir, f"log_wthStart_{last}.html"), "w", encoding='utf-8') as ft:
+                        ft.write(html_results_withQual_wthStart)
+
+                    with open(os.path.join(html_dir, "body_r_withQual.html"), "r") as f:
+                        html_results_withQual_wthStart = f.read()
+
+                    html_results_withQual_wthStart = html_results_withQual_wthStart.format(compName=self.comp_name.text, compDates=self.comp_date.text, cDate=current_date,
+                                       cTime=current_time)
+
+                    with open(os.path.join(html_dir, "body_r_usualWithQual.txt"), "r") as f:
+                        bodyInfo = f.read()
+
+                    with open(os.path.join(html_dir, "header_r_usualWithQual_wthStart.txt"), "r") as f:
+                        headerInfo = f.read()
+
+                    html_results_withQual_wthStart = html_results_withQual_wthStart.replace("[rinda]", bodyInfo.format(a[0], a[1], a[2], a[3], a[4], a[5],
+                                                                   a[6], a[7], a[8], a[9], a[10], a[11], a[12], a[13],
+                                                                   a[14], a[15], a[16], a[17], a[18], a[19],
+                                                                   a[20]) + "\n[rinda]")
+                    html_results_withQual_wthStart = html_results_withQual_wthStart.replace("[header]",
+                                        headerInfo.format(info[last_id][7], info[last_id][2], info[last_id][1],
+                                                          info[last_id][4], info[last_id][3], info[last_id][0],
+                                                          info[last_id][5], info[last_id][6]))
+                else:
+                    html_results_withQual_wthStart = html_results_withQual_wthStart.replace("[header]",
+                                        headerInfo.format(info[last_id][7], info[last_id][2], info[last_id][1],
+                                                          info[last_id][4], info[last_id][3], info[last_id][0],
+                                                          info[last_id][5], info[last_id][6]))
+                    html_results_withQual_wthStart = html_results_withQual_wthStart.replace("[rinda]", bodyInfo.format(a[0], a[1], a[2], a[3], a[4], a[5],
+                                                                   a[6], a[7], a[8], a[9], a[10], a[11], a[12], a[13],
+                                                                   a[14], a[15], a[16], a[17], a[18], a[19],
+                                                                   a[20]) + "\n[rinda]")
+                    first_insert = False
+
+                last = a[-1]
+                last_id += 1
+
+        html_results_withQual_wthStart = html_results_withQual_wthStart.replace("[rinda]", "")
+        last_prog = info[last_id - 1][8]
+        html_results_withQual_wthStart = html_results_withQual_wthStart.replace("[prog_sys]", last_prog)
+        html_results_withQual_wthStart = html_results_withQual_wthStart.replace("[prog_sys]", "")
+        with open(os.path.join(html_dir, f"log_wthStart_{last}.html"), "w", encoding='utf-8') as ft:
+            ft.write(html_results_withQual_wthStart)
+#--------------------------------------------------------------------------------------
+        with open(os.path.join(html_dir, "body_r_masterWithQual.txt"), "r") as f:
+            bodyInfo = f.read()
+
+        with open(os.path.join(html_dir, "header_r_masterWithQual.txt"), "r") as f:
+            headerInfo = f.read()
+
+        last = ''
+        last_id = 0
+        first_insert = True
+        for j, a in enumerate(res_withQual_master):
+            if a[-1] == last:
+                html_master_withQual = html_master_withQual.replace("[rinda]",
+                                                bodyInfo.format(a[0], a[1], a[2], a[3], a[4], a[5], a[6], a[7], a[8],
                                                               a[9], a[10], a[11], a[12], a[13], a[14]) + "\n[rinda]")
                 last = a[-1]
             else:
                 if not first_insert:
-                    htmlMaster = htmlMaster.replace("[rinda]", "")
+                    html_master_withQual = html_master_withQual.replace("[rinda]", "")
                     last_prog = info[last_id-1][8]
-                    htmlMaster = htmlMaster.replace("[prog_sys]", last_prog)
-                    htmlMaster = htmlMaster.replace("[prog_sys]", "")
+                    html_master_withQual = html_master_withQual.replace("[prog_sys]", last_prog)
+                    html_master_withQual = html_master_withQual.replace("[prog_sys]", "")
 
                     with open(os.path.join(html_dir, f"log_mast_{last}.html"), "w", encoding='utf-8') as ft:
-                        ft.write(htmlMaster)
+                        ft.write(html_master_withQual)
 
-                    with open(os.path.join(html_dir, "res_with_qual.html"), "r") as f:
-                        htmlMaster = f.read()
+                    with open(os.path.join(html_dir, "body_r_withQual.html"), "r") as f:
+                        html_master_withQual = f.read()
 
-                    htmlMaster = htmlMaster.format(compName=self.comp_name.text, compDates=self.comp_date.text,
+                    html_master_withQual = html_master_withQual.format(compName=self.comp_name.text, compDates=self.comp_date.text,
                                                    cDate=current_date,
                                                    cTime=current_time)
 
-                    with open(os.path.join(html_dir, "tbody_res_with_qual_masters.txt"), "r") as f:
-                        trMast = f.read()
+                    with open(os.path.join(html_dir, "body_r_masterWithQual.txt"), "r") as f:
+                        bodyInfo = f.read()
 
-                    with open(os.path.join(html_dir, "race_header_master.txt"), "r") as f:
-                        infMast = f.read()
+                    with open(os.path.join(html_dir, "header_r_masterWithQual.txt"), "r") as f:
+                        headerInfo = f.read()
 
-                    with open(os.path.join(html_dir, "race_headerFIRST_master.txt"), "r") as f:
-                        infOneMast = f.read()
-
-                    htmlMaster = htmlMaster.replace("[rinda]", trMast.format(a[0], a[1], a[2], a[3], a[4], a[5],
+                    html_master_withQual = html_master_withQual.replace("[rinda]", bodyInfo.format(a[0], a[1], a[2], a[3], a[4], a[5],
                                                                              a[6], a[7], a[8], a[9], a[10],
                                                                              a[11], a[12], a[13], a[14]) + "\n[rinda]")
-                    htmlMaster = htmlMaster.replace("[header]", infOneMast.format(info[last_id][7], info[last_id][2],
+                    html_master_withQual = html_master_withQual.replace("[header]", headerInfo.format(info[last_id][7], info[last_id][2],
                                                                                   info[last_id][1],
                                                                                   info[last_id][4], info[last_id][3],
                                                                                   info[last_id][0],
                                                                                   info[last_id][5], info[last_id][6]))
                 else:
-                    htmlMaster = htmlMaster.replace("[header]", infOneMast.format(info[last_id][7], info[last_id][2],
+                    html_master_withQual = html_master_withQual.replace("[header]", headerInfo.format(info[last_id][7], info[last_id][2],
                                                                                   info[last_id][1],
                                                                                   info[last_id][4], info[last_id][3],
                                                                                   info[last_id][0],
                                                                                   info[last_id][5], info[last_id][6]))
-                    htmlMaster = htmlMaster.replace("[rinda]", trMast.format(a[0],
+                    html_master_withQual = html_master_withQual.replace("[rinda]", bodyInfo.format(a[0],
                                                                              a[1],
                                                                              a[2],
                                                                              a[3],
@@ -2105,23 +2240,113 @@ class RaceApp(BoxLayout):
 
                 last = a[-1]
                 last_id += 1
-        htmlMaster = htmlMaster.replace("[rinda]", "")
+        html_master_withQual = html_master_withQual.replace("[rinda]", "")
         last_prog = info[last_id-1][8]
-        htmlMaster = htmlMaster.replace("[prog_sys]", last_prog)
-        htmlMaster = htmlMaster.replace("[prog_sys]", "")
+        html_master_withQual = html_master_withQual.replace("[prog_sys]", last_prog)
+        html_master_withQual = html_master_withQual.replace("[prog_sys]", "")
 
         with open(os.path.join(html_dir, f"log_mast_{last}.html"), "w", encoding='utf-8') as ft:
-            ft.write(htmlMaster)
+            ft.write(html_master_withQual)
 
-        # -----------------------------------------------------------------------------------------------
-        with open(os.path.join(html_dir, "start_lists_master.txt"), "r") as f:
-            tr = f.read()
+# -----------------------------------------------------------------------------------------------------------
+            with open(os.path.join(html_dir, "body_r_masterWithQual.txt"), "r") as f:
+                bodyInfo = f.read()
 
-        with open(os.path.join(html_dir, "start_header_master.txt"), "r") as f:
-            inf = f.read()
+            with open(os.path.join(html_dir, "header_r_masterWithQual_wthStart.txt"), "r") as f:
+                headerInfo = f.read()
 
-        with open(os.path.join(html_dir, "start_headerFIRST_master.txt"), "r") as f:
-            infOne = f.read()
+            last = ''
+            last_id = 0
+            first_insert = True
+            for j, a in enumerate(res_withQual_master_start):
+                if a[-1] == last:
+                    html_master_withQual_wthStart = html_master_withQual_wthStart.replace("[rinda]",
+                                                                        bodyInfo.format(a[0], a[1], a[2], a[3], a[4],
+                                                                                        a[5], a[6], a[7], a[8],
+                                                                                        a[9], a[10], a[11], a[12],
+                                                                                        a[13], a[14]) + "\n[rinda]")
+                    last = a[-1]
+                else:
+                    if not first_insert:
+                        html_master_withQual_wthStart = html_master_withQual_wthStart.replace("[rinda]", "")
+                        last_prog = info[last_id - 1][8]
+                        html_master_withQual_wthStart = html_master_withQual_wthStart.replace("[prog_sys]", last_prog)
+                        html_master_withQual_wthStart = html_master_withQual_wthStart.replace("[prog_sys]", "")
+
+                        with open(os.path.join(html_dir, f"log_mast_wthStart_{last}.html"), "w", encoding='utf-8') as ft:
+                            ft.write(html_master_withQual_wthStart)
+
+                        with open(os.path.join(html_dir, "body_r_withQual.html"), "r") as f:
+                            html_master_withQual_wthStart = f.read()
+
+                        html_master_withQual_wthStart = html_master_withQual_wthStart.format(compName=self.comp_name.text,
+                                                                           compDates=self.comp_date.text,
+                                                                           cDate=current_date,
+                                                                           cTime=current_time)
+
+                        with open(os.path.join(html_dir, "body_r_masterWithQual.txt"), "r") as f:
+                            bodyInfo = f.read()
+
+                        with open(os.path.join(html_dir, "header_r_masterWithQual_wthStart.txt"), "r") as f:
+                            headerInfo = f.read()
+
+                        html_master_withQual_wthStart = html_master_withQual_wthStart.replace("[rinda]",
+                                                                            bodyInfo.format(a[0], a[1], a[2], a[3],
+                                                                                            a[4], a[5],
+                                                                                            a[6], a[7], a[8], a[9],
+                                                                                            a[10],
+                                                                                            a[11], a[12], a[13],
+                                                                                            a[14]) + "\n[rinda]")
+                        html_master_withQual_wthStart = html_master_withQual_wthStart.replace("[header]",
+                                                                            headerInfo.format(info[last_id][7],
+                                                                                              info[last_id][2],
+                                                                                              info[last_id][1],
+                                                                                              info[last_id][4],
+                                                                                              info[last_id][3],
+                                                                                              info[last_id][0],
+                                                                                              info[last_id][5],
+                                                                                              info[last_id][6]))
+                    else:
+                        html_master_withQual_wthStart = html_master_withQual_wthStart.replace("[header]",
+                                                                            headerInfo.format(info[last_id][7],
+                                                                                              info[last_id][2],
+                                                                                              info[last_id][1],
+                                                                                              info[last_id][4],
+                                                                                              info[last_id][3],
+                                                                                              info[last_id][0],
+                                                                                              info[last_id][5],
+                                                                                              info[last_id][6]))
+                        html_master_withQual_wthStart = html_master_withQual_wthStart.replace("[rinda]", bodyInfo.format(a[0],
+                                                                                                       a[1],
+                                                                                                       a[2],
+                                                                                                       a[3],
+                                                                                                       a[4],
+                                                                                                       a[5],
+                                                                                                       a[6],
+                                                                                                       a[7],
+                                                                                                       a[8], a[9],
+                                                                                                       a[10], a[11],
+                                                                                                       a[12], a[13], a[
+                                                                                                           14]) + "\n[rinda]")
+                        first_insert = False
+
+                    last = a[-1]
+                    last_id += 1
+            html_master_withQual_wthStart = html_master_withQual_wthStart.replace("[rinda]", "")
+            last_prog = info[last_id - 1][8]
+            html_master_withQual_wthStart = html_master_withQual_wthStart.replace("[prog_sys]", last_prog)
+            html_master_withQual_wthStart = html_master_withQual_wthStart.replace("[prog_sys]", "")
+
+            with open(os.path.join(html_dir, f"log_mast_wthStart_{last}.html"), "w", encoding='utf-8') as ft:
+                ft.write(html_master_withQual_wthStart)
+
+# -----------------------------------------------------------------------------------------------------------
+
+        with open(os.path.join(html_dir, "body_s_master.txt"), "r") as f:
+            bodyInfo = f.read()
+
+        with open(os.path.join(html_dir, "header_s_master.txt"), "r") as f:
+            headerInfo = f.read()
 
         last = ''
         last_id = 0
@@ -2129,50 +2354,47 @@ class RaceApp(BoxLayout):
 
         for j, a in enumerate(start_data_master):
             if a[-1] == last:
-                start_htmlMaster = start_htmlMaster.replace("[st_rinda]",
-                                                            tr.format(a[0], a[1], a[2], a[3], a[4], a[5]) + "\n[st_rinda]")
+                html_startlists_master = html_startlists_master.replace("[st_rinda]",
+                                                            bodyInfo.format(a[0], a[1], a[2], a[3], a[4], a[5]) + "\n[st_rinda]")
                 last = a[-1]
 
             else:
                 if not first_insert_start:
-                    start_htmlMaster = start_htmlMaster.replace("[st_rinda]", "")
+                    html_startlists_master = html_startlists_master.replace("[st_rinda]", "")
                     last_prog = info[last_id - 1][8]
-                    start_htmlMaster = start_htmlMaster.replace("[prog_sys]", last_prog)
-                    start_htmlMaster = start_htmlMaster.replace("[prog_sys]", "")
+                    html_startlists_master = html_startlists_master.replace("[prog_sys]", last_prog)
+                    html_startlists_master = html_startlists_master.replace("[prog_sys]", "")
 
                     with open(os.path.join(html_dir, f"start_log_master_{last}.html"), "w", encoding='utf-8') as ft:
-                        ft.write(start_htmlMaster)
+                        ft.write(html_startlists_master)
 
-                    with open(os.path.join(html_dir, "start_lists.html"), "r") as f:
-                        start_htmlMaster = f.read()
+                    with open(os.path.join(html_dir, "main_s.html"), "r") as f:
+                        html_startlists_master = f.read()
 
-                    start_htmlMaster = start_htmlMaster.format(compName=self.comp_name.text,
+                    html_startlists_master = html_startlists_master.format(compName=self.comp_name.text,
                                                                compDates=self.comp_date.text,
                                                                cDate=current_date, cTime=current_time)
 
-                    with open(os.path.join(html_dir, "start_lists_master.txt"), "r") as f:
-                        tr = f.read()
+                    with open(os.path.join(html_dir, "body_s_master.txt"), "r") as f:
+                        bodyInfo = f.read()
 
-                    with open(os.path.join(html_dir, "start_header_master.txt"), "r") as f:
-                        inf = f.read()
+                    with open(os.path.join(html_dir, "header_s_master.txt"), "r") as f:
+                        headerInfo = f.read()
 
-                    with open(os.path.join(html_dir, "start_headerFIRST_master.txt"), "r") as f:
-                        infOne = f.read()
-
-                    start_htmlMaster = start_htmlMaster.replace("[st_rinda]",
-                                                                tr.format(a[0], a[1], a[2], a[3],
+                    html_startlists_master = html_startlists_master.replace("[st_rinda]",
+                                                                bodyInfo.format(a[0], a[1], a[2], a[3],
                                                                           a[4], a[5]) + "\n[st_rinda]")
-                    start_htmlMaster = start_htmlMaster.replace("[header]",
-                                                                infOne.format(info[last_id][7], info[last_id][2],
+                    html_startlists_master = html_startlists_master.replace("[header]",
+                                                                headerInfo.format(info[last_id][7], info[last_id][2],
                                                                               info[last_id][1],
                                                                               info[last_id][4], info[last_id][3],
                                                                               info[last_id][0],
                                                                               info[last_id][5], info[last_id][6]))
                 else:
-                    start_htmlMaster = start_htmlMaster.replace("[st_rinda]", tr.format(a[0], a[1], a[2], a[3],
+                    html_startlists_master = html_startlists_master.replace("[st_rinda]", bodyInfo.format(a[0], a[1], a[2], a[3],
                                                                                         a[4], a[5]) + "\n[st_rinda]")
-                    start_htmlMaster = start_htmlMaster.replace("[header]",
-                                                                infOne.format(info[last_id][7], info[last_id][2],
+                    html_startlists_master = html_startlists_master.replace("[header]",
+                                                                headerInfo.format(info[last_id][7], info[last_id][2],
                                                                               info[last_id][1],
                                                                               info[last_id][4], info[last_id][3],
                                                                               info[last_id][0],
@@ -2182,21 +2404,18 @@ class RaceApp(BoxLayout):
                 last = a[-1]
                 last_id += 1
 
-        start_htmlMaster = start_htmlMaster.replace("[st_rinda]", "")
+        html_startlists_master = html_startlists_master.replace("[st_rinda]", "")
         last_prog = info[last_id - 1][8]
-        start_htmlMaster = start_htmlMaster.replace("[prog_sys]", last_prog)
-        start_htmlMaster = start_htmlMaster.replace("[prog_sys]", "")
+        html_startlists_master = html_startlists_master.replace("[prog_sys]", last_prog)
+        html_startlists_master = html_startlists_master.replace("[prog_sys]", "")
         with open(os.path.join(html_dir, f"start_log_master_{last}.html"), "w", encoding='utf-8') as ft:
-            ft.write(start_htmlMaster)
+            ft.write(html_startlists_master)
         # Start lists (ordinary)
-        with open(os.path.join(html_dir, "start_lists.txt"), "r") as f:
-            tr = f.read()
+        with open(os.path.join(html_dir, "body_s.txt"), "r") as f:
+            bodyInfo = f.read()
 
-        with open(os.path.join(html_dir, "start_header.txt"), "r") as f:
-            inf = f.read()
-
-        with open(os.path.join(html_dir, "start_headerFIRST.txt"), "r") as f:
-            infOne = f.read()
+        with open(os.path.join(html_dir, "header_s_usual.txt"), "r") as f:
+            headerInfo = f.read()
 
         last = ''
         last_id = 0
@@ -2204,45 +2423,42 @@ class RaceApp(BoxLayout):
 
         for j, a in enumerate(start_data):
             if a[-1] == last:
-                start_html = start_html.replace("[st_rinda]", tr.format(a[0], a[1], a[2], a[3], a[4]) + "\n[st_rinda]")
+                html_startlists = html_startlists.replace("[st_rinda]", bodyInfo.format(a[0], a[1], a[2], a[3], a[4]) + "\n[st_rinda]")
                 last = a[-1]
             else:
                 if not first_insert_start:
-                    start_html = start_html.replace("[st_rinda]", "")
+                    html_startlists = html_startlists.replace("[st_rinda]", "")
                     last_prog = info[last_id - 1][8]
-                    start_html = start_html.replace("[prog_sys]", last_prog)
-                    start_html = start_html.replace("[prog_sys]", "")
+                    html_startlists = html_startlists.replace("[prog_sys]", last_prog)
+                    html_startlists = html_startlists.replace("[prog_sys]", "")
 
                     with open(os.path.join(html_dir, f"start_log_{last}.html"), "w", encoding='utf-8') as ft:
-                        ft.write(start_html)
+                        ft.write(html_startlists)
 
-                    with open(os.path.join(html_dir, "start_lists.html"), "r") as f:
-                        start_html = f.read()
+                    with open(os.path.join(html_dir, "main_s.html"), "r") as f:
+                        html_startlists = f.read()
 
-                    start_html = start_html.format(compName=self.comp_name.text, compDates=self.comp_date.text,
+                    html_startlists = html_startlists.format(compName=self.comp_name.text, compDates=self.comp_date.text,
                                                    cDate=current_date,
                                                    cTime=current_time)
 
-                    with open(os.path.join(html_dir, "start_lists.txt"), "r") as f:
-                        tr = f.read()
+                    with open(os.path.join(html_dir, "body_s.txt"), "r") as f:
+                        bodyInfo = f.read()
 
-                    with open(os.path.join(html_dir, "start_header.txt"), "r") as f:
-                        inf = f.read()
+                    with open(os.path.join(html_dir, "header_s_usual.txt"), "r") as f:
+                        headerInfo = f.read()
 
-                    with open(os.path.join(html_dir, "start_headerFIRST.txt"), "r") as f:
-                        infOne = f.read()
-
-                    start_html = start_html.replace("[st_rinda]",
-                                                    tr.format(a[0], a[1], a[2], a[3], a[4]) + "\n[st_rinda]")
-                    start_html = start_html.replace("[header]", infOne.format(info[last_id][7], info[last_id][2],
+                    html_startlists = html_startlists.replace("[st_rinda]",
+                                                    bodyInfo.format(a[0], a[1], a[2], a[3], a[4]) + "\n[st_rinda]")
+                    html_startlists = html_startlists.replace("[header]", headerInfo.format(info[last_id][7], info[last_id][2],
                                                                               info[last_id][1],
                                                                               info[last_id][4], info[last_id][3],
                                                                               info[last_id][0],
                                                                               info[last_id][5], info[last_id][6]))
                 else:
-                    start_html = start_html.replace("[st_rinda]",
-                                                    tr.format(a[0], a[1], a[2], a[3], a[4]) + "\n[st_rinda]")
-                    start_html = start_html.replace("[header]", infOne.format(info[last_id][7], info[last_id][2],
+                    html_startlists = html_startlists.replace("[st_rinda]",
+                                                    bodyInfo.format(a[0], a[1], a[2], a[3], a[4]) + "\n[st_rinda]")
+                    html_startlists = html_startlists.replace("[header]", headerInfo.format(info[last_id][7], info[last_id][2],
                                                                               info[last_id][1],
                                                                               info[last_id][4], info[last_id][3],
                                                                               info[last_id][0],
@@ -2252,20 +2468,20 @@ class RaceApp(BoxLayout):
                 last = a[-1]
                 last_id += 1
 
-        start_html = start_html.replace("[st_rinda]", "")
+        html_startlists = html_startlists.replace("[st_rinda]", "")
         last_prog = info[last_id - 1][8]
-        start_html = start_html.replace("[prog_sys]", last_prog)
-        start_html = start_html.replace("[prog_sys]", "")
+        html_startlists = html_startlists.replace("[prog_sys]", last_prog)
+        html_startlists = html_startlists.replace("[prog_sys]", "")
         with open(os.path.join(html_dir, f"start_log_{last}.html"), "w", encoding='utf-8') as ft:
-            ft.write(start_html)
+            ft.write(html_startlists)
 
 #------------------------------------------------------------------------------
 
-        with open(os.path.join(html_dir, "entry_lists.txt"), "r") as f:
-            tr = f.read()
+        with open(os.path.join(html_dir, "body_entries.txt"), "r") as f:
+            bodyInfo = f.read()
 
-        with open(os.path.join(html_dir, "entry_lists_header.txt"), "r") as f:
-            infOne = f.read()
+        with open(os.path.join(html_dir, "header_entries.txt"), "r") as f:
+            headerInfo = f.read()
 
         last = ''
         last_id = 0
@@ -2273,120 +2489,203 @@ class RaceApp(BoxLayout):
 
         for j, a in enumerate(entry_data):
             if a[-1] == last:
-                entry_html = entry_html.replace("[entry_rinda]",
-                                                tr.format(a[0], a[1], a[2]) + "\n[entry_rinda]")
+                html_entries = html_entries.replace("[entry_rinda]",
+                                                bodyInfo.format(a[0], a[1], a[2]) + "\n[entry_rinda]")
                 last = a[-1]
             else:
                 if not first_insert_start:
-                    entry_html = entry_html.replace("[entry_rinda]", "")
+                    html_entries = html_entries.replace("[entry_rinda]", "")
 
                     with open(os.path.join(html_dir, f"entry_by_events_log_{last}.html"), "w", encoding='utf-8') as ft:
-                        ft.write(entry_html)
+                        ft.write(html_entries)
 
-                    with open(os.path.join(html_dir, "entry_lists.html"), "r") as f:
-                        entry_html = f.read()
+                    with open(os.path.join(html_dir, "main_entries.html"), "r") as f:
+                        html_entries = f.read()
 
-                    entry_html = entry_html.format(compName=self.comp_name.text, compDates=self.comp_date.text,
+                    html_entries = html_entries.format(compName=self.comp_name.text, compDates=self.comp_date.text,
                                                    cDate=current_date,
                                                    cTime=current_time)
 
-                    with open(os.path.join(html_dir, "entry_lists.txt"), "r") as f:
-                        tr = f.read()
+                    with open(os.path.join(html_dir, "body_entries.txt"), "r") as f:
+                        bodyInfo = f.read()
 
-                    with open(os.path.join(html_dir, "entry_lists_header.txt"), "r") as f:
-                        infOne = f.read()
+                    with open(os.path.join(html_dir, "header_entries.txt"), "r") as f:
+                        headerInfo = f.read()
 
-                    entry_html = entry_html.replace("[entry_rinda]",
-                                                    tr.format(a[0], a[1], a[2]) + "\n[entry_rinda]")
-                    entry_html = entry_html.replace("[header]", infOne.format(info[last_id][7], info[last_id][2],
+                    html_entries = html_entries.replace("[entry_rinda]",
+                                                    bodyInfo.format(a[0], a[1], a[2]) + "\n[entry_rinda]")
+                    html_entries = html_entries.replace("[header]", headerInfo.format(info[last_id][7], info[last_id][2],
                                                                                     info[last_id][1]))
                 else:
-                    entry_html = entry_html.replace("[entry_rinda]",
-                                                    tr.format(a[0], a[1], a[2]) + "\n[entry_rinda]")
-                    entry_html = entry_html.replace("[header]", infOne.format(info[last_id][7], info[last_id][2],
+                    html_entries = html_entries.replace("[entry_rinda]",
+                                                    bodyInfo.format(a[0], a[1], a[2]) + "\n[entry_rinda]")
+                    html_entries = html_entries.replace("[header]", headerInfo.format(info[last_id][7], info[last_id][2],
                                                                                     info[last_id][1]))
                     first_insert_start = False
 
                 last = a[-1]
                 last_id += 1
 
-        entry_html = entry_html.replace("[entry_rinda]", "")
+        html_entries = html_entries.replace("[entry_rinda]", "")
         with open(os.path.join(html_dir, f"entry_by_events_log_{last}.html"), "w", encoding='utf-8') as ft:
-            ft.write(entry_html)
+            ft.write(html_entries)
 
 # ------------------------------------------------------------------------------
-        with open(os.path.join(html_dir, "tbody_res_no_qual.txt"), "r") as f:
-            trQ = f.read()
+        with open(os.path.join(html_dir, "body_r_usualNoQual.txt"), "r") as f:
+            bodyInfo = f.read()
 
-        with open(os.path.join(html_dir, "race_header_noq.txt"), "r") as f:
-            infQ = f.read()
-
-        with open(os.path.join(html_dir, "race_headerFIRST_noq.txt"), "r") as f:
-            infOneQ = f.read()
+        with open(os.path.join(html_dir, "header_r_usualNoQual.txt"), "r") as f:
+            headerInfo = f.read()
 
         last = ''
         last_id = 0
         first_insert = True
 
-        for j, a in enumerate(dataQ):
+        for j, a in enumerate(res_noQual):
             if a[-1] == last:
-                htmlQ = htmlQ.replace("[rinda_noq]",
-                                      trQ.format(a[0], a[1], a[2], a[3], a[4], a[5],
+                html_results_noQual = html_results_noQual.replace("[rinda_noq]",
+                                      bodyInfo.format(a[0], a[1], a[2], a[3], a[4], a[5],
                                                              a[6], a[7], a[8], a[9], a[10], a[11], a[12], a[13], a[14], a[15], a[16], a[17], a[18], a[19], a[20]) + "\n[rinda_noq]")
                 last = a[-1]
             else:
                 if not first_insert:
-                    htmlQ = htmlQ.replace("[rinda_noq]", "")
-                    htmlQ = htmlQ.replace("[prog_sys]", "")
+                    html_results_noQual = html_results_noQual.replace("[rinda_noq]", "")
+                    html_results_noQual = html_results_noQual.replace("[prog_sys]", "")
 
                     with open(os.path.join(html_dir, f"log_noq_{last}.html"), "w", encoding='utf-8') as ft:
-                        ft.write(htmlQ)
+                        ft.write(html_results_noQual)
 
-                    with open(os.path.join(html_dir, "res_no_qual.html"), "r") as f:
-                        htmlQ = f.read()
+                    with open(os.path.join(html_dir, "body_r_noQual.html"), "r") as f:
+                        html_results_noQual = f.read()
 
-                    htmlQ = htmlQ.format(compName=self.comp_name.text, compDates=self.comp_date.text,
+                    html_results_noQual = html_results_noQual.format(compName=self.comp_name.text, compDates=self.comp_date.text,
                                          cDate=current_date,
                                          cTime=current_time)
 
-                    with open(os.path.join(html_dir, "tbody_res_no_qual.txt"), "r") as f:
-                        trQ = f.read()
+                    with open(os.path.join(html_dir, "body_r_usualNoQual.txt"), "r") as f:
+                        bodyInfo = f.read()
 
-                    with open(os.path.join(html_dir, "race_header_noq.txt"), "r") as f:
-                        infQ = f.read()
+                    with open(os.path.join(html_dir, "header_r_usualNoQual.txt"), "r") as f:
+                        headerInfo = f.read()
 
-                    with open(os.path.join(html_dir, "race_headerFIRST_noq.txt"), "r") as f:
-                        infOneQ = f.read()
-
-                    htmlQ = htmlQ.replace("[rinda_noq]", trQ.format(a[0], a[1], a[2], a[3], a[4], a[5],
+                    html_results_noQual = html_results_noQual.replace("[rinda_noq]", bodyInfo.format(a[0], a[1], a[2], a[3], a[4], a[5],
                                                              a[6], a[7], a[8], a[9], a[10], a[11], a[12], a[13], a[14], a[15], a[16], a[17], a[18], a[19], a[20]) + "\n[rinda_noq]")
-                    htmlQ = htmlQ.replace("[header]",
-                                          infOneQ.format(info[last_id][7], info[last_id][2], info[last_id][1],
+                    html_results_noQual = html_results_noQual.replace("[header]",
+                                          headerInfo.format(info[last_id][7], info[last_id][2], info[last_id][1],
                                                          info[last_id][4], info[last_id][3], info[last_id][0],
                                                          info[last_id][5], info[last_id][6]))
                 else:
-                    htmlQ = htmlQ.replace("[header]",
-                                          infOneQ.format(info[last_id][7], info[last_id][2], info[last_id][1],
+                    html_results_noQual = html_results_noQual.replace("[header]",
+                                          headerInfo.format(info[last_id][7], info[last_id][2], info[last_id][1],
                                                          info[last_id][4], info[last_id][3], info[last_id][0],
                                                          info[last_id][5], info[last_id][6]))
-                    htmlQ = htmlQ.replace("[rinda_noq]", trQ.format(a[0], a[1], a[2], a[3], a[4], a[5],
+                    html_results_noQual = html_results_noQual.replace("[rinda_noq]", bodyInfo.format(a[0], a[1], a[2], a[3], a[4], a[5],
                                                              a[6], a[7], a[8], a[9], a[10], a[11], a[12], a[13], a[14], a[15], a[16], a[17], a[18], a[19], a[20]) + "\n[rinda_noq]")
                     first_insert = False
 
                 last = a[-1]
                 last_id += 1
 
-        htmlQ = htmlQ.replace("[rinda_noq]", "")
-        htmlQ = htmlQ.replace("[prog_sys]", "")
+        html_results_noQual = html_results_noQual.replace("[rinda_noq]", "")
+        html_results_noQual = html_results_noQual.replace("[prog_sys]", "")
 
         with open(os.path.join(html_dir, f"log_noq_{last}.html"), "w", encoding='utf-8') as ft:
-            ft.write(htmlQ)
+            ft.write(html_results_noQual)
 # ------------------------------------------------------------------------------
-        with open(os.path.join(html_dir, "atlase.txt"), "r") as f:
-            trQ = f.read()
+            with open(os.path.join(html_dir, "body_r_usualNoQual.txt"), "r") as f:
+                bodyInfo = f.read()
 
-        with open(os.path.join(html_dir, "atlase_header.txt"), "r") as f:
-            infOneQ = f.read()
+            with open(os.path.join(html_dir, "header_r_usualNoQual_wthStart.txt"), "r") as f:
+                headerInfo = f.read()
+
+            last = ''
+            last_id = 0
+            first_insert = True
+
+            for j, a in enumerate(res_noQual_start):
+                if a[-1] == last:
+                    html_results_noQual_wthStart = html_results_noQual_wthStart.replace("[rinda_noq]",
+                                                                      bodyInfo.format(a[0], a[1], a[2], a[3], a[4],
+                                                                                      a[5],
+                                                                                      a[6], a[7], a[8], a[9], a[10],
+                                                                                      a[11], a[12], a[13], a[14], a[15],
+                                                                                      a[16], a[17], a[18], a[19],
+                                                                                      a[20]) + "\n[rinda_noq]")
+                    last = a[-1]
+                else:
+                    if not first_insert:
+                        html_results_noQual_wthStart = html_results_noQual_wthStart.replace("[rinda_noq]", "")
+                        html_results_noQual_wthStart = html_results_noQual_wthStart.replace("[prog_sys]", "")
+
+                        with open(os.path.join(html_dir, f"log_noq_wthStart_{last}.html"), "w", encoding='utf-8') as ft:
+                            ft.write(html_results_noQual_wthStart)
+
+                        with open(os.path.join(html_dir, "body_r_noQual.html"), "r") as f:
+                            html_results_noQual_wthStart = f.read()
+
+                        html_results_noQual_wthStart = html_results_noQual_wthStart.format(compName=self.comp_name.text,
+                                                                         compDates=self.comp_date.text,
+                                                                         cDate=current_date,
+                                                                         cTime=current_time)
+
+                        with open(os.path.join(html_dir, "body_r_usualNoQual.txt"), "r") as f:
+                            bodyInfo = f.read()
+
+                        with open(os.path.join(html_dir, "header_r_usualNoQual_wthStart.txt"), "r") as f:
+                            headerInfo = f.read()
+
+                        html_results_noQual_wthStart = html_results_noQual_wthStart.replace("[rinda_noq]",
+                                                                          bodyInfo.format(a[0], a[1], a[2], a[3], a[4],
+                                                                                          a[5],
+                                                                                          a[6], a[7], a[8], a[9], a[10],
+                                                                                          a[11], a[12], a[13], a[14],
+                                                                                          a[15], a[16], a[17], a[18],
+                                                                                          a[19],
+                                                                                          a[20]) + "\n[rinda_noq]")
+                        html_results_noQual_wthStart = html_results_noQual_wthStart.replace("[header]",
+                                                                          headerInfo.format(info[last_id][7],
+                                                                                            info[last_id][2],
+                                                                                            info[last_id][1],
+                                                                                            info[last_id][4],
+                                                                                            info[last_id][3],
+                                                                                            info[last_id][0],
+                                                                                            info[last_id][5],
+                                                                                            info[last_id][6]))
+                    else:
+                        html_results_noQual_wthStart = html_results_noQual_wthStart.replace("[header]",
+                                                                          headerInfo.format(info[last_id][7],
+                                                                                            info[last_id][2],
+                                                                                            info[last_id][1],
+                                                                                            info[last_id][4],
+                                                                                            info[last_id][3],
+                                                                                            info[last_id][0],
+                                                                                            info[last_id][5],
+                                                                                            info[last_id][6]))
+                        html_results_noQual_wthStart = html_results_noQual_wthStart.replace("[rinda_noq]",
+                                                                          bodyInfo.format(a[0], a[1], a[2], a[3], a[4],
+                                                                                          a[5],
+                                                                                          a[6], a[7], a[8], a[9], a[10],
+                                                                                          a[11], a[12], a[13], a[14],
+                                                                                          a[15], a[16], a[17], a[18],
+                                                                                          a[19],
+                                                                                          a[20]) + "\n[rinda_noq]")
+                        first_insert = False
+
+                    last = a[-1]
+                    last_id += 1
+
+            html_results_noQual_wthStart = html_results_noQual_wthStart.replace("[rinda_noq]", "")
+            html_results_noQual_wthStart = html_results_noQual_wthStart.replace("[prog_sys]", "")
+
+            with open(os.path.join(html_dir, f"log_noq_wthStart_{last}.html"), "w", encoding='utf-8') as ft:
+                ft.write(html_results_noQual_wthStart)
+        # ------------------------------------------------------------------------------
+
+        with open(os.path.join(html_dir, "body_atlase.txt"), "r") as f:
+            bodyInfo = f.read()
+
+        with open(os.path.join(html_dir, "header_atlase.txt"), "r") as f:
+            headerInfo = f.read()
 
         last = ''
         last_id = 0
@@ -2394,119 +2693,111 @@ class RaceApp(BoxLayout):
 
         for j, a in enumerate(atlase):
             if a[-1] == last:
-                atlase_html = atlase_html.replace("[rinda_noq]",
-                                      trQ.format(a[0], a[1], a[2], a[3], a[4], a[5], a[6], a[7], a[8],
-                                                 a[9], a[10], a[11], a[12], a[13], a[14], a[15], a[16], a[17]) + "\n[rinda_noq]")
+                html_atlase = html_atlase.replace("[rinda_noq]",
+                                      bodyInfo.format(a[0], a[1], a[2], a[3], a[4], a[5], a[6], a[7], a[8]) + "\n[rinda_noq]")
                 last = a[-1]
             else:
                 if not first_insert:
-                    atlase_html = atlase_html.replace("[rinda_noq]", "")
-                    atlase_html = atlase_html.replace("[prog_sys]", "")
+                    html_atlase = html_atlase.replace("[rinda_noq]", "")
+                    html_atlase = html_atlase.replace("[prog_sys]", "")
 
                     with open(os.path.join(html_dir, f"atlase_{last}.html"), "w", encoding='utf-8') as ft:
-                        ft.write(atlase_html)
+                        ft.write(html_atlase)
 
-                    with open(os.path.join(html_dir, "res_no_qual.html"), "r") as f:
-                        atlase_html = f.read()
+                    with open(os.path.join(html_dir, "body_r_noQual.html"), "r") as f:
+                        html_atlase = f.read()
 
-                    atlase_html = atlase_html.format(compName=self.comp_name.text, compDates=self.comp_date.text,
+                    html_atlase = html_atlase.format(compName=self.comp_name.text, compDates=self.comp_date.text,
                                          cDate=current_date,
                                          cTime=current_time)
 
-                    with open(os.path.join(html_dir, "atlase.txt"), "r") as f:
-                        trQ = f.read()
+                    with open(os.path.join(html_dir, "body_atlase.txt"), "r") as f:
+                        bodyInfo = f.read()
 
-                    with open(os.path.join(html_dir, "atlase_header.txt"), "r") as f:
-                        infOneQ = f.read()
+                    with open(os.path.join(html_dir, "header_atlase.txt"), "r") as f:
+                        headerInfo = f.read()
 
-                    atlase_html = atlase_html.replace("[rinda_noq]", trQ.format(a[0], a[1], a[2], a[3], a[4], a[5],
-                                                                    a[6], a[7], a[8], a[9], a[10], a[11], a[12], a[13], a[14], a[15], a[16], a[17]) + "\n[rinda_noq]")
-                    atlase_html = atlase_html.replace("[header]",
-                                          infOneQ.format(info[last_id][7], info[last_id][2], info[last_id][1],
+                    html_atlase = html_atlase.replace("[rinda_noq]", bodyInfo.format(a[0], a[1], a[2], a[3], a[4], a[5],
+                                                                    a[6], a[7], a[8]) + "\n[rinda_noq]")
+                    html_atlase = html_atlase.replace("[header]",
+                                          headerInfo.format(info[last_id][7], info[last_id][2], info[last_id][1],
                                                          info[last_id][4], info[last_id][3], info[last_id][0],
                                                          info[last_id][5], info[last_id][6]))
                 else:
-                    atlase_html = atlase_html.replace("[header]",
-                                          infOneQ.format(info[last_id][7], info[last_id][2], info[last_id][1],
+                    html_atlase = html_atlase.replace("[header]",
+                                          headerInfo.format(info[last_id][7], info[last_id][2], info[last_id][1],
                                                          info[last_id][4], info[last_id][3], info[last_id][0],
                                                          info[last_id][5], info[last_id][6]))
-                    atlase_html = atlase_html.replace("[rinda_noq]", trQ.format(a[0], a[1], a[2], a[3],
-                                                                    a[4], a[5], a[6], a[7], a[8],
-                                                                    a[9], a[10], a[11], a[12], a[13], a[14], a[15], a[16], a[17]) + "\n[rinda_noq]")
+                    html_atlase = html_atlase.replace("[rinda_noq]", bodyInfo.format(a[0], a[1], a[2], a[3],
+                                                                    a[4], a[5], a[6], a[7], a[8]) + "\n[rinda_noq]")
                     first_insert = False
 
                 last = a[-1]
                 last_id += 1
 
-        atlase_html = atlase_html.replace("[rinda_noq]", "")
-        atlase_html = atlase_html.replace("[prog_sys]", "")
+        html_atlase = html_atlase.replace("[rinda_noq]", "")
+        html_atlase = html_atlase.replace("[prog_sys]", "")
 
         with open(os.path.join(html_dir, f"atlase_{last}.html"), "w", encoding='utf-8') as ft:
-            ft.write(atlase_html)
-
+            ft.write(html_atlase)
 # --------------------------------------------------------------------------------------
 
-        with open(os.path.join(html_dir, "tbody_res_no_qual_masters.txt"), "r") as f:
-            trMasterQ = f.read()
+        with open(os.path.join(html_dir, "body_r_masterNoQual.txt"), "r") as f:
+            bodyInfo = f.read()
 
-        with open(os.path.join(html_dir, "race_header_noq_master.txt"), "r") as f:
-            infQMast = f.read()
 
-        with open(os.path.join(html_dir, "race_headerFIRST_noq_master.txt"), "r") as f:
-            infOneQMast = f.read()
+        with open(os.path.join(html_dir, "header_r_masterNoQual.txt"), "r") as f:
+            headerInfo = f.read()
 
         last = ''
         last_id = 0
         first_insert = True
 
-        for j, a in enumerate(dataMasterQ):
+        for j, a in enumerate(res_noQual_master):
             if a[-1] == last:
-                htmlMasterQ = htmlMasterQ.replace("[rinda_noq]",
-                                                  trMasterQ.format(a[0], a[1], a[2], a[3], a[4], a[5], a[6], a[7], a[8],
+                html_master_noQual = html_master_noQual.replace("[rinda_noq]",
+                                                  bodyInfo.format(a[0], a[1], a[2], a[3], a[4], a[5], a[6], a[7], a[8],
                                                                    a[9], a[10], a[11], a[12], a[13], a[14]) + "\n[rinda_noq]")
                 last = a[-1]
             else:
                 if not first_insert:
-                    htmlMasterQ = htmlMasterQ.replace("[rinda_noq]", "")
-                    htmlMasterQ = htmlMasterQ.replace("[prog_sys]", "")
+                    html_master_noQual = html_master_noQual.replace("[rinda_noq]", "")
+                    html_master_noQual = html_master_noQual.replace("[prog_sys]", "")
 
                     with open(os.path.join(html_dir, f"log_noq_master_{last}.html"), "w", encoding='utf-8') as ft:
-                        ft.write(htmlMasterQ)
+                        ft.write(html_master_noQual)
 
-                    with open(os.path.join(html_dir, "res_no_qual.html"), "r") as f:
-                        htmlMasterQ = f.read()
+                    with open(os.path.join(html_dir, "body_r_noQual.html"), "r") as f:
+                        html_master_noQual = f.read()
 
-                    htmlMasterQ = htmlMasterQ.format(compName=self.comp_name.text, compDates=self.comp_date.text,
+                    html_master_noQual = html_master_noQual.format(compName=self.comp_name.text, compDates=self.comp_date.text,
                                                      cDate=current_date,
                                                      cTime=current_time)
 
-                    with open(os.path.join(html_dir, "tbody_res_no_qual_masters.txt"), "r") as f:
-                        trMasterQ = f.read()
+                    with open(os.path.join(html_dir, "body_r_masterNoQual.txt"), "r") as f:
+                        bodyInfo = f.read()
 
-                    with open(os.path.join(html_dir, "race_header_noq_master.txt"), "r") as f:
-                        infQMast = f.read()
+                    with open(os.path.join(html_dir, "header_r_masterNoQual.txt"), "r") as f:
+                        headerInfo = f.read()
 
-                    with open(os.path.join(html_dir, "race_headerFIRST_noq_master.txt"), "r") as f:
-                        infOneQMast = f.read()
-
-                    htmlMasterQ = htmlMasterQ.replace("[rinda_noq]",
-                                                      trMasterQ.format(a[0], a[1], a[2], a[3], a[4], a[5],
+                    html_master_noQual = html_master_noQual.replace("[rinda_noq]",
+                                                      bodyInfo.format(a[0], a[1], a[2], a[3], a[4], a[5],
                                                                        a[6], a[7], a[8], a[9], a[10],
                                                                        a[11], a[12], a[13], a[14]) + "\n[rinda_noq]")
-                    htmlMasterQ = htmlMasterQ.replace("[header]", infOneQMast.format(info[last_id][7], info[last_id][2],
+                    html_master_noQual = html_master_noQual.replace("[header]", headerInfo.format(info[last_id][7], info[last_id][2],
                                                                                      info[last_id][1],
                                                                                      info[last_id][4], info[last_id][3],
                                                                                      info[last_id][0],
                                                                                      info[last_id][5],
                                                                                      info[last_id][6]))
                 else:
-                    htmlMasterQ = htmlMasterQ.replace("[header]", infOneQMast.format(info[last_id][7], info[last_id][2],
+                    html_master_noQual = html_master_noQual.replace("[header]", headerInfo.format(info[last_id][7], info[last_id][2],
                                                                                      info[last_id][1],
                                                                                      info[last_id][4], info[last_id][3],
                                                                                      info[last_id][0],
                                                                                      info[last_id][5],
                                                                                      info[last_id][6]))
-                    htmlMasterQ = htmlMasterQ.replace("[rinda_noq]", trMasterQ.format(a[0], a[1], a[2], a[3], a[4],
+                    html_master_noQual = html_master_noQual.replace("[rinda_noq]", bodyInfo.format(a[0], a[1], a[2], a[3], a[4],
                                                                                       a[5], a[6], a[7], a[8], a[9],
                                                                                       a[10], a[11], a[12], a[13], a[14]) + "\n[rinda_noq]")
                     first_insert = False
@@ -2514,14 +2805,95 @@ class RaceApp(BoxLayout):
                 last = a[-1]
                 last_id += 1
 
-        htmlMasterQ = htmlMasterQ.replace("[rinda_noq]", "")
-        htmlMasterQ = htmlMasterQ.replace("[prog_sys]", "")
+        html_master_noQual = html_master_noQual.replace("[rinda_noq]", "")
+        html_master_noQual = html_master_noQual.replace("[prog_sys]", "")
 
         with open(os.path.join(html_dir, f"log_noq_master_{last}.html"), "w", encoding='utf-8') as ft:
-            ft.write(htmlMasterQ)
+            ft.write(html_master_noQual)
+
+            # --------------------------------------------------------------------------------------
+
+            with open(os.path.join(html_dir, "body_r_masterNoQual.txt"), "r") as f:
+                bodyInfo = f.read()
+
+            with open(os.path.join(html_dir, "header_r_masterNoQual_wthStart.txt"), "r") as f:
+                headerInfo = f.read()
+
+            last = ''
+            last_id = 0
+            first_insert = True
+
+            for j, a in enumerate(res_noQual_master_start):
+                if a[-1] == last:
+                    html_master_noQual_wthStart = html_master_noQual_wthStart.replace("[rinda_noq]",
+                                                                    bodyInfo.format(a[0], a[1], a[2], a[3], a[4],
+                                                                                      a[5], a[6], a[7], a[8],
+                                                                                      a[9], a[10], a[11], a[12], a[13],
+                                                                                      a[14]) + "\n[rinda_noq]")
+                    last = a[-1]
+                else:
+                    if not first_insert:
+                        html_master_noQual_wthStart = html_master_noQual_wthStart.replace("[rinda_noq]", "")
+                        html_master_noQual_wthStart = html_master_noQual_wthStart.replace("[prog_sys]", "")
+
+                        with open(os.path.join(html_dir, f"log_noq_master_wthStart_{last}.html"), "w", encoding='utf-8') as ft:
+                            ft.write(html_master_noQual_wthStart)
+
+                        with open(os.path.join(html_dir, "body_r_noQual.html"), "r") as f:
+                            html_master_noQual_wthStart = f.read()
+
+                        html_master_noQual_wthStart = html_master_noQual_wthStart.format(compName=self.comp_name.text,
+                                                                       compDates=self.comp_date.text,
+                                                                       cDate=current_date,
+                                                                       cTime=current_time)
+
+                        with open(os.path.join(html_dir, "body_r_masterNoQual.txt"), "r") as f:
+                            bodyInfo = f.read()
+
+                        with open(os.path.join(html_dir, "header_r_masterNoQual_wthStart.txt"), "r") as f:
+                            headerInfo = f.read()
+
+                        html_master_noQual_wthStart = html_master_noQual_wthStart.replace("[rinda_noq]",
+                                                                        bodyInfo.format(a[0], a[1], a[2], a[3], a[4],
+                                                                                          a[5],
+                                                                                          a[6], a[7], a[8], a[9], a[10],
+                                                                                          a[11], a[12], a[13],
+                                                                                          a[14]) + "\n[rinda_noq]")
+                        html_master_noQual_wthStart = html_master_noQual_wthStart.replace("[header]", headerInfo.format(info[last_id][7],
+                                                                                                      info[last_id][2],
+                                                                                                      info[last_id][1],
+                                                                                                      info[last_id][4],
+                                                                                                      info[last_id][3],
+                                                                                                      info[last_id][0],
+                                                                                                      info[last_id][5],
+                                                                                                      info[last_id][6]))
+                    else:
+                        html_master_noQual_wthStart = html_master_noQual_wthStart.replace("[header]", headerInfo.format(info[last_id][7],
+                                                                                                      info[last_id][2],
+                                                                                                      info[last_id][1],
+                                                                                                      info[last_id][4],
+                                                                                                      info[last_id][3],
+                                                                                                      info[last_id][0],
+                                                                                                      info[last_id][5],
+                                                                                                      info[last_id][6]))
+                        html_master_noQual_wthStart = html_master_noQual_wthStart.replace("[rinda_noq]",
+                                                                        bodyInfo.format(a[0], a[1], a[2], a[3], a[4],
+                                                                                          a[5], a[6], a[7], a[8], a[9],
+                                                                                          a[10], a[11], a[12], a[13],
+                                                                                          a[14]) + "\n[rinda_noq]")
+                        first_insert = False
+
+                    last = a[-1]
+                    last_id += 1
+
+            html_master_noQual_wthStart = html_master_noQual_wthStart.replace("[rinda_noq]", "")
+            html_master_noQual_wthStart = html_master_noQual_wthStart.replace("[prog_sys]", "")
+
+            with open(os.path.join(html_dir, f"log_noq_master_wthStart_{last}.html"), "w", encoding='utf-8') as ft:
+                ft.write(html_master_noQual_wthStart)
 
 # --------------------------------------------------------------------------------------
-        with open(os.path.join(html_dir, "start_lists_short.txt"), "r") as f:
+        with open(os.path.join(html_dir, "body_s_short.txt"), "r") as f:
             stListSh = f.read()
 
         last = ''
@@ -2530,19 +2902,19 @@ class RaceApp(BoxLayout):
 
         for j, a in enumerate(infoShort):
             if a[-1] == last:
-                start_short = start_short.replace("[short_rinda]",
+                html_short_startlists = html_short_startlists.replace("[short_rinda]",
                                                   stListSh.format(a[0], a[1], a[2], a[3], a[4], a[5], a[6], a[7],
                                                                    a[8],
                                                                    a[9], a[10], a[11], a[12], a[13], a[14], a[15], a[16], a[17], a[18], a[19], a[20], a[21], a[22], a[23], a[24]) + "\n[short_rinda]")
                 last = a[-1]
             else:
                 if not first_insert:
-                    start_short = start_short.replace("[short_rinda]",
+                    html_short_startlists = html_short_startlists.replace("[short_rinda]",
                                                       stListSh.format(a[0], a[1], a[2], a[3], a[4], a[5], a[6], a[7],
                                                                    a[8],
                                                                    a[9], a[10], a[11], a[12], a[13], a[14], a[15], a[16], a[17], a[18], a[19], a[20], a[21], a[22], a[23], a[24]) + "\n[short_rinda]")
                 else:
-                    start_short = start_short.replace("[short_rinda]", stListSh.format(a[0], a[1], a[2], a[3], a[4], a[5], a[6], a[7],
+                    html_short_startlists = html_short_startlists.replace("[short_rinda]", stListSh.format(a[0], a[1], a[2], a[3], a[4], a[5], a[6], a[7],
                                                                    a[8],
                                                                    a[9], a[10], a[11], a[12], a[13], a[14], a[15], a[16], a[17], a[18], a[19], a[20], a[21], a[22], a[23], a[24]) + "\n[short_rinda]")
                     first_insert = False
@@ -2550,9 +2922,9 @@ class RaceApp(BoxLayout):
                 last = a[-1]
                 last_id += 1
 
-        start_short = start_short.replace("[short_rinda]", "")
-        with open(os.path.join(html_dir, f"start_short_log.html"), "w", encoding='utf-8') as ft:
-            ft.write(start_short)
+        html_short_startlists = html_short_startlists.replace("[short_rinda]", "")
+        with open(os.path.join(html_dir, f"html_short_startlists_log.html"), "w", encoding='utf-8') as ft:
+            ft.write(html_short_startlists)
 
 
         end = datetime.datetime.now()
