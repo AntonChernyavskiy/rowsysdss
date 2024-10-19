@@ -37,22 +37,17 @@ class FileChooserPopup(Popup):
         self.size_hint = (0.8, 0.8)
         self.auto_dismiss = True
 
-        # Initialize selected_files as an empty list
         self.selected_files = []
 
-        # Determine the default path
         self.default_path = os.path.join(
             os.path.expanduser("~"), 'Documents', 'rowSysDocs'
         )
 
-        # Ensure the default path exists; if not, fallback to user's Documents folder
         if not os.path.exists(self.default_path):
             self.default_path = os.path.expanduser("~Documents")
 
-        # Create layout for popup content
         layout = BoxLayout(orientation='vertical')
 
-        # Enable multiselect in FileChooserListView
         self.file_chooser = FileChooserListView(
             multiselect=True,
             path=self.default_path,
@@ -60,7 +55,6 @@ class FileChooserPopup(Popup):
         )
         layout.add_widget(self.file_chooser)
 
-        # Add a button to confirm file selection
         select_button = Button(text='Select', size_hint_y=None, height=40)
         select_button.bind(on_press=self.on_file_selected)
         layout.add_widget(select_button)
@@ -77,7 +71,7 @@ def get_documents_path():
     elif platform == 'linux' or platform == 'macosx':
         return os.path.join(os.path.expanduser('~'), 'Documents')
     else:
-        return os.path.expanduser('~')  # На случай, если платформа не Windows, Linux или macOS
+        return os.path.expanduser('~')
 
 def get_default_folder():
     documents_path = get_documents_path()
@@ -90,13 +84,12 @@ class CustomFileChooser(FileChooserListView):
         try:
             return GetFileAttributesExW(fn)[0] & FILE_ATTRIBUTE_HIDDEN
         except pywintypes.error as e:
-            # Игнорируем ошибку, возвращаем False для системных файлов
+
             return False
 
 class DriveButton(Button, ButtonBehavior):
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
-
 
 class EventDetailPopup(Popup):
     def __init__(self, event_data, **kwargs):
@@ -109,7 +102,6 @@ class EventDetailPopup(Popup):
         table_layout = GridLayout(cols=2, spacing=10, size_hint_y=None)
         table_layout.bind(minimum_height=table_layout.setter('height'))
 
-        # Adding rows for each event detail
         for key, value in event_data.items():
             table_layout.add_widget(Label(text=key, bold=True))
             table_layout.add_widget(Label(text=str(value)))
@@ -119,7 +111,6 @@ class EventDetailPopup(Popup):
         layout.add_widget(scroll_view)
 
         self.content = layout
-
 
 class RaceApp(BoxLayout):
     def __init__(self, **kwargs):
@@ -244,7 +235,7 @@ class RaceApp(BoxLayout):
 
     def edit_heatsheet(self, instance):
         try:
-            self.widget_map = {}  # Dictionary to map (row_idx, col_name) to TextInput widget
+            self.widget_map = {}
             heatsheet_df = pd.read_csv('C:\\Users\\Admin\\Documents\\raceDocs\\heatsheet.csv')
             title = 'Heatsheet Details'
 
@@ -262,7 +253,7 @@ class RaceApp(BoxLayout):
                     table_layout.add_widget(header_label)
 
                 def on_focus(instance, value):
-                    if not value:  # When the TextInput loses focus
+                    if not value:
                         row_idx = instance.row_idx
                         col_name = instance.col_name
                         self.widget_map[(row_idx, col_name)] = instance
@@ -295,31 +286,24 @@ class RaceApp(BoxLayout):
 
     def save_heatsheet_changes(self, instance):
         try:
-            # Load the current heatsheet data
+
             heatsheet_df = pd.read_csv('C:\\Users\\Admin\\Documents\\raceDocs\\heatsheet.csv', encoding='utf-8')
 
-            # Update the DataFrame with changes from TextInput widgets
             for (row_idx, col_name), widget in self.widget_map.items():
                 heatsheet_df.at[row_idx, col_name] = widget.text
 
-            # Replace any NaN values with a single space
             heatsheet_df = heatsheet_df.fillna(' ')
 
-            # Save the updated DataFrame to CSV
             heatsheet_df.to_csv('C:\\Users\\Admin\\Documents\\raceDocs\\heatsheet.csv', index=False, encoding='utf-8')
 
-            # Read the file again to ensure all 'nan' strings are replaced with a space
             with open('C:\\Users\\Admin\\Documents\\raceDocs\\heatsheet.csv', 'r', encoding='utf-8') as file:
                 file_content = file.read()
 
-            # Replace 'nan' with a single space
             file_content = file_content.replace('nan', ' ')
 
-            # Write the corrected content back to the file
             with open('C:\\Users\\Admin\\Documents\\raceDocs\\heatsheet.csv', 'w', encoding='utf-8') as file:
                 file.write(file_content)
 
-            # Close the popup
             self.popup.dismiss()
         except Exception as e:
             error_popup = Popup(title='Error', content=Label(text=f'Error saving heatsheet changes: {str(e)}'),
@@ -327,7 +311,7 @@ class RaceApp(BoxLayout):
             error_popup.open()
 
     def find_widget_at(self, row_idx, col_name):
-        # Helper function to find the TextInput widget for a specific cell
+
         for widget in self.children:
             if isinstance(widget, ScrollView):
                 for child in widget.children:
@@ -342,23 +326,22 @@ class RaceApp(BoxLayout):
         """Open the file in the default web browser."""
         try:
             if is_local:
-                # If the file is local, use a local file path
+
                 file_url = f'file://{file_path}'
             else:
-                # For FTP, we may need to construct a URL
-                # Assuming the FTP server is accessible via HTTP/S protocol
+
                 ftp_server = self.ftp_server_input.text
                 file_url = f'http://{ftp_server}/{file_path.lstrip("/")}'
 
             webbrowser.open(file_url)
-            popup.dismiss()  # Close the popup after opening the file
+            popup.dismiss()
             self.show_popup('Success', f'Opened {file_path} in browser')
         except Exception as e:
             self.show_popup('Error', f'Error opening {file_path} in browser: {str(e)}')
 
     def upload_to_ftp(self, instance):
         """Handle uploading files from local directory to FTP server."""
-        # Open file chooser popup
+
         file_chooser = FileChooserPopup()
         file_chooser.bind(on_dismiss=self.upload_files)
         file_chooser.open()
@@ -373,11 +356,11 @@ class RaceApp(BoxLayout):
                     with open(file_path, 'rb') as file:
                         self.ftps.storbinary(f'STOR {file_name}', file)
                     print(f"File {file_name} uploaded successfully.")
-                    # Notify the user about each successful upload
+
                     self.show_popup('File Uploaded', f'File {file_name} uploaded successfully!')
                 except Exception as e:
                     print(f"Error uploading file: {file_name}, {str(e)}")
-                    # Notify the user about the error
+
                     self.show_popup('Error', f'Error uploading file: {file_name}, {str(e)}')
 
     def download_file(self, instance):
@@ -390,7 +373,7 @@ class RaceApp(BoxLayout):
                 with open(local_file_path, 'wb') as file:
                     file.write(file_content)
                 print(f"File {file_name} downloaded successfully.")
-                # Notify the user
+
                 self.show_popup('File Downloaded', f'File {file_name} downloaded successfully!')
             except Exception as e:
                 print(f"Error downloading file: {str(e)}")
@@ -417,9 +400,9 @@ class RaceApp(BoxLayout):
 
     def list_local_directory(self, path):
         """List files and directories in the local directory."""
-        self.local_file_list_layout.clear_widgets()  # Очистка виджетов, которые были ранее
+        self.local_file_list_layout.clear_widgets()
         try:
-            # Добавляем кнопку "Назад", если не в корневой директории
+
             if os.path.abspath(path) != os.path.abspath(os.sep):
                 btn = Button(text='..', size_hint_y=None, height=40)
                 btn.bind(on_press=self.go_to_parent_local_directory)
@@ -444,14 +427,12 @@ class RaceApp(BoxLayout):
         file_name = instance.text
         file_path = os.path.join(self.current_local_path, file_name)
 
-        # Create a popup for file interaction
         self.show_file_interaction_popup(file_name, file_path, is_local=True)
 
     def show_file_interaction_popup(self, file_name, file_path, is_local):
         """Show popup for file interaction: download, delete, rename, move, open in browser."""
         content = BoxLayout(orientation='vertical', padding=20, spacing=10)
 
-        # Add buttons for different actions
         download_btn = Button(text='Download', size_hint_y=None, height=50)
         delete_btn = Button(text='Delete', size_hint_y=None, height=50)
         rename_btn = Button(text='Rename', size_hint_y=None, height=50)
@@ -468,7 +449,6 @@ class RaceApp(BoxLayout):
         popup = Popup(title='File Actions', content=content, size_hint=(0.8, 0.6), auto_dismiss=True)
         popup.open()
 
-        # Bind buttons to their respective functions
         download_btn.bind(on_press=lambda x: self.download_file(file_name, is_local, popup))
         delete_btn.bind(on_press=lambda x: self.delete_file(file_path, is_local, popup))
         rename_btn.bind(on_press=lambda x: self.rename_file(file_path, is_local, popup))
@@ -478,10 +458,10 @@ class RaceApp(BoxLayout):
     def download_file(self, file_name, is_local, popup):
         """Download the selected file."""
         if is_local:
-            # Handle local file download (e.g., open the file or copy to a new location)
+
             self.show_popup('Download', f'File {file_name} downloaded from local storage.')
         else:
-            # Handle FTP file download
+
             self.download_file_from_ftp(file_name)
             self.show_popup('Download', f'File {file_name} downloaded from FTP.')
 
@@ -527,7 +507,7 @@ class RaceApp(BoxLayout):
             if is_local:
                 os.rename(file_path, new_path)
             else:
-                # FTP rename
+
                 self.ftps.rename(file_path, new_name)
 
             self.show_popup('Renamed', f'File renamed to {new_name}.')
@@ -540,13 +520,13 @@ class RaceApp(BoxLayout):
         """Move the file between local and FTP folders."""
         try:
             if is_local:
-                # Move file from local to FTP
+
                 file_path = os.path.join(self.current_local_path, file_name)
                 with open(file_path, 'rb') as file:
                     self.ftps.storbinary(f'STOR {file_name}', file)
                 self.show_popup('Moved', f'File {file_name} moved to FTP.')
             else:
-                # Move file from FTP to local
+
                 file_content = self.download_file_from_ftp(file_name)
                 local_file_path = os.path.join(self.current_local_path, file_name)
                 with open(local_file_path, 'wb') as file:
@@ -682,7 +662,7 @@ class RaceApp(BoxLayout):
         regatta_code = self.regatta_code.text.strip()
 
         if not regatta_code:
-            # Handle the case where regatta_code is empty
+
             error_popup = Popup(title='Error', content=Label(text='Regatta code is empty.'),
                                 size_hint=(0.6, 0.4))
             error_popup.open()
@@ -705,24 +685,21 @@ class RaceApp(BoxLayout):
             error_popup.open()
             return
 
-        # Process the heatsheet file and ensure the 'Prog' column is of string type
         heat = pd.read_csv(temp_heatsheet_path)
         heat["Prog"] = ""
-        heat = heat.astype({"Prog": "str"})  # Ensure the column is of string type
+        heat = heat.astype({"Prog": "str"})
 
-        # Remove the row containing "Abbrev" and all rows below it
         index_abbrev = heat[heat.apply(lambda row: row.astype(str).str.contains("Abbrev").any(), axis=1)].index
         if len(index_abbrev) > 0:
-            heat = heat[:index_abbrev[0]]  # Keep only rows above "Abbrev"
+            heat = heat[:index_abbrev[0]]
 
         heat.to_csv(temp_heatsheet_path, index=False)
 
         if os.path.exists(heatsheet_path):
             f_heat = pd.read_csv(heatsheet_path)
-            heat["Prog"] = f_heat["Prog"].astype("str")  # Ensure the existing data is also of string type
+            heat["Prog"] = f_heat["Prog"].astype("str")
             heat.to_csv(heatsheet_path, index=False)
 
-        # Окно подтверждения успешной загрузки
         success_popup = Popup(title='Success',
                               content=Label(text='Heatsheet file successfully downloaded and updated.'),
                               size_hint=(0.6, 0.4))
@@ -754,8 +731,8 @@ class RaceApp(BoxLayout):
                 box.add_widget(checkbox)
                 label = Label(text=display_text, size_hint_x=0.8, halign='center', valign='middle')
                 label.bind(size=label.setter('text_size'))
-                label.index = idx  # Store index in label
-                label.bind(on_touch_down=self.on_label_touch_down)  # Bind touch event
+                label.index = idx
+                label.bind(on_touch_down=self.on_label_touch_down)
                 box.add_widget(label)
                 self.event_layout.add_widget(box)
                 self.event_checkboxes.append((checkbox, idx))
@@ -778,7 +755,6 @@ class RaceApp(BoxLayout):
             self.ftps.cwd(self.current_path)
             files = self.ftps.nlst()
 
-            # Add Back button if not in the root directory
             if self.current_path != '/':
                 btn = Button(text='..', size_hint_y=None, height=40)
                 btn.bind(on_press=self.go_to_parent_directory)
@@ -799,17 +775,14 @@ class RaceApp(BoxLayout):
 
     def on_file_selected(self, instance):
         file_name = instance.text
-        file_path = self.file_path  # Используем напрямую переданный путь к файлу
-        is_local = True  # Или логика для определения, является ли файл локальным
+        file_path = self.file_path
+        is_local = True
 
-        # Create the content for the popup
         content = BoxLayout(orientation='vertical', padding=20, spacing=10)
 
-        # Label with the file name
         file_label = Label(text=f'File: {file_name}', font_size='18sp', size_hint_y=None, height=40)
         content.add_widget(file_label)
 
-        # Button to download the file
         download_btn = Button(
             text='Download',
             size_hint_y=None,
@@ -821,7 +794,6 @@ class RaceApp(BoxLayout):
         download_btn.bind(on_press=lambda x: self.download_file_popup_action(file_name))
         content.add_widget(download_btn)
 
-        # Button to delete the file
         delete_btn = Button(
             text='Delete',
             size_hint_y=None,
@@ -833,7 +805,6 @@ class RaceApp(BoxLayout):
         delete_btn.bind(on_press=lambda x: self.delete_file_popup_action(file_name))
         content.add_widget(delete_btn)
 
-        # Button to rename the file
         rename_btn = Button(
             text='Rename',
             size_hint_y=None,
@@ -845,7 +816,6 @@ class RaceApp(BoxLayout):
         rename_btn.bind(on_press=lambda x: self.rename_file_popup_action(file_name))
         content.add_widget(rename_btn)
 
-        # Button to move the file
         move_btn = Button(
             text='Move',
             size_hint_y=None,
@@ -857,7 +827,6 @@ class RaceApp(BoxLayout):
         move_btn.bind(on_press=lambda x: self.move_file_popup_action(file_name))
         content.add_widget(move_btn)
 
-        # Button to open the file in browser
         open_in_browser_btn = Button(
             text='Open in Browser',
             size_hint_y=None,
@@ -869,7 +838,6 @@ class RaceApp(BoxLayout):
         open_in_browser_btn.bind(on_press=lambda x: self.open_file_in_browser(file_path, is_local, popup))
         content.add_widget(open_in_browser_btn)
 
-        # Create and open the popup
         popup = Popup(
             title='File Actions',
             content=content,
@@ -893,7 +861,7 @@ class RaceApp(BoxLayout):
         try:
             self.ftps.delete(file_name)
             self.show_popup('Success', f'{file_name} deleted successfully!')
-            self.update_file_list()  # Refresh FTP file list after deletion
+            self.update_file_list()
         except Exception as e:
             self.show_popup('Error', f'Error deleting {file_name}: {str(e)}')
 
@@ -921,17 +889,17 @@ class RaceApp(BoxLayout):
         try:
             self.ftps.rename(old_name, new_name)
             self.show_popup('Success', f'File renamed to {new_name}')
-            self.update_file_list()  # Refresh FTP file list after renaming
+            self.update_file_list()
         except Exception as e:
             self.show_popup('Error', f'Error renaming file: {str(e)}')
 
     def move_file_popup_action(self, file_name):
         """Download the file from FTP and move it locally."""
         try:
-            # Move file from FTP to local
+
             self.download_file_popup_action(file_name)
             self.show_popup('Success', f'{file_name} moved successfully!')
-            self.update_file_list()  # Refresh FTP file list
+            self.update_file_list()
         except Exception as e:
             self.show_popup('Error', f'Error moving file: {str(e)}')
 
@@ -943,7 +911,7 @@ class RaceApp(BoxLayout):
         system = platform.system()
         if system == 'Windows':
             os.startfile(file_path)
-        elif system == 'Darwin':  # macOS
+        elif system == 'Darwin':
             subprocess.call(['open', file_path])
         elif system == 'Linux':
             subprocess.call(['xdg-open', file_path])
@@ -999,7 +967,7 @@ class RaceApp(BoxLayout):
 
     def show_event_details(self, index):
         try:
-            # Читаем данные из CSV
+
             results_df = pd.read_csv('C:\\Users\\Admin\\Documents\\raceDocs\\results.csv')
             event_row = self.df.loc[index]
             event_num = event_row.get('EventNum', '')
@@ -1014,7 +982,6 @@ class RaceApp(BoxLayout):
 
             results_df['Event'] = results_df['Event'].str.strip()
 
-            # Копируем данные для фильтрации
             filtered_results_df = results_df[results_df['Event'] == event_to_search].fillna(' ')
 
             if 'Place' in filtered_results_df.columns:
@@ -1024,10 +991,8 @@ class RaceApp(BoxLayout):
                                'AdjTime', 'Delta', 'Rank', 'Qual']
             filtered_results_df = filtered_results_df[columns_to_keep]
 
-            # Сохраняем копию для сравнения изменений
             original_filtered_df = filtered_results_df.copy()
 
-            # Список для хранения изменений
             changes = []
 
             content = BoxLayout(orientation='vertical', padding=10)
@@ -1043,17 +1008,15 @@ class RaceApp(BoxLayout):
                     header_label = Label(text=column, bold=True, size_hint_y=None, height=40)
                     table_layout.add_widget(header_label)
 
-                # Функция для сохранения изменений при потере фокуса
                 def on_focus(instance, value):
-                    if not value:  # Когда TextInput теряет фокус
+                    if not value:
                         row_idx = instance.row_idx
                         col_name = instance.col_name
 
-                        # Проверяем, изменилось ли значение
                         new_value = instance.text
                         original_value = original_filtered_df.at[row_idx, col_name]
                         if new_value != original_value:
-                            # Сохраняем изменения в список
+
                             changes.append((row_idx, col_name, new_value))
                             filtered_results_df.at[row_idx, col_name] = new_value
 
@@ -1070,18 +1033,15 @@ class RaceApp(BoxLayout):
                 scroll_view.add_widget(table_layout)
                 content.add_widget(scroll_view)
 
-            # Кнопка для сохранения изменений
             save_button = Button(text='Save Changes', size_hint_y=None, height=40)
             content.add_widget(save_button)
 
-            # Функция сохранения изменений
             def save_changes(instance):
                 if changes:
                     for row_idx, col_name, new_value in changes:
-                        # Обновляем только изменённые ячейки в оригинальном DataFrame
+
                         results_df.loc[results_df.index == filtered_results_df.index[row_idx], col_name] = new_value
 
-                    # Сохраняем обновлённый DataFrame
                     results_df.to_csv('C:\\Users\\Admin\\Documents\\raceDocs\\results.csv', index=False)
 
                 popup.dismiss()
@@ -1120,7 +1080,7 @@ class RaceApp(BoxLayout):
                 data = {
                     'competition_name': self.comp_name.text,
                     'competition_date': self.comp_date.text,
-                    'regatta_code': self.regatta_code.text  # Add regatta_code here
+                    'regatta_code': self.regatta_code.text
                 }
                 try:
                     if os.path.exists(self.data_file):
@@ -1154,10 +1114,8 @@ class RaceApp(BoxLayout):
                 with open(self.data_file, 'r') as f:
                     presets = json.load(f)
 
-                # Main layout for the popup
                 content = BoxLayout(orientation='vertical', spacing=10, padding=(10, 20))
 
-                # Spinner for selecting a preset
                 content.add_widget(Label(text='Select a preset:', size_hint_y=None, height=30))
                 preset_spinner = Spinner(
                     text='Select Preset',
@@ -1167,11 +1125,9 @@ class RaceApp(BoxLayout):
                 )
                 content.add_widget(preset_spinner)
 
-                # Label to preview the selected preset's details
                 preset_details_label = Label(text='', size_hint_y=None, height=60, valign='top')
                 content.add_widget(preset_details_label)
 
-                # Horizontal layout for the buttons
                 button_layout = BoxLayout(orientation='horizontal', size_hint_y=None, height=50, spacing=20)
                 load_btn = Button(text='Load', size_hint_x=0.5)
                 cancel_btn = Button(text='Cancel', size_hint_x=0.5)
@@ -1188,7 +1144,7 @@ class RaceApp(BoxLayout):
                         data = presets[text]
                         comp_name = data.get('competition_name', '')
                         comp_date = data.get('competition_date', '')
-                        regatta_code = data.get('regatta_code', '')  # Get regatta_code here
+                        regatta_code = data.get('regatta_code', '')
                         preset_details_label.text = (
                             f"Competition Name: {comp_name}\n"
                             f"Competition Date: {comp_date}\n"
@@ -1205,7 +1161,7 @@ class RaceApp(BoxLayout):
                         data = presets[preset_name]
                         self.comp_name.text = data.get('competition_name', '')
                         self.comp_date.text = data.get('competition_date', '')
-                        self.regatta_code.text = data.get('regatta_code', '')  # Load regatta_code here
+                        self.regatta_code.text = data.get('regatta_code', '')
                         popup.dismiss()
                         success_popup = Popup(title='Success', content=Label(text='Preset loaded successfully!'),
                                               size_hint=(0.6, 0.4))
@@ -1313,14 +1269,11 @@ class RaceApp(BoxLayout):
     def show_export_popup(self, instance):
         content = BoxLayout(orientation='horizontal')
 
-        # Left side layout
         left_layout = BoxLayout(orientation='vertical', spacing=10, padding=[10, 20, 10, 20], size_hint=(0.7, 1))
 
-        # File name input
         file_name_input = TextInput(hint_text='Enter file name', multiline=False, size_hint_y=None, height=dp(44))
         left_layout.add_widget(file_name_input)
 
-        # File type spinner
         file_spinner = Spinner(
             text='Select File',
             values=('ENTRY LIST','MASTER RESULTS WITH NO QUAL', 'MASTER RESULTS WITH NO QUAL (START TIME)', 'MASTER RESULTS WITH QUAL', 'MASTER RESULTS WITH QUAL (START TIME)',
@@ -1331,7 +1284,6 @@ class RaceApp(BoxLayout):
         )
         left_layout.add_widget(file_spinner)
 
-        # Checkbox for deleting intermediate files
         delete_intermediate_cb = CheckBox(size_hint_y=None, height=dp(44))
         delete_intermediate_label = Label(text='Delete intermediate files', size_hint_y=None, height=dp(44))
         delete_intermediate_layout = BoxLayout(orientation='horizontal', size_hint_y=None, height=dp(44))
@@ -1339,7 +1291,6 @@ class RaceApp(BoxLayout):
         delete_intermediate_layout.add_widget(delete_intermediate_label)
         left_layout.add_widget(delete_intermediate_layout)
 
-        # Checkbox for opening file in Chrome
         open_in_chrome_cb = CheckBox(size_hint_y=None, height=dp(44))
         open_in_chrome_label = Label(text='Open file in Chrome after printing', size_hint_y=None, height=dp(44))
         open_in_chrome_layout = BoxLayout(orientation='horizontal', size_hint_y=None, height=dp(44))
@@ -1347,7 +1298,6 @@ class RaceApp(BoxLayout):
         open_in_chrome_layout.add_widget(open_in_chrome_label)
         left_layout.add_widget(open_in_chrome_layout)
 
-        # Select Drive button
         dropdown = DropDown()
         for drive in ['C:', 'D:', 'E:', 'F:', 'G:']:
             btn = Button(text=drive, size_hint_y=None, height=dp(44))
@@ -1358,26 +1308,21 @@ class RaceApp(BoxLayout):
         dropdown.bind(on_select=lambda instance, x: setattr(drive_button, 'text', x))
         left_layout.add_widget(drive_button)
 
-        # Reset to default path button
         reset_path_button = Button(text='Reset to Default Path', size_hint_y=None, height=dp(44))
         reset_path_button.bind(on_press=lambda x: self.reset_to_default_path(file_chooser, get_default_folder()))
         left_layout.add_widget(reset_path_button)
 
-        # Export button
         export_btn = Button(text='Export', size_hint_y=None, height=dp(44))
         export_btn.bind(on_press=lambda x: self.print_files(file_name_input.text, file_spinner.text, file_chooser.path,
                                                             delete_intermediate_cb.active, open_in_chrome_cb.active))
         left_layout.add_widget(export_btn)
 
-        # File chooser on the right
         default_folder = get_default_folder()
         file_chooser = FileChooserListView(path=default_folder, size_hint=(0.3, 1))
 
-        # Add widgets to content
         content.add_widget(left_layout)
         content.add_widget(file_chooser)
 
-        # Open the popup
         popup = Popup(title='Export File', content=content, size_hint=(0.9, 0.9))
         popup.open()
 
@@ -1385,6 +1330,8 @@ class RaceApp(BoxLayout):
         file_chooser.path = default_folder
 
     def print_files(self, file_name, selected_file, folder_path, delete_intermediate, open_in_chrome):
+        global selectedFile
+        selectedFile = selected_file
         try:
             if not self.selected_events:
                 raise ValueError("No events selected")
@@ -1393,20 +1340,18 @@ class RaceApp(BoxLayout):
                 raise ValueError("No folder selected")
 
             selected_event_nums = [str(self.df.iloc[idx]['EventNum']) for idx in self.selected_events]
-            selected_event_nums = sorted(selected_event_nums, key=int)  # Sort event numbers
+            selected_event_nums = sorted(selected_event_nums, key=int)
             print("Selected Event Numbers:", selected_event_nums)
 
             self.process_files(selected_event_nums)
 
             chrome_path = self.get_chrome_path()
             absolute_path = os.path.dirname(__file__)
-            html_dir = os.path.join(absolute_path, 'html')  # Directory for HTML files
+            html_dir = os.path.join(absolute_path, 'html')
 
-            # Ensure the folder path exists
             if not os.path.exists(folder_path):
                 os.makedirs(folder_path)
 
-            # Load event_num.csv and create cat_list
             home_dir = os.path.expanduser("~")
             race_docs_dir = os.path.join(home_dir, "Documents", "raceDocs")
             eventNumFILE = os.path.join(race_docs_dir, "compInfo/event_num.csv")
@@ -1420,10 +1365,9 @@ class RaceApp(BoxLayout):
             html_short_startlists_log_handled = False
             for ev in selected_event_nums:
                 event_row = self.df[self.df['EventNum'] == int(ev)].iloc[0]
-                event_name = event_row['Event'].split()[1]  # Extract name after first space
+                event_name = event_row['Event'].split()[1]
                 eta = event_row['Event'].split()[2] if len(event_row['Event'].split()) > 2 else event_row['EventNum']
 
-                # Get event number from category name
                 ev_num = cat_list.get(event_name)
 
                 if selected_file == 'RESULTS WITH QUAL':
@@ -1460,7 +1404,6 @@ class RaceApp(BoxLayout):
                 else:
                     raise ValueError("Invalid file selection")
 
-                # Формируем имя файла
                 output_file_name = f"race-{ev}___event-{ev_num}___name-{event_name}___eta-{eta}.pdf"
                 output_file_path = os.path.join(folder_path, output_file_name)
                 temp_pdf_files.append(output_file_path)
@@ -1475,23 +1418,21 @@ class RaceApp(BoxLayout):
                 input_file_path_url = input_file_path.replace('\\', '/').replace(' ', '%20')
                 input_file_path_url = f"file:///{input_file_path_url}"
 
-                print(f"Input file path URL: {input_file_path_url}")  # Debugging URL
+                print(f"Input file path URL: {input_file_path_url}")
 
                 cmd = [
                     chrome_path,
                     "--headless",
                     "--disable-gpu",
-                    "--no-sandbox",  # Added --no-sandbox for potential fix
+                    "--no-sandbox",
                     f"--print-to-pdf={output_file_path}",
                     input_file_path_url
                 ]
 
-                # Debug the command
                 print(f"Running command: {' '.join(cmd)}")
 
                 result = subprocess.run(cmd, capture_output=True, text=True)
 
-                # Debugging outputs
                 print("stdout:", result.stdout)
                 print("stderr:", result.stderr)
 
@@ -1601,42 +1542,6 @@ class RaceApp(BoxLayout):
         for index, row in fll.iterrows():
             flag_list[row["Shortcut"]] = row["Flag"]
 
-        with open("html/body_r_withQual.html", "r") as f:
-            html_results_withQual = f.read()
-
-        with open("html/body_r_withQual.html", "r") as f:
-            html_results_withQual_wthStart = f.read()
-
-        with open("html/body_r_noQual.html", "r") as f:
-            html_results_noQual = f.read()
-        with open("html/body_r_noQual.html", "r") as f:
-            html_results_noQual_wthStart = f.read()
-
-        with open("html/main_s.html", "r") as f:
-            html_startlists = f.read()
-
-        with open("html/body_r_withQual.html", "r") as f:
-            html_master_withQual = f.read()
-        with open("html/body_r_withQual.html", "r") as f:
-            html_master_withQual_wthStart = f.read()
-
-        with open("html/body_r_noQual.html", "r") as f:
-            html_master_noQual = f.read()
-        with open("html/body_r_noQual.html", "r") as f:
-            html_master_noQual_wthStart = f.read()
-
-        with open("html/main_s.html", "r") as f:
-            html_startlists_master = f.read()
-
-        with open("html/main_entries.html", "r") as f:
-            html_entries = f.read()
-
-        with open("html/main_s_short.html", "r") as f:
-            html_short_startlists = f.read()
-
-        with open("html/main_atlase.html", "r") as f:
-            html_atlase = f.read()
-
         start = datetime.datetime.now()
         print("Start: ", start)
 
@@ -1663,20 +1568,20 @@ class RaceApp(BoxLayout):
                 def surnameCheck(input_string):
                     if not input_string or len(input_string) == 0:
                         return ' '
-                    # Убираем все числа и закрывающие скобки
+
                     clean_string = ''.join(c for c in input_string if not c.isdigit() and c not in "())")
-                    # Разбиваем строку по пробелам
+
                     parts = clean_string.split()
-                    # Ищем слово, написанное заглавными буквами
+
                     uppercase_parts = [part for part in parts if part.isupper()]
                     if uppercase_parts:
                         surname = uppercase_parts[0]
-                        # Форматируем фамилию так, чтобы первая буква была заглавной, остальные строчными
+
                         return surname.capitalize()
                     return ' '
 
                 def determine_indices(lane_split):
-                    # Проверяем, есть ли в первом элементе числа
+
                     if lane_split[0] and lane_split[0][0].isdigit():
                         return 1, 2
                     return 0, 1
@@ -1705,42 +1610,41 @@ class RaceApp(BoxLayout):
                 lane5_split = safe_split(df["Lane 5"][i])
                 lane6_split = safe_split(df["Lane 6"][i])
 
-                # Определяем индексы для фамилии и клуба
                 lane1_indices = determine_indices(lane1_split)
                 lane2_indices = determine_indices(lane2_split)
                 lane3_indices = determine_indices(lane3_split)
                 lane4_indices = determine_indices(lane4_split)
                 lane5_indices = determine_indices(lane5_split)
                 lane6_indices = determine_indices(lane6_split)
-
-                infoShort.append([
-                    df["EventNum"][i],
-                    cat_list.get(event_split[1]),
-                    event_split[1],
-                    df["Day"][i],
-                    df["Start"][i],
-                    event_split[2],
-                    f'<img src="flags/{flag_list.get(lane1_split[0], "none.jpg")}" style="max-width: 6mm; max-height: 6mm">',
-                    aff_list.get(lane1_split[lane1_indices[0]], " "),
-                    surnameCheck(lane1_split[lane1_indices[1]]),
-                    f'<img src="flags/{flag_list.get(lane2_split[0], "none.jpg")}" style="max-width: 6mm; max-height: 6mm">',
-                    aff_list.get(lane2_split[lane2_indices[0]], " "),
-                    surnameCheck(lane2_split[lane2_indices[1]]),
-                    f'<img src="flags/{flag_list.get(lane3_split[0], "none.jpg")}" style="max-width: 6mm; max-height: 6mm">',
-                    aff_list.get(lane3_split[lane3_indices[0]], " "),
-                    surnameCheck(lane3_split[lane3_indices[1]]),
-                    f'<img src="flags/{flag_list.get(lane4_split[0], "none.jpg")}" style="max-width: 6mm; max-height: 6mm">',
-                    aff_list.get(lane4_split[lane4_indices[0]], " "),
-                    surnameCheck(lane4_split[lane4_indices[1]]),
-                    f'<img src="flags/{flag_list.get(lane5_split[0], "none.jpg")}" style="max-width: 6mm; max-height: 6mm">',
-                    aff_list.get(lane5_split[lane5_indices[0]], " "),
-                    surnameCheck(lane5_split[lane5_indices[1]]),
-                    f'<img src="flags/{flag_list.get(lane6_split[0], "none.jpg")}" style="max-width: 6mm; max-height: 6mm">',
-                    aff_list.get(lane6_split[lane6_indices[0]], " "),
-                    surnameCheck(lane6_split[lane6_indices[1]]),
-                    df["Prog"][i] if df["Prog"][i] and not math.isnan(df["Prog"][i]) else " ",
-                    en
-                ])
+                if selectedFile == "SHORT STARTLIST":
+                    infoShort.append([
+                        df["EventNum"][i],
+                        cat_list.get(event_split[1]),
+                        event_split[1],
+                        df["Day"][i],
+                        df["Start"][i],
+                        event_split[2],
+                        f'<img src="flags/{flag_list.get(lane1_split[0], "none.jpg")}" style="max-width: 6mm; max-height: 6mm">',
+                        aff_list.get(lane1_split[lane1_indices[0]], " "),
+                        surnameCheck(lane1_split[lane1_indices[1]]),
+                        f'<img src="flags/{flag_list.get(lane2_split[0], "none.jpg")}" style="max-width: 6mm; max-height: 6mm">',
+                        aff_list.get(lane2_split[lane2_indices[0]], " "),
+                        surnameCheck(lane2_split[lane2_indices[1]]),
+                        f'<img src="flags/{flag_list.get(lane3_split[0], "none.jpg")}" style="max-width: 6mm; max-height: 6mm">',
+                        aff_list.get(lane3_split[lane3_indices[0]], " "),
+                        surnameCheck(lane3_split[lane3_indices[1]]),
+                        f'<img src="flags/{flag_list.get(lane4_split[0], "none.jpg")}" style="max-width: 6mm; max-height: 6mm">',
+                        aff_list.get(lane4_split[lane4_indices[0]], " "),
+                        surnameCheck(lane4_split[lane4_indices[1]]),
+                        f'<img src="flags/{flag_list.get(lane5_split[0], "none.jpg")}" style="max-width: 6mm; max-height: 6mm">',
+                        aff_list.get(lane5_split[lane5_indices[0]], " "),
+                        surnameCheck(lane5_split[lane5_indices[1]]),
+                        f'<img src="flags/{flag_list.get(lane6_split[0], "none.jpg")}" style="max-width: 6mm; max-height: 6mm">',
+                        aff_list.get(lane6_split[lane6_indices[0]], " "),
+                        surnameCheck(lane6_split[lane6_indices[1]]),
+                        df["Prog"][i] if df["Prog"][i] and not math.isnan(df["Prog"][i]) else " ",
+                        en
+                    ])
 
         def format_time(seconds):
             """Format time as mm:ss.00 if more than a minute, otherwise as ss.00."""
@@ -1756,13 +1660,13 @@ class RaceApp(BoxLayout):
             if isinstance(time_str, str):
                 time_str = time_str.strip()
                 parts = time_str.split(':')
-                if len(parts) == 2:  # mm:ss.00 format
+                if len(parts) == 2:
                     try:
                         minutes, seconds = map(float, parts)
                         return minutes * 60 + seconds
                     except ValueError:
                         return None
-                elif len(parts) == 1:  # s.00 format
+                elif len(parts) == 1:
                     try:
                         return float(parts[0])
                     except ValueError:
@@ -1775,7 +1679,6 @@ class RaceApp(BoxLayout):
             if current_time is None:
                 return " ", " "
 
-            # Collect all times for the same event
             times = [time_to_seconds(df[time_column][i]) for i in df.index
                      if str(df["EventNum"][i]) == event_num and time_to_seconds(df[time_column][i]) is not None]
 
@@ -1785,7 +1688,6 @@ class RaceApp(BoxLayout):
             sorted_times = sorted(set(times))
             print(f"Sorted times for event {event_num} in column {time_column}: {sorted_times}")
 
-            # Calculate rank
             rank = sum(t < current_time for t in sorted_times) + 1
             delta = current_time - min(sorted_times) if sorted_times else None
             if delta is not None and delta == 0:
@@ -1808,22 +1710,18 @@ class RaceApp(BoxLayout):
 
             return f"{split_time_str}", " "
 
-        # Determine columns to check for missing data
         time_columns = ["500m", "1000m", "1500m"]
 
-        # Collect valid indices for each time column
         valid_indices = {col: [] for col in time_columns}
         for col in time_columns:
             valid_indices[col] = [i for i in fl.index if not pd.isna(fl[col][i])]
 
-        # Determine which columns have data for all participants
         columns_with_data = {col: len(valid_indices[col]) == len(fl.index) for col in time_columns}
-        columns_with_data["Finish"] = True  # Always include Finish
+        columns_with_data["Finish"] = True
 
         for j, en in enumerate(fl["EventNum"]):
             if str(en) in selected_event_nums:
                 if fl["Crew"][j] != "Empty":
-                    # Check if data is available for all required splits
                     valid = all(fl[col][j] is not None for col in time_columns if columns_with_data[col])
                     if valid:
                         def masterFun(a):
@@ -1849,7 +1747,6 @@ class RaceApp(BoxLayout):
                         else:
                             modeltime = None
 
-                        # Calculating ranks, deltas, and splits
                         m1000split, _ = split_time(fl["500m"][j], fl["1000m"][j]) if columns_with_data["1000m"] else (
                         "", "")
                         m1500split, _ = split_time(fl["1000m"][j], fl["1500m"][j]) if columns_with_data["1500m"] else (
@@ -1862,7 +1759,6 @@ class RaceApp(BoxLayout):
                         m1500rank, m1500delta = rank_and_delta("1500m", fl, j, str(en)) if columns_with_data[
                             "1500m"] else ("", "")
 
-                        # Remove "+ 00:00.00" from delta values
                         if m500delta == "+ 00:00.00":
                             m500delta = ""
                         if m1000delta == "+ 00:00.00":
@@ -1872,7 +1768,6 @@ class RaceApp(BoxLayout):
                         if mFinsplit == "+ 00:00.00":
                             mFinsplit = ""
 
-                        # If delta is empty, move split to delta and clear split
                         if m500delta == "":
                             m500delta = m500split
                             m500split = ""
@@ -1889,115 +1784,124 @@ class RaceApp(BoxLayout):
                         bow_value = str(fl["Bow"][j])
                         bow_display = bow_value.split()[0] if " " in bow_value else bow_value
 
-                        res_withQual.append([
-                            str(fl["Place"][j]).split(sep=".")[0],
-                            str(fl["Bow"][j]) if "[" in str(fl["Bow"][j]) else str(fl["Bow"][j]).split(sep=".")[0],
-                            f'<img src="flags/{flag_list.get(str(fl["CrewAbbrev"][j]), "default_flag")}" style="max-width: 6mm">',
-                            fl["Crew"][j], fl["Stroke"][j].replace("/", "<br>"),
-                            format_time(time_to_seconds(fl["500m"][j])) if columns_with_data["500m"] else "",
-                            m500rank, m500delta,
-                            format_time(time_to_seconds(fl["1000m"][j])) if columns_with_data["1000m"] else "",
-                            m1000rank, m1000delta, m1000split,
-                            format_time(time_to_seconds(fl["1500m"][j])) if columns_with_data["1500m"] else "",
-                            m1500rank, m1500delta, m1500split,
-                            fl["AdjTime"][j],
-                            f'+ {format_time(time_to_seconds(fl["Delta"][j]))}' if fl["Delta"][j] else "",
-                            mFinsplit, fl["Qual"][j], coach_list.get(fl["Stroke"][j]), en
-                        ])
+                        if selectedFile == "RESULTS WITH QUAL":
+                            res_withQual.append([
+                                str(fl["Place"][j]).split(sep=".")[0],
+                                str(fl["Bow"][j]) if "[" in str(fl["Bow"][j]) else str(fl["Bow"][j]).split(sep=".")[0],
+                                f'<img src="flags/{flag_list.get(str(fl["CrewAbbrev"][j]), "default_flag")}" style="max-width: 6mm">',
+                                fl["Crew"][j], fl["Stroke"][j].replace("/", "<br>"),
+                                format_time(time_to_seconds(fl["500m"][j])) if columns_with_data["500m"] else "",
+                                m500rank, m500delta,
+                                format_time(time_to_seconds(fl["1000m"][j])) if columns_with_data["1000m"] else "",
+                                m1000rank, m1000delta, m1000split,
+                                format_time(time_to_seconds(fl["1500m"][j])) if columns_with_data["1500m"] else "",
+                                m1500rank, m1500delta, m1500split,
+                                fl["AdjTime"][j],
+                                f'+ {format_time(time_to_seconds(fl["Delta"][j]))}' if fl["Delta"][j] else "",
+                                mFinsplit, fl["Qual"][j], coach_list.get(fl["Stroke"][j]), en
+                            ])
+                        if selectedFile == "RESULTS WITH QUAL (START TIME)":
+                            res_withQual_start.append([
+                                str(fl["Place"][j]).split(sep=".")[0],
+                                bow_display,
+                                f'<img src="flags/{flag_list.get(str(fl["CrewAbbrev"][j]), "default_flag")}" style="max-width: 6mm">',
+                                fl["Crew"][j], fl["Stroke"][j].replace("/", "<br>"),
+                                " ",
+                                " ", " ",
+                                " ",
+                                " ", " ", " ",
+                                fl["Start"][j],
+                                " ", " ", " ",
+                                fl["AdjTime"][j],
+                                f'+ {format_time(time_to_seconds(fl["Delta"][j]))}' if fl["Delta"][j] else "",
+                                mFinsplit, fl["Qual"][j], coach_list.get(fl["Stroke"][j]), en
+                            ])
+                        if selectedFile == "RESULTS WITH NO QUAL":
+                            res_noQual.append([str(fl["Place"][j]).split(sep=".")[0], f"({str(fl["Rank"][j]).split(sep=".")[0]})",
+                                            str(fl["Bow"][j]) if "[" in str(fl["Bow"][j]) else str(fl["Bow"][j]).split(sep=".")[0],
+                                            f'<img src="flags/{flag_list.get(str(fl["CrewAbbrev"][j]), "default_flag")}" style="max-width: 6mm">',
+                                            fl["Crew"][j], fl["Stroke"][j].replace("/", "<br>"), format_time(time_to_seconds(fl["500m"][j])) if columns_with_data["500m"] else "",
+                                            m500rank, m500delta,
+                                            format_time(time_to_seconds(fl["1000m"][j])) if columns_with_data["1000m"] else "",
+                                            m1000rank, m1000delta, m1000split,
+                                            format_time(time_to_seconds(fl["1500m"][j])) if columns_with_data["1500m"] else "",
+                                            m1500rank, m1500delta, m1500split,
+                                            fl["AdjTime"][j],
+                                            f'+ {format_time(time_to_seconds(fl["Delta"][j]))}' if fl["Delta"][j] else "",
+                                            mFinsplit, coach_list.get(fl["Stroke"][j]), en])
 
-                        res_withQual_start.append([
-                            str(fl["Place"][j]).split(sep=".")[0],
-                            bow_display,
-                            f'<img src="flags/{flag_list.get(str(fl["CrewAbbrev"][j]), "default_flag")}" style="max-width: 6mm">',
-                            fl["Crew"][j], fl["Stroke"][j].replace("/", "<br>"),
-                            " ",
-                            " ", " ",
-                            " ",
-                            " ", " ", " ",
-                            fl["Start"][j],
-                            " ", " ", " ",
-                            fl["AdjTime"][j],
-                            f'+ {format_time(time_to_seconds(fl["Delta"][j]))}' if fl["Delta"][j] else "",
-                            mFinsplit, fl["Qual"][j], coach_list.get(fl["Stroke"][j]), en
-                        ])
+                        if selectedFile == "RESULTS WITH NO QUAL (START TIME)":
+                            res_noQual_start.append(
+                                [str(fl["Place"][j]).split(sep=".")[0], f"({str(fl["Rank"][j]).split(sep=".")[0]})",
+                                 bow_display,
+                                 f'<img src="flags/{flag_list.get(str(fl["CrewAbbrev"][j]), "default_flag")}" style="max-width: 6mm">',
+                                 fl["Crew"][j], fl["Stroke"][j].replace("/", "<br>"),
+                                 " ",
+                                 " ", " ",
+                                 " ",
+                                 " ", " ", " ",
+                                 fl["Start"][j],
+                                 " ", " ", " ",
+                                 fl["AdjTime"][j],
+                                 f'+ {format_time(time_to_seconds(fl["Delta"][j]))}' if fl["Delta"][j] else "",
+                                 mFinsplit, coach_list.get(fl["Stroke"][j]), en])
 
-                        res_noQual.append([str(fl["Place"][j]).split(sep=".")[0], f"({str(fl["Rank"][j]).split(sep=".")[0]})",
-                                        str(fl["Bow"][j]) if "[" in str(fl["Bow"][j]) else str(fl["Bow"][j]).split(sep=".")[0],
-                                        f'<img src="flags/{flag_list.get(str(fl["CrewAbbrev"][j]), "default_flag")}" style="max-width: 6mm">',
-                                        fl["Crew"][j], fl["Stroke"][j].replace("/", "<br>"), format_time(time_to_seconds(fl["500m"][j])) if columns_with_data["500m"] else "",
-                                        m500rank, m500delta,
-                                        format_time(time_to_seconds(fl["1000m"][j])) if columns_with_data["1000m"] else "",
-                                        m1000rank, m1000delta, m1000split,
-                                        format_time(time_to_seconds(fl["1500m"][j])) if columns_with_data["1500m"] else "",
-                                        m1500rank, m1500delta, m1500split,
-                                        fl["AdjTime"][j],
-                                        f'+ {format_time(time_to_seconds(fl["Delta"][j]))}' if fl["Delta"][j] else "",
-                                        mFinsplit, coach_list.get(fl["Stroke"][j]), en])
-
-                        res_noQual_start.append(
-                            [str(fl["Place"][j]).split(sep=".")[0], f"({str(fl["Rank"][j]).split(sep=".")[0]})",
-                             bow_display,
-                             f'<img src="flags/{flag_list.get(str(fl["CrewAbbrev"][j]), "default_flag")}" style="max-width: 6mm">',
-                             fl["Crew"][j], fl["Stroke"][j].replace("/", "<br>"),
-                             " ",
-                             " ", " ",
-                             " ",
-                             " ", " ", " ",
-                             fl["Start"][j],
-                             " ", " ", " ",
-                             fl["AdjTime"][j],
-                             f'+ {format_time(time_to_seconds(fl["Delta"][j]))}' if fl["Delta"][j] else "",
-                             mFinsplit, coach_list.get(fl["Stroke"][j]), en])
-
-                        atlase.append([str(fl["Place"][j]).split(sep=".")[0], bow_display,
-                                       f'<img src="flags/{flag_list.get(str(fl["CrewAbbrev"][j]), "default_flag")}" style="max-width: 6mm">',
-                                       fl["Crew"][j], fl["Stroke"][j].replace("/", "<br>"), fl["Start"][j], fl["AdjTime"][j], fl["Qual"][j], modeltime, en])
-
-                        res_withQual_master.append([str(fl["Place"][j]).split(sep=".")[0], str(fl["Bow"][j]) if "[" in str(fl["Bow"][j]) else str(fl["Bow"][j]).split(sep=".")[0],
+                        if selectedFile == "TEST RACE":
+                            atlase.append([str(fl["Place"][j]).split(sep=".")[0], bow_display,
                                            f'<img src="flags/{flag_list.get(str(fl["CrewAbbrev"][j]), "default_flag")}" style="max-width: 6mm">',
-                                           fl["Crew"][j],
-                                           fl["Stroke"][j].replace("/", "<br>"), format_time(time_to_seconds(fl["1500m"][j])) if columns_with_data["1500m"] else "",
-                                        m1500rank, m1500delta, fl["RawTime"][j], mFinsplit, fl["AdjTime"][j],
-                                           f'+ {format_time(time_to_seconds(fl["Delta"][j]))}' if fl["Delta"][j] else "",
-                                           fl["Qual"][j], masterFun(str(fl["PenaltyCode"][j])), en])
+                                           fl["Crew"][j], fl["Stroke"][j].replace("/", "<br>"), fl["Start"][j], fl["AdjTime"][j], fl["Qual"][j], modeltime, en])
 
-                        res_withQual_master_start.append([str(fl["Place"][j]).split(sep=".")[0],
-                                                            bow_display,
-                                                            f'<img src="flags/{flag_list.get(str(fl["CrewAbbrev"][j]), "default_flag")}" style="max-width: 6mm">',
-                                                            fl["Crew"][j],
-                                                            fl["Stroke"][j].replace("/", "<br>"),
-                                                            fl["Start"][j],
-                                                            " ", " ", fl["RawTime"][j], mFinsplit, fl["AdjTime"][j],
-                             f'+ {format_time(time_to_seconds(fl["Delta"][j]))}' if fl["Delta"][j] else "",
-                                                            fl["Qual"][j], masterFun(str(fl["PenaltyCode"][j])), en])
+                        if selectedFile == "MASTER RESULTS WITH QUAL":
+                            res_withQual_master.append([str(fl["Place"][j]).split(sep=".")[0], str(fl["Bow"][j]) if "[" in str(fl["Bow"][j]) else str(fl["Bow"][j]).split(sep=".")[0],
+                                               f'<img src="flags/{flag_list.get(str(fl["CrewAbbrev"][j]), "default_flag")}" style="max-width: 6mm">',
+                                               fl["Crew"][j],
+                                               fl["Stroke"][j].replace("/", "<br>"), format_time(time_to_seconds(fl["1500m"][j])) if columns_with_data["1500m"] else "",
+                                            m1500rank, m1500delta, fl["RawTime"][j], mFinsplit, fl["AdjTime"][j],
+                                               f'+ {format_time(time_to_seconds(fl["Delta"][j]))}' if fl["Delta"][j] else "",
+                                               fl["Qual"][j], masterFun(str(fl["PenaltyCode"][j])), en])
 
-                        res_noQual_master.append([str(fl["Place"][j]).split(sep=".")[0], f"({str(fl["Rank"][j]).split(sep=".")[0]})",
-                             str(fl["Bow"][j]) if "[" in str(fl["Bow"][j]) else str(fl["Bow"][j]).split(sep=".")[0],
-                             f'<img src="flags/{flag_list.get(str(fl["CrewAbbrev"][j]), "default_flag")}" style="max-width: 6mm">',
-                             fl["Crew"][j], fl["Stroke"][j].replace("/", "<br>"), format_time(time_to_seconds(fl["1500m"][j])) if columns_with_data["1500m"] else "",
-                                        m1500rank, m1500delta, fl["RawTime"][j], mFinsplit, fl["AdjTime"][j],
-                                           f'+ {format_time(time_to_seconds(fl["Delta"][j]))}' if fl["Delta"][j] else "", masterFun(str(fl["PenaltyCode"][j])), en])
+                        if selectedFile == "MASTER RESULTS WITH QUAL (START TIME)":
+                            res_withQual_master_start.append([str(fl["Place"][j]).split(sep=".")[0],
+                                                                bow_display,
+                                                                f'<img src="flags/{flag_list.get(str(fl["CrewAbbrev"][j]), "default_flag")}" style="max-width: 6mm">',
+                                                                fl["Crew"][j],
+                                                                fl["Stroke"][j].replace("/", "<br>"),
+                                                                fl["Start"][j],
+                                                                " ", " ", fl["RawTime"][j], mFinsplit, fl["AdjTime"][j],
+                                 f'+ {format_time(time_to_seconds(fl["Delta"][j]))}' if fl["Delta"][j] else "",
+                                                                fl["Qual"][j], masterFun(str(fl["PenaltyCode"][j])), en])
 
-                        res_noQual_master_start.append([str(fl["Place"][j]).split(sep=".")[0], f"({str(fl["Rank"][j]).split(sep=".")[0]})",
-                             bow_display,
-                             f'<img src="flags/{flag_list.get(str(fl["CrewAbbrev"][j]), "default_flag")}" style="max-width: 6mm">',
-                             fl["Crew"][j], fl["Stroke"][j].replace("/", "<br>"),
-                             fl["Start"][j],
-                             " ", " ", fl["RawTime"][j], mFinsplit, fl["AdjTime"][j],
-                             f'+ {format_time(time_to_seconds(fl["Delta"][j]))}' if fl["Delta"][j] else "",
-                             masterFun(str(fl["PenaltyCode"][j])), en])
+                        if selectedFile == "MASTER RESULTS WITH NO QUAL":
+                            res_noQual_master.append([str(fl["Place"][j]).split(sep=".")[0], f"({str(fl["Rank"][j]).split(sep=".")[0]})",
+                                 str(fl["Bow"][j]) if "[" in str(fl["Bow"][j]) else str(fl["Bow"][j]).split(sep=".")[0],
+                                 f'<img src="flags/{flag_list.get(str(fl["CrewAbbrev"][j]), "default_flag")}" style="max-width: 6mm">',
+                                 fl["Crew"][j], fl["Stroke"][j].replace("/", "<br>"), format_time(time_to_seconds(fl["1500m"][j])) if columns_with_data["1500m"] else "",
+                                            m1500rank, m1500delta, fl["RawTime"][j], mFinsplit, fl["AdjTime"][j],
+                                               f'+ {format_time(time_to_seconds(fl["Delta"][j]))}' if fl["Delta"][j] else "", masterFun(str(fl["PenaltyCode"][j])), en])
 
-                        start_data.append([str(fl["Bow"][j]) if "[" in str(fl["Bow"][j]) else str(fl["Bow"][j]).split(sep=".")[0],
-                                           f'<img src="flags/{flag_list.get(str(fl["CrewAbbrev"][j]), "default_flag")}" style="max-width: 6mm">',
-                                           fl["Crew"][j], fl["Stroke"][j].replace("/", ", "), coach_list.get(fl["Stroke"][j]), en])
+                        if selectedFile == "MASTER RESULTS WITH NO QUAL (START TIME)":
+                            res_noQual_master_start.append([str(fl["Place"][j]).split(sep=".")[0], f"({str(fl["Rank"][j]).split(sep=".")[0]})",
+                                 bow_display,
+                                 f'<img src="flags/{flag_list.get(str(fl["CrewAbbrev"][j]), "default_flag")}" style="max-width: 6mm">',
+                                 fl["Crew"][j], fl["Stroke"][j].replace("/", "<br>"),
+                                 fl["Start"][j],
+                                 " ", " ", fl["RawTime"][j], mFinsplit, fl["AdjTime"][j],
+                                 f'+ {format_time(time_to_seconds(fl["Delta"][j]))}' if fl["Delta"][j] else "",
+                                 masterFun(str(fl["PenaltyCode"][j])), en])
 
-                        start_data_master.append([str(fl["Bow"][j]) if "[" in str(fl["Bow"][j]) else str(fl["Bow"][j]).split(sep=".")[0],
-                                           f'<img src="flags/{flag_list.get(str(fl["CrewAbbrev"][j]), "default_flag")}" style="max-width: 6mm">',
-                                           fl["Crew"][j], fl["Stroke"][j].replace("/", "<br>"),
-                                           masterFun(str(fl["PenaltyCode"][j])), coach_list.get(fl["Stroke"][j]), en])
+                        if selectedFile == "STARTLIST":
+                            start_data.append([str(fl["Bow"][j]) if "[" in str(fl["Bow"][j]) else str(fl["Bow"][j]).split(sep=".")[0],
+                                               f'<img src="flags/{flag_list.get(str(fl["CrewAbbrev"][j]), "default_flag")}" style="max-width: 6mm">',
+                                               fl["Crew"][j], fl["Stroke"][j].replace("/", ", "), coach_list.get(fl["Stroke"][j]), en])
+                        if selectedFile == "MASTER STARTLIST":
+                            start_data_master.append([str(fl["Bow"][j]) if "[" in str(fl["Bow"][j]) else str(fl["Bow"][j]).split(sep=".")[0],
+                                               f'<img src="flags/{flag_list.get(str(fl["CrewAbbrev"][j]), "default_flag")}" style="max-width: 6mm">',
+                                               fl["Crew"][j], fl["Stroke"][j].replace("/", "<br>"),
+                                               masterFun(str(fl["PenaltyCode"][j])), coach_list.get(fl["Stroke"][j]), en])
 
-                        entry_data.append([f'<img src="flags/{flag_list.get(str(fl["CrewAbbrev"][j]), "default_flag")}" style="max-width: 6mm">',
-                                              fl["Crew"][j], fl["Stroke"][j].replace("/", ", "), en])
+                        if selectedFile == "ENTRY LIST":
+                            entry_data.append([f'<img src="flags/{flag_list.get(str(fl["CrewAbbrev"][j]), "default_flag")}" style="max-width: 6mm">',
+                                                  fl["Crew"][j], fl["Stroke"][j].replace("/", ", "), en])
 
         atlase.sort(key=lambda x: x[8] if x[8] is not None else -float('inf'), reverse=True)
         for index, row in enumerate(atlase, start=1):
@@ -2005,250 +1909,249 @@ class RaceApp(BoxLayout):
         import re
 
         def extract_number(value):
-            value_str = str(value)  # Преобразуем в строку
-            match = re.search(r'\d+', value_str)  # Ищем числовые значения
+            value_str = str(value)
+            match = re.search(r'\d+', value_str)
             return int(
-                match.group()) if match else 999999  # Если нашли число, возвращаем его, иначе возвращаем большое значение
+                match.group()) if match else 999999
 
-        # Применяем функцию к данным
         start_data.sort(key=lambda x: (extract_number(x[5]), extract_number(x[0])))
         start_data_master.sort(key=lambda x: (extract_number(x[6]), extract_number(x[0])))
 
         current_date = datetime.datetime.now().strftime('%Y-%m-%d')
         current_time = datetime.datetime.now().strftime('%H:%M:%S')
 
-        html_results_withQual = html_results_withQual.format(compName=self.comp_name.text, compDates=self.comp_date.text, cDate=current_date,
-                           cTime=current_time)
-        html_results_withQual_wthStart = html_results_withQual_wthStart.format(compName=self.comp_name.text, compDates=self.comp_date.text, cDate=current_date,
-                           cTime=current_time)
+        html_dir = os.path.join(os.path.dirname(__file__), 'html')
 
-        html_results_noQual = html_results_noQual.format(compName=self.comp_name.text, compDates=self.comp_date.text, cDate=current_date,
-                           cTime=current_time)
-        html_results_noQual_wthStart = html_results_noQual_wthStart.format(compName=self.comp_name.text, compDates=self.comp_date.text,
-                                                         cDate=current_date,
-                                                         cTime=current_time)
+        if selectedFile == "RESULTS WITH QUAL":
+            with open("html/body_r_withQual.html", "r") as f:
+                html_results_withQual = f.read()
 
-        html_master_withQual = html_master_withQual.format(compName=self.comp_name.text, compDates=self.comp_date.text, cDate=current_date,
-                           cTime=current_time)
-        html_master_withQual_wthStart = html_master_withQual_wthStart.format(compName=self.comp_name.text, compDates=self.comp_date.text,
-                                                           cDate=current_date,
-                                                           cTime=current_time)
-        html_master_noQual = html_master_noQual.format(compName=self.comp_name.text, compDates=self.comp_date.text, cDate=current_date,
-                             cTime=current_time)
-        html_master_noQual_wthStart = html_master_noQual_wthStart.format(compName=self.comp_name.text, compDates=self.comp_date.text,
+            html_results_withQual = html_results_withQual.format(compName=self.comp_name.text,
+                                                                 compDates=self.comp_date.text, cDate=current_date,
+                                                                 cTime=current_time)
+
+            with open(os.path.join(html_dir, "body_r_usualWithQual.txt"), "r") as f:
+                bodyInfo = f.read()
+            with open(os.path.join(html_dir, "header_r_usualWithQual.txt"), "r") as f:
+                headerInfo = f.read()
+
+            last = ''
+            last_id = 0
+            first_insert = True
+            for j, a in enumerate(res_withQual):
+                if a[-1] == last:
+                    html_results_withQual = html_results_withQual.replace("[rinda]",
+                                        bodyInfo.format(a[0], a[1], a[2], a[3], a[4], a[5], a[6], a[7], a[8], a[9], a[10], a[11], a[12], a[13], a[14], a[15], a[16], a[17], a[18], a[19], a[20]) + "\n[rinda]")
+                    last = a[-1]
+                else:
+                    if not first_insert:
+                        html_results_withQual = html_results_withQual.replace("[rinda]", "")
+                        last_prog = info[last_id-1][8]
+                        html_results_withQual = html_results_withQual.replace("[prog_sys]", last_prog)
+                        html_results_withQual = html_results_withQual.replace("[prog_sys]", "")
+                        with open(os.path.join(html_dir, f"log_{last}.html"), "w", encoding='utf-8') as ft:
+                            ft.write(html_results_withQual)
+
+                        with open(os.path.join(html_dir, "body_r_withQual.html"), "r") as f:
+                            html_results_withQual = f.read()
+
+                        html_results_withQual = html_results_withQual.format(compName=self.comp_name.text, compDates=self.comp_date.text, cDate=current_date,
+                                           cTime=current_time)
+
+                        with open(os.path.join(html_dir, "body_r_usualWithQual.txt"), "r") as f:
+                            bodyInfo = f.read()
+
+                        with open(os.path.join(html_dir, "header_r_usualWithQual.txt"), "r") as f:
+                            headerInfo = f.read()
+
+                        html_results_withQual = html_results_withQual.replace("[rinda]", bodyInfo.format(a[0], a[1], a[2], a[3], a[4], a[5],
+                                                                 a[6], a[7], a[8], a[9], a[10], a[11], a[12], a[13], a[14], a[15], a[16], a[17], a[18], a[19], a[20]) + "\n[rinda]")
+                        html_results_withQual = html_results_withQual.replace("[header]", headerInfo.format(info[last_id][7], info[last_id][2], info[last_id][1],
+                                                                      info[last_id][4], info[last_id][3], info[last_id][0],
+                                                                      info[last_id][5], info[last_id][6]))
+                    else:
+                        html_results_withQual = html_results_withQual.replace("[header]", headerInfo.format(info[last_id][7], info[last_id][2], info[last_id][1],
+                                                                      info[last_id][4], info[last_id][3], info[last_id][0],
+                                                                      info[last_id][5], info[last_id][6]))
+                        html_results_withQual = html_results_withQual.replace("[rinda]", bodyInfo.format(a[0], a[1], a[2], a[3], a[4], a[5],
+                                                                 a[6], a[7], a[8], a[9], a[10], a[11], a[12], a[13], a[14], a[15], a[16], a[17], a[18], a[19], a[20]) + "\n[rinda]")
+                        first_insert = False
+
+                    last = a[-1]
+                    last_id += 1
+
+            html_results_withQual = html_results_withQual.replace("[rinda]", "")
+            last_prog = info[last_id-1][8]
+            html_results_withQual = html_results_withQual.replace("[prog_sys]", last_prog)
+            html_results_withQual = html_results_withQual.replace("[prog_sys]", "")
+            with open(os.path.join(html_dir, f"log_{last}.html"), "w", encoding='utf-8') as ft:
+                ft.write(html_results_withQual)
+
+        if selectedFile == "RESULTS WITH QUAL (START TIME)":
+            with open("html/body_r_withQual.html", "r") as f:
+                html_results_withQual_wthStart = f.read()
+
+            html_results_withQual_wthStart = html_results_withQual_wthStart.format(compName=self.comp_name.text,
+                                                                                   compDates=self.comp_date.text,
+                                                                                   cDate=current_date,
+                                                                                   cTime=current_time)
+
+            with open(os.path.join(html_dir, "body_r_usualWithQual.txt"), "r") as f:
+                bodyInfo = f.read()
+            with open(os.path.join(html_dir, "header_r_usualWithQual_wthStart.txt"), "r") as f:
+                headerInfo = f.read()
+
+            last = ''
+            last_id = 0
+            first_insert = True
+            for j, a in enumerate(res_withQual_start):
+                if a[-1] == last:
+                    html_results_withQual_wthStart = html_results_withQual_wthStart.replace("[rinda]",
+                                        bodyInfo.format(a[0], a[1], a[2], a[3], a[4], a[5], a[6], a[7], a[8], a[9], a[10],
+                                                        a[11], a[12], a[13], a[14], a[15], a[16], a[17], a[18], a[19],
+                                                        a[20]) + "\n[rinda]")
+                    last = a[-1]
+                else:
+                    if not first_insert:
+                        html_results_withQual_wthStart = html_results_withQual_wthStart.replace("[rinda]", "")
+                        last_prog = info[last_id - 1][8]
+                        html_results_withQual_wthStart = html_results_withQual_wthStart.replace("[prog_sys]", last_prog)
+                        html_results_withQual_wthStart = html_results_withQual_wthStart.replace("[prog_sys]", "")
+                        with open(os.path.join(html_dir, f"log_wthStart_{last}.html"), "w", encoding='utf-8') as ft:
+                            ft.write(html_results_withQual_wthStart)
+
+                        with open(os.path.join(html_dir, "body_r_withQual.html"), "r") as f:
+                            html_results_withQual_wthStart = f.read()
+
+                        html_results_withQual_wthStart = html_results_withQual_wthStart.format(compName=self.comp_name.text, compDates=self.comp_date.text, cDate=current_date,
+                                           cTime=current_time)
+
+                        with open(os.path.join(html_dir, "body_r_usualWithQual.txt"), "r") as f:
+                            bodyInfo = f.read()
+
+                        with open(os.path.join(html_dir, "header_r_usualWithQual_wthStart.txt"), "r") as f:
+                            headerInfo = f.read()
+
+                        html_results_withQual_wthStart = html_results_withQual_wthStart.replace("[rinda]", bodyInfo.format(a[0], a[1], a[2], a[3], a[4], a[5],
+                                                                       a[6], a[7], a[8], a[9], a[10], a[11], a[12], a[13],
+                                                                       a[14], a[15], a[16], a[17], a[18], a[19],
+                                                                       a[20]) + "\n[rinda]")
+                        html_results_withQual_wthStart = html_results_withQual_wthStart.replace("[header]",
+                                            headerInfo.format(info[last_id][7], info[last_id][2], info[last_id][1],
+                                                              info[last_id][4], info[last_id][3], info[last_id][0],
+                                                              info[last_id][5], info[last_id][6]))
+                    else:
+                        html_results_withQual_wthStart = html_results_withQual_wthStart.replace("[header]",
+                                            headerInfo.format(info[last_id][7], info[last_id][2], info[last_id][1],
+                                                              info[last_id][4], info[last_id][3], info[last_id][0],
+                                                              info[last_id][5], info[last_id][6]))
+                        html_results_withQual_wthStart = html_results_withQual_wthStart.replace("[rinda]", bodyInfo.format(a[0], a[1], a[2], a[3], a[4], a[5],
+                                                                       a[6], a[7], a[8], a[9], a[10], a[11], a[12], a[13],
+                                                                       a[14], a[15], a[16], a[17], a[18], a[19],
+                                                                       a[20]) + "\n[rinda]")
+                        first_insert = False
+
+                    last = a[-1]
+                    last_id += 1
+
+            html_results_withQual_wthStart = html_results_withQual_wthStart.replace("[rinda]", "")
+            last_prog = info[last_id - 1][8]
+            html_results_withQual_wthStart = html_results_withQual_wthStart.replace("[prog_sys]", last_prog)
+            html_results_withQual_wthStart = html_results_withQual_wthStart.replace("[prog_sys]", "")
+            with open(os.path.join(html_dir, f"log_wthStart_{last}.html"), "w", encoding='utf-8') as ft:
+                ft.write(html_results_withQual_wthStart)
+
+        if selectedFile == "MASTER RESULTS WITH QUAL":
+            with open("html/body_r_withQual.html", "r") as f:
+                html_master_withQual = f.read()
+
+            html_master_withQual = html_master_withQual.format(compName=self.comp_name.text, compDates=self.comp_date.text,
+                                                               cDate=current_date,
+                                                               cTime=current_time)
+
+            with open(os.path.join(html_dir, "body_r_masterWithQual.txt"), "r") as f:
+                bodyInfo = f.read()
+
+            with open(os.path.join(html_dir, "header_r_masterWithQual.txt"), "r") as f:
+                headerInfo = f.read()
+
+            last = ''
+            last_id = 0
+            first_insert = True
+            for j, a in enumerate(res_withQual_master):
+                if a[-1] == last:
+                    html_master_withQual = html_master_withQual.replace("[rinda]",
+                                                    bodyInfo.format(a[0], a[1], a[2], a[3], a[4], a[5], a[6], a[7], a[8],
+                                                                  a[9], a[10], a[11], a[12], a[13], a[14]) + "\n[rinda]")
+                    last = a[-1]
+                else:
+                    if not first_insert:
+                        html_master_withQual = html_master_withQual.replace("[rinda]", "")
+                        last_prog = info[last_id-1][8]
+                        html_master_withQual = html_master_withQual.replace("[prog_sys]", last_prog)
+                        html_master_withQual = html_master_withQual.replace("[prog_sys]", "")
+
+                        with open(os.path.join(html_dir, f"log_mast_{last}.html"), "w", encoding='utf-8') as ft:
+                            ft.write(html_master_withQual)
+
+                        with open(os.path.join(html_dir, "body_r_withQual.html"), "r") as f:
+                            html_master_withQual = f.read()
+
+                        html_master_withQual = html_master_withQual.format(compName=self.comp_name.text, compDates=self.comp_date.text,
                                                        cDate=current_date,
                                                        cTime=current_time)
 
-        html_startlists = html_startlists.format(compName=self.comp_name.text, compDates=self.comp_date.text, cDate=current_date,
-                                       cTime=current_time)
-        html_startlists_master = html_startlists_master.format(compName=self.comp_name.text, compDates=self.comp_date.text, cDate=current_date,
-                                       cTime=current_time)
-        html_entries = html_entries.format(compName=self.comp_name.text, compDates=self.comp_date.text, cDate=current_date,
-                                                   cTime=current_time)
-        html_short_startlists = html_short_startlists.format(compName=self.comp_name.text, compDates=self.comp_date.text, cDate=current_date,
-                                       cTime=current_time)
-        html_atlase = html_atlase.format(compName=self.comp_name.text, compDates=self.comp_date.text,
-                                         cDate=current_date, cTime=current_time)
+                        with open(os.path.join(html_dir, "body_r_masterWithQual.txt"), "r") as f:
+                            bodyInfo = f.read()
 
-        html_dir = os.path.join(os.path.dirname(__file__), 'html')
+                        with open(os.path.join(html_dir, "header_r_masterWithQual.txt"), "r") as f:
+                            headerInfo = f.read()
 
+                        html_master_withQual = html_master_withQual.replace("[rinda]", bodyInfo.format(a[0], a[1], a[2], a[3], a[4], a[5],
+                                                                                 a[6], a[7], a[8], a[9], a[10],
+                                                                                 a[11], a[12], a[13], a[14]) + "\n[rinda]")
+                        html_master_withQual = html_master_withQual.replace("[header]", headerInfo.format(info[last_id][7], info[last_id][2],
+                                                                                      info[last_id][1],
+                                                                                      info[last_id][4], info[last_id][3],
+                                                                                      info[last_id][0],
+                                                                                      info[last_id][5], info[last_id][6]))
+                    else:
+                        html_master_withQual = html_master_withQual.replace("[header]", headerInfo.format(info[last_id][7], info[last_id][2],
+                                                                                      info[last_id][1],
+                                                                                      info[last_id][4], info[last_id][3],
+                                                                                      info[last_id][0],
+                                                                                      info[last_id][5], info[last_id][6]))
+                        html_master_withQual = html_master_withQual.replace("[rinda]", bodyInfo.format(a[0],
+                                                                                 a[1],
+                                                                                 a[2],
+                                                                                 a[3],
+                                                                                 a[4],
+                                                                                 a[5],
+                                                                                 a[6],
+                                                                                 a[7],
+                                                                                 a[8], a[9], a[10], a[11], a[12], a[13], a[14]) + "\n[rinda]")
+                        first_insert = False
 
-        with open(os.path.join(html_dir, "body_r_usualWithQual.txt"), "r") as f:
-            bodyInfo = f.read()
-        with open(os.path.join(html_dir, "header_r_usualWithQual.txt"), "r") as f:
-            headerInfo = f.read()
+                    last = a[-1]
+                    last_id += 1
+            html_master_withQual = html_master_withQual.replace("[rinda]", "")
+            last_prog = info[last_id-1][8]
+            html_master_withQual = html_master_withQual.replace("[prog_sys]", last_prog)
+            html_master_withQual = html_master_withQual.replace("[prog_sys]", "")
 
-        last = ''
-        last_id = 0
-        first_insert = True
-        for j, a in enumerate(res_withQual):
-            if a[-1] == last:
-                html_results_withQual = html_results_withQual.replace("[rinda]",
-                                    bodyInfo.format(a[0], a[1], a[2], a[3], a[4], a[5], a[6], a[7], a[8], a[9], a[10], a[11], a[12], a[13], a[14], a[15], a[16], a[17], a[18], a[19], a[20]) + "\n[rinda]")
-                last = a[-1]
-            else:
-                if not first_insert:
-                    html_results_withQual = html_results_withQual.replace("[rinda]", "")
-                    last_prog = info[last_id-1][8]
-                    html_results_withQual = html_results_withQual.replace("[prog_sys]", last_prog)
-                    html_results_withQual = html_results_withQual.replace("[prog_sys]", "")
-                    with open(os.path.join(html_dir, f"log_{last}.html"), "w", encoding='utf-8') as ft:
-                        ft.write(html_results_withQual)
+            with open(os.path.join(html_dir, f"log_mast_{last}.html"), "w", encoding='utf-8') as ft:
+                ft.write(html_master_withQual)
 
-                    with open(os.path.join(html_dir, "body_r_withQual.html"), "r") as f:
-                        html_results_withQual = f.read()
+        if selectedFile == "MASTER RESULTS WITH QUAL (START TIME)":
 
-                    html_results_withQual = html_results_withQual.format(compName=self.comp_name.text, compDates=self.comp_date.text, cDate=current_date,
-                                       cTime=current_time)
+            with open("html/body_r_withQual.html", "r") as f:
+                html_master_withQual_wthStart = f.read()
 
-                    with open(os.path.join(html_dir, "body_r_usualWithQual.txt"), "r") as f:
-                        bodyInfo = f.read()
+            html_master_withQual_wthStart = html_master_withQual_wthStart.format(compName=self.comp_name.text,
+                                                                                 compDates=self.comp_date.text,
+                                                                                 cDate=current_date,
+                                                                                 cTime=current_time)
 
-                    with open(os.path.join(html_dir, "header_r_usualWithQual.txt"), "r") as f:
-                        headerInfo = f.read()
-
-                    html_results_withQual = html_results_withQual.replace("[rinda]", bodyInfo.format(a[0], a[1], a[2], a[3], a[4], a[5],
-                                                             a[6], a[7], a[8], a[9], a[10], a[11], a[12], a[13], a[14], a[15], a[16], a[17], a[18], a[19], a[20]) + "\n[rinda]")
-                    html_results_withQual = html_results_withQual.replace("[header]", headerInfo.format(info[last_id][7], info[last_id][2], info[last_id][1],
-                                                                  info[last_id][4], info[last_id][3], info[last_id][0],
-                                                                  info[last_id][5], info[last_id][6]))
-                else:
-                    html_results_withQual = html_results_withQual.replace("[header]", headerInfo.format(info[last_id][7], info[last_id][2], info[last_id][1],
-                                                                  info[last_id][4], info[last_id][3], info[last_id][0],
-                                                                  info[last_id][5], info[last_id][6]))
-                    html_results_withQual = html_results_withQual.replace("[rinda]", bodyInfo.format(a[0], a[1], a[2], a[3], a[4], a[5],
-                                                             a[6], a[7], a[8], a[9], a[10], a[11], a[12], a[13], a[14], a[15], a[16], a[17], a[18], a[19], a[20]) + "\n[rinda]")
-                    first_insert = False
-
-                last = a[-1]
-                last_id += 1
-
-        html_results_withQual = html_results_withQual.replace("[rinda]", "")
-        last_prog = info[last_id-1][8]
-        html_results_withQual = html_results_withQual.replace("[prog_sys]", last_prog)
-        html_results_withQual = html_results_withQual.replace("[prog_sys]", "")
-        with open(os.path.join(html_dir, f"log_{last}.html"), "w", encoding='utf-8') as ft:
-            ft.write(html_results_withQual)
-#--------------------------------------------------------------------------------------------------
-        with open(os.path.join(html_dir, "body_r_usualWithQual.txt"), "r") as f:
-            bodyInfo = f.read()
-        with open(os.path.join(html_dir, "header_r_usualWithQual_wthStart.txt"), "r") as f:
-            headerInfo = f.read()
-
-        last = ''
-        last_id = 0
-        first_insert = True
-        for j, a in enumerate(res_withQual_start):
-            if a[-1] == last:
-                html_results_withQual_wthStart = html_results_withQual_wthStart.replace("[rinda]",
-                                    bodyInfo.format(a[0], a[1], a[2], a[3], a[4], a[5], a[6], a[7], a[8], a[9], a[10],
-                                                    a[11], a[12], a[13], a[14], a[15], a[16], a[17], a[18], a[19],
-                                                    a[20]) + "\n[rinda]")
-                last = a[-1]
-            else:
-                if not first_insert:
-                    html_results_withQual_wthStart = html_results_withQual_wthStart.replace("[rinda]", "")
-                    last_prog = info[last_id - 1][8]
-                    html_results_withQual_wthStart = html_results_withQual_wthStart.replace("[prog_sys]", last_prog)
-                    html_results_withQual_wthStart = html_results_withQual_wthStart.replace("[prog_sys]", "")
-                    with open(os.path.join(html_dir, f"log_wthStart_{last}.html"), "w", encoding='utf-8') as ft:
-                        ft.write(html_results_withQual_wthStart)
-
-                    with open(os.path.join(html_dir, "body_r_withQual.html"), "r") as f:
-                        html_results_withQual_wthStart = f.read()
-
-                    html_results_withQual_wthStart = html_results_withQual_wthStart.format(compName=self.comp_name.text, compDates=self.comp_date.text, cDate=current_date,
-                                       cTime=current_time)
-
-                    with open(os.path.join(html_dir, "body_r_usualWithQual.txt"), "r") as f:
-                        bodyInfo = f.read()
-
-                    with open(os.path.join(html_dir, "header_r_usualWithQual_wthStart.txt"), "r") as f:
-                        headerInfo = f.read()
-
-                    html_results_withQual_wthStart = html_results_withQual_wthStart.replace("[rinda]", bodyInfo.format(a[0], a[1], a[2], a[3], a[4], a[5],
-                                                                   a[6], a[7], a[8], a[9], a[10], a[11], a[12], a[13],
-                                                                   a[14], a[15], a[16], a[17], a[18], a[19],
-                                                                   a[20]) + "\n[rinda]")
-                    html_results_withQual_wthStart = html_results_withQual_wthStart.replace("[header]",
-                                        headerInfo.format(info[last_id][7], info[last_id][2], info[last_id][1],
-                                                          info[last_id][4], info[last_id][3], info[last_id][0],
-                                                          info[last_id][5], info[last_id][6]))
-                else:
-                    html_results_withQual_wthStart = html_results_withQual_wthStart.replace("[header]",
-                                        headerInfo.format(info[last_id][7], info[last_id][2], info[last_id][1],
-                                                          info[last_id][4], info[last_id][3], info[last_id][0],
-                                                          info[last_id][5], info[last_id][6]))
-                    html_results_withQual_wthStart = html_results_withQual_wthStart.replace("[rinda]", bodyInfo.format(a[0], a[1], a[2], a[3], a[4], a[5],
-                                                                   a[6], a[7], a[8], a[9], a[10], a[11], a[12], a[13],
-                                                                   a[14], a[15], a[16], a[17], a[18], a[19],
-                                                                   a[20]) + "\n[rinda]")
-                    first_insert = False
-
-                last = a[-1]
-                last_id += 1
-
-        html_results_withQual_wthStart = html_results_withQual_wthStart.replace("[rinda]", "")
-        last_prog = info[last_id - 1][8]
-        html_results_withQual_wthStart = html_results_withQual_wthStart.replace("[prog_sys]", last_prog)
-        html_results_withQual_wthStart = html_results_withQual_wthStart.replace("[prog_sys]", "")
-        with open(os.path.join(html_dir, f"log_wthStart_{last}.html"), "w", encoding='utf-8') as ft:
-            ft.write(html_results_withQual_wthStart)
-#--------------------------------------------------------------------------------------
-        with open(os.path.join(html_dir, "body_r_masterWithQual.txt"), "r") as f:
-            bodyInfo = f.read()
-
-        with open(os.path.join(html_dir, "header_r_masterWithQual.txt"), "r") as f:
-            headerInfo = f.read()
-
-        last = ''
-        last_id = 0
-        first_insert = True
-        for j, a in enumerate(res_withQual_master):
-            if a[-1] == last:
-                html_master_withQual = html_master_withQual.replace("[rinda]",
-                                                bodyInfo.format(a[0], a[1], a[2], a[3], a[4], a[5], a[6], a[7], a[8],
-                                                              a[9], a[10], a[11], a[12], a[13], a[14]) + "\n[rinda]")
-                last = a[-1]
-            else:
-                if not first_insert:
-                    html_master_withQual = html_master_withQual.replace("[rinda]", "")
-                    last_prog = info[last_id-1][8]
-                    html_master_withQual = html_master_withQual.replace("[prog_sys]", last_prog)
-                    html_master_withQual = html_master_withQual.replace("[prog_sys]", "")
-
-                    with open(os.path.join(html_dir, f"log_mast_{last}.html"), "w", encoding='utf-8') as ft:
-                        ft.write(html_master_withQual)
-
-                    with open(os.path.join(html_dir, "body_r_withQual.html"), "r") as f:
-                        html_master_withQual = f.read()
-
-                    html_master_withQual = html_master_withQual.format(compName=self.comp_name.text, compDates=self.comp_date.text,
-                                                   cDate=current_date,
-                                                   cTime=current_time)
-
-                    with open(os.path.join(html_dir, "body_r_masterWithQual.txt"), "r") as f:
-                        bodyInfo = f.read()
-
-                    with open(os.path.join(html_dir, "header_r_masterWithQual.txt"), "r") as f:
-                        headerInfo = f.read()
-
-                    html_master_withQual = html_master_withQual.replace("[rinda]", bodyInfo.format(a[0], a[1], a[2], a[3], a[4], a[5],
-                                                                             a[6], a[7], a[8], a[9], a[10],
-                                                                             a[11], a[12], a[13], a[14]) + "\n[rinda]")
-                    html_master_withQual = html_master_withQual.replace("[header]", headerInfo.format(info[last_id][7], info[last_id][2],
-                                                                                  info[last_id][1],
-                                                                                  info[last_id][4], info[last_id][3],
-                                                                                  info[last_id][0],
-                                                                                  info[last_id][5], info[last_id][6]))
-                else:
-                    html_master_withQual = html_master_withQual.replace("[header]", headerInfo.format(info[last_id][7], info[last_id][2],
-                                                                                  info[last_id][1],
-                                                                                  info[last_id][4], info[last_id][3],
-                                                                                  info[last_id][0],
-                                                                                  info[last_id][5], info[last_id][6]))
-                    html_master_withQual = html_master_withQual.replace("[rinda]", bodyInfo.format(a[0],
-                                                                             a[1],
-                                                                             a[2],
-                                                                             a[3],
-                                                                             a[4],
-                                                                             a[5],
-                                                                             a[6],
-                                                                             a[7],
-                                                                             a[8], a[9], a[10], a[11], a[12], a[13], a[14]) + "\n[rinda]")
-                    first_insert = False
-
-                last = a[-1]
-                last_id += 1
-        html_master_withQual = html_master_withQual.replace("[rinda]", "")
-        last_prog = info[last_id-1][8]
-        html_master_withQual = html_master_withQual.replace("[prog_sys]", last_prog)
-        html_master_withQual = html_master_withQual.replace("[prog_sys]", "")
-
-        with open(os.path.join(html_dir, f"log_mast_{last}.html"), "w", encoding='utf-8') as ft:
-            ft.write(html_master_withQual)
-
-# -----------------------------------------------------------------------------------------------------------
             with open(os.path.join(html_dir, "body_r_masterWithQual.txt"), "r") as f:
                 bodyInfo = f.read()
 
@@ -2340,258 +2243,299 @@ class RaceApp(BoxLayout):
             with open(os.path.join(html_dir, f"log_mast_wthStart_{last}.html"), "w", encoding='utf-8') as ft:
                 ft.write(html_master_withQual_wthStart)
 
-# -----------------------------------------------------------------------------------------------------------
+        if selectedFile == "MASTER STARTLIST":
 
-        with open(os.path.join(html_dir, "body_s_master.txt"), "r") as f:
-            bodyInfo = f.read()
+            with open("html/main_s.html", "r") as f:
+                html_startlists_master = f.read()
 
-        with open(os.path.join(html_dir, "header_s_master.txt"), "r") as f:
-            headerInfo = f.read()
+            html_startlists_master = html_startlists_master.format(compName=self.comp_name.text,
+                                                                   compDates=self.comp_date.text, cDate=current_date,
+                                                                   cTime=current_time)
 
-        last = ''
-        last_id = 0
-        first_insert_start = True
+            with open(os.path.join(html_dir, "body_s_master.txt"), "r") as f:
+                bodyInfo = f.read()
 
-        for j, a in enumerate(start_data_master):
-            if a[-1] == last:
-                html_startlists_master = html_startlists_master.replace("[st_rinda]",
-                                                            bodyInfo.format(a[0], a[1], a[2], a[3], a[4], a[5]) + "\n[st_rinda]")
-                last = a[-1]
+            with open(os.path.join(html_dir, "header_s_master.txt"), "r") as f:
+                headerInfo = f.read()
 
-            else:
-                if not first_insert_start:
-                    html_startlists_master = html_startlists_master.replace("[st_rinda]", "")
-                    last_prog = info[last_id - 1][8]
-                    html_startlists_master = html_startlists_master.replace("[prog_sys]", last_prog)
-                    html_startlists_master = html_startlists_master.replace("[prog_sys]", "")
+            last = ''
+            last_id = 0
+            first_insert_start = True
 
-                    with open(os.path.join(html_dir, f"start_log_master_{last}.html"), "w", encoding='utf-8') as ft:
-                        ft.write(html_startlists_master)
-
-                    with open(os.path.join(html_dir, "main_s.html"), "r") as f:
-                        html_startlists_master = f.read()
-
-                    html_startlists_master = html_startlists_master.format(compName=self.comp_name.text,
-                                                               compDates=self.comp_date.text,
-                                                               cDate=current_date, cTime=current_time)
-
-                    with open(os.path.join(html_dir, "body_s_master.txt"), "r") as f:
-                        bodyInfo = f.read()
-
-                    with open(os.path.join(html_dir, "header_s_master.txt"), "r") as f:
-                        headerInfo = f.read()
-
+            for j, a in enumerate(start_data_master):
+                if a[-1] == last:
                     html_startlists_master = html_startlists_master.replace("[st_rinda]",
-                                                                bodyInfo.format(a[0], a[1], a[2], a[3],
-                                                                          a[4], a[5]) + "\n[st_rinda]")
-                    html_startlists_master = html_startlists_master.replace("[header]",
-                                                                headerInfo.format(info[last_id][7], info[last_id][2],
-                                                                              info[last_id][1],
-                                                                              info[last_id][4], info[last_id][3],
-                                                                              info[last_id][0],
-                                                                              info[last_id][5], info[last_id][6]))
+                                                                bodyInfo.format(a[0], a[1], a[2], a[3], a[4], a[5]) + "\n[st_rinda]")
+                    last = a[-1]
+
                 else:
-                    html_startlists_master = html_startlists_master.replace("[st_rinda]", bodyInfo.format(a[0], a[1], a[2], a[3],
-                                                                                        a[4], a[5]) + "\n[st_rinda]")
-                    html_startlists_master = html_startlists_master.replace("[header]",
-                                                                headerInfo.format(info[last_id][7], info[last_id][2],
-                                                                              info[last_id][1],
-                                                                              info[last_id][4], info[last_id][3],
-                                                                              info[last_id][0],
-                                                                              info[last_id][5], info[last_id][6]))
-                    first_insert_start = False
+                    if not first_insert_start:
+                        html_startlists_master = html_startlists_master.replace("[st_rinda]", "")
+                        last_prog = info[last_id - 1][8]
+                        html_startlists_master = html_startlists_master.replace("[prog_sys]", last_prog)
+                        html_startlists_master = html_startlists_master.replace("[prog_sys]", "")
 
-                last = a[-1]
-                last_id += 1
+                        with open(os.path.join(html_dir, f"start_log_master_{last}.html"), "w", encoding='utf-8') as ft:
+                            ft.write(html_startlists_master)
 
-        html_startlists_master = html_startlists_master.replace("[st_rinda]", "")
-        last_prog = info[last_id - 1][8]
-        html_startlists_master = html_startlists_master.replace("[prog_sys]", last_prog)
-        html_startlists_master = html_startlists_master.replace("[prog_sys]", "")
-        with open(os.path.join(html_dir, f"start_log_master_{last}.html"), "w", encoding='utf-8') as ft:
-            ft.write(html_startlists_master)
-        # Start lists (ordinary)
-        with open(os.path.join(html_dir, "body_s.txt"), "r") as f:
-            bodyInfo = f.read()
+                        with open(os.path.join(html_dir, "main_s.html"), "r") as f:
+                            html_startlists_master = f.read()
 
-        with open(os.path.join(html_dir, "header_s_usual.txt"), "r") as f:
-            headerInfo = f.read()
+                        html_startlists_master = html_startlists_master.format(compName=self.comp_name.text,
+                                                                   compDates=self.comp_date.text,
+                                                                   cDate=current_date, cTime=current_time)
 
-        last = ''
-        last_id = 0
-        first_insert_start = True
+                        with open(os.path.join(html_dir, "body_s_master.txt"), "r") as f:
+                            bodyInfo = f.read()
 
-        for j, a in enumerate(start_data):
-            if a[-1] == last:
-                html_startlists = html_startlists.replace("[st_rinda]", bodyInfo.format(a[0], a[1], a[2], a[3], a[4]) + "\n[st_rinda]")
-                last = a[-1]
-            else:
-                if not first_insert_start:
-                    html_startlists = html_startlists.replace("[st_rinda]", "")
-                    last_prog = info[last_id - 1][8]
-                    html_startlists = html_startlists.replace("[prog_sys]", last_prog)
-                    html_startlists = html_startlists.replace("[prog_sys]", "")
+                        with open(os.path.join(html_dir, "header_s_master.txt"), "r") as f:
+                            headerInfo = f.read()
 
-                    with open(os.path.join(html_dir, f"start_log_{last}.html"), "w", encoding='utf-8') as ft:
-                        ft.write(html_startlists)
+                        html_startlists_master = html_startlists_master.replace("[st_rinda]",
+                                                                    bodyInfo.format(a[0], a[1], a[2], a[3],
+                                                                              a[4], a[5]) + "\n[st_rinda]")
+                        html_startlists_master = html_startlists_master.replace("[header]",
+                                                                    headerInfo.format(info[last_id][7], info[last_id][2],
+                                                                                  info[last_id][1],
+                                                                                  info[last_id][4], info[last_id][3],
+                                                                                  info[last_id][0],
+                                                                                  info[last_id][5], info[last_id][6]))
+                    else:
+                        html_startlists_master = html_startlists_master.replace("[st_rinda]", bodyInfo.format(a[0], a[1], a[2], a[3],
+                                                                                            a[4], a[5]) + "\n[st_rinda]")
+                        html_startlists_master = html_startlists_master.replace("[header]",
+                                                                    headerInfo.format(info[last_id][7], info[last_id][2],
+                                                                                  info[last_id][1],
+                                                                                  info[last_id][4], info[last_id][3],
+                                                                                  info[last_id][0],
+                                                                                  info[last_id][5], info[last_id][6]))
+                        first_insert_start = False
 
-                    with open(os.path.join(html_dir, "main_s.html"), "r") as f:
-                        html_startlists = f.read()
+                    last = a[-1]
+                    last_id += 1
 
-                    html_startlists = html_startlists.format(compName=self.comp_name.text, compDates=self.comp_date.text,
-                                                   cDate=current_date,
-                                                   cTime=current_time)
+            html_startlists_master = html_startlists_master.replace("[st_rinda]", "")
+            last_prog = info[last_id - 1][8]
+            html_startlists_master = html_startlists_master.replace("[prog_sys]", last_prog)
+            html_startlists_master = html_startlists_master.replace("[prog_sys]", "")
+            with open(os.path.join(html_dir, f"start_log_master_{last}.html"), "w", encoding='utf-8') as ft:
+                ft.write(html_startlists_master)
 
-                    with open(os.path.join(html_dir, "body_s.txt"), "r") as f:
-                        bodyInfo = f.read()
+        if selectedFile == "STARTLIST":
 
-                    with open(os.path.join(html_dir, "header_s_usual.txt"), "r") as f:
-                        headerInfo = f.read()
+            with open("html/main_s.html", "r") as f:
+                html_startlists = f.read()
 
-                    html_startlists = html_startlists.replace("[st_rinda]",
-                                                    bodyInfo.format(a[0], a[1], a[2], a[3], a[4]) + "\n[st_rinda]")
-                    html_startlists = html_startlists.replace("[header]", headerInfo.format(info[last_id][7], info[last_id][2],
-                                                                              info[last_id][1],
-                                                                              info[last_id][4], info[last_id][3],
-                                                                              info[last_id][0],
-                                                                              info[last_id][5], info[last_id][6]))
+            html_startlists = html_startlists.format(compName=self.comp_name.text, compDates=self.comp_date.text,
+                                                     cDate=current_date,
+                                                     cTime=current_time)
+
+            with open(os.path.join(html_dir, "body_s.txt"), "r") as f:
+                bodyInfo = f.read()
+
+            with open(os.path.join(html_dir, "header_s_usual.txt"), "r") as f:
+                headerInfo = f.read()
+
+            last = ''
+            last_id = 0
+            first_insert_start = True
+
+            for j, a in enumerate(start_data):
+                if a[-1] == last:
+                    html_startlists = html_startlists.replace("[st_rinda]", bodyInfo.format(a[0], a[1], a[2], a[3], a[4]) + "\n[st_rinda]")
+                    last = a[-1]
                 else:
-                    html_startlists = html_startlists.replace("[st_rinda]",
-                                                    bodyInfo.format(a[0], a[1], a[2], a[3], a[4]) + "\n[st_rinda]")
-                    html_startlists = html_startlists.replace("[header]", headerInfo.format(info[last_id][7], info[last_id][2],
-                                                                              info[last_id][1],
-                                                                              info[last_id][4], info[last_id][3],
-                                                                              info[last_id][0],
-                                                                              info[last_id][5], info[last_id][6]))
-                    first_insert_start = False
+                    if not first_insert_start:
+                        html_startlists = html_startlists.replace("[st_rinda]", "")
+                        last_prog = info[last_id - 1][8]
+                        html_startlists = html_startlists.replace("[prog_sys]", last_prog)
+                        html_startlists = html_startlists.replace("[prog_sys]", "")
 
-                last = a[-1]
-                last_id += 1
+                        with open(os.path.join(html_dir, f"start_log_{last}.html"), "w", encoding='utf-8') as ft:
+                            ft.write(html_startlists)
 
-        html_startlists = html_startlists.replace("[st_rinda]", "")
-        last_prog = info[last_id - 1][8]
-        html_startlists = html_startlists.replace("[prog_sys]", last_prog)
-        html_startlists = html_startlists.replace("[prog_sys]", "")
-        with open(os.path.join(html_dir, f"start_log_{last}.html"), "w", encoding='utf-8') as ft:
-            ft.write(html_startlists)
+                        with open(os.path.join(html_dir, "main_s.html"), "r") as f:
+                            html_startlists = f.read()
 
-#------------------------------------------------------------------------------
+                        html_startlists = html_startlists.format(compName=self.comp_name.text, compDates=self.comp_date.text,
+                                                       cDate=current_date,
+                                                       cTime=current_time)
 
-        with open(os.path.join(html_dir, "body_entries.txt"), "r") as f:
-            bodyInfo = f.read()
+                        with open(os.path.join(html_dir, "body_s.txt"), "r") as f:
+                            bodyInfo = f.read()
 
-        with open(os.path.join(html_dir, "header_entries.txt"), "r") as f:
-            headerInfo = f.read()
+                        with open(os.path.join(html_dir, "header_s_usual.txt"), "r") as f:
+                            headerInfo = f.read()
 
-        last = ''
-        last_id = 0
-        first_insert_start = True
+                        html_startlists = html_startlists.replace("[st_rinda]",
+                                                        bodyInfo.format(a[0], a[1], a[2], a[3], a[4]) + "\n[st_rinda]")
+                        html_startlists = html_startlists.replace("[header]", headerInfo.format(info[last_id][7], info[last_id][2],
+                                                                                  info[last_id][1],
+                                                                                  info[last_id][4], info[last_id][3],
+                                                                                  info[last_id][0],
+                                                                                  info[last_id][5], info[last_id][6]))
+                    else:
+                        html_startlists = html_startlists.replace("[st_rinda]",
+                                                        bodyInfo.format(a[0], a[1], a[2], a[3], a[4]) + "\n[st_rinda]")
+                        html_startlists = html_startlists.replace("[header]", headerInfo.format(info[last_id][7], info[last_id][2],
+                                                                                  info[last_id][1],
+                                                                                  info[last_id][4], info[last_id][3],
+                                                                                  info[last_id][0],
+                                                                                  info[last_id][5], info[last_id][6]))
+                        first_insert_start = False
 
-        for j, a in enumerate(entry_data):
-            if a[-1] == last:
-                html_entries = html_entries.replace("[entry_rinda]",
-                                                bodyInfo.format(a[0], a[1], a[2]) + "\n[entry_rinda]")
-                last = a[-1]
-            else:
-                if not first_insert_start:
-                    html_entries = html_entries.replace("[entry_rinda]", "")
+                    last = a[-1]
+                    last_id += 1
 
-                    with open(os.path.join(html_dir, f"entry_by_events_log_{last}.html"), "w", encoding='utf-8') as ft:
-                        ft.write(html_entries)
+            html_startlists = html_startlists.replace("[st_rinda]", "")
+            last_prog = info[last_id - 1][8]
+            html_startlists = html_startlists.replace("[prog_sys]", last_prog)
+            html_startlists = html_startlists.replace("[prog_sys]", "")
+            with open(os.path.join(html_dir, f"start_log_{last}.html"), "w", encoding='utf-8') as ft:
+                ft.write(html_startlists)
 
-                    with open(os.path.join(html_dir, "main_entries.html"), "r") as f:
-                        html_entries = f.read()
+        if selectedFile == "ENTRY LIST":
 
-                    html_entries = html_entries.format(compName=self.comp_name.text, compDates=self.comp_date.text,
-                                                   cDate=current_date,
-                                                   cTime=current_time)
+            with open("html/main_entries.html", "r") as f:
+                html_entries = f.read()
 
-                    with open(os.path.join(html_dir, "body_entries.txt"), "r") as f:
-                        bodyInfo = f.read()
+            html_entries = html_entries.format(compName=self.comp_name.text, compDates=self.comp_date.text,
+                                               cDate=current_date,
+                                               cTime=current_time)
 
-                    with open(os.path.join(html_dir, "header_entries.txt"), "r") as f:
-                        headerInfo = f.read()
+            with open(os.path.join(html_dir, "body_entries.txt"), "r") as f:
+                bodyInfo = f.read()
 
+            with open(os.path.join(html_dir, "header_entries.txt"), "r") as f:
+                headerInfo = f.read()
+
+            last = ''
+            last_id = 0
+            first_insert_start = True
+
+            for j, a in enumerate(entry_data):
+                if a[-1] == last:
                     html_entries = html_entries.replace("[entry_rinda]",
                                                     bodyInfo.format(a[0], a[1], a[2]) + "\n[entry_rinda]")
-                    html_entries = html_entries.replace("[header]", headerInfo.format(info[last_id][7], info[last_id][2],
-                                                                                    info[last_id][1]))
+                    last = a[-1]
                 else:
-                    html_entries = html_entries.replace("[entry_rinda]",
-                                                    bodyInfo.format(a[0], a[1], a[2]) + "\n[entry_rinda]")
-                    html_entries = html_entries.replace("[header]", headerInfo.format(info[last_id][7], info[last_id][2],
-                                                                                    info[last_id][1]))
-                    first_insert_start = False
+                    if not first_insert_start:
+                        html_entries = html_entries.replace("[entry_rinda]", "")
 
-                last = a[-1]
-                last_id += 1
+                        with open(os.path.join(html_dir, f"entry_by_events_log_{last}.html"), "w", encoding='utf-8') as ft:
+                            ft.write(html_entries)
 
-        html_entries = html_entries.replace("[entry_rinda]", "")
-        with open(os.path.join(html_dir, f"entry_by_events_log_{last}.html"), "w", encoding='utf-8') as ft:
-            ft.write(html_entries)
+                        with open(os.path.join(html_dir, "main_entries.html"), "r") as f:
+                            html_entries = f.read()
 
-# ------------------------------------------------------------------------------
-        with open(os.path.join(html_dir, "body_r_usualNoQual.txt"), "r") as f:
-            bodyInfo = f.read()
+                        html_entries = html_entries.format(compName=self.comp_name.text, compDates=self.comp_date.text,
+                                                       cDate=current_date,
+                                                       cTime=current_time)
 
-        with open(os.path.join(html_dir, "header_r_usualNoQual.txt"), "r") as f:
-            headerInfo = f.read()
+                        with open(os.path.join(html_dir, "body_entries.txt"), "r") as f:
+                            bodyInfo = f.read()
 
-        last = ''
-        last_id = 0
-        first_insert = True
+                        with open(os.path.join(html_dir, "header_entries.txt"), "r") as f:
+                            headerInfo = f.read()
 
-        for j, a in enumerate(res_noQual):
-            if a[-1] == last:
-                html_results_noQual = html_results_noQual.replace("[rinda_noq]",
-                                      bodyInfo.format(a[0], a[1], a[2], a[3], a[4], a[5],
-                                                             a[6], a[7], a[8], a[9], a[10], a[11], a[12], a[13], a[14], a[15], a[16], a[17], a[18], a[19], a[20]) + "\n[rinda_noq]")
-                last = a[-1]
-            else:
-                if not first_insert:
-                    html_results_noQual = html_results_noQual.replace("[rinda_noq]", "")
-                    html_results_noQual = html_results_noQual.replace("[prog_sys]", "")
+                        html_entries = html_entries.replace("[entry_rinda]",
+                                                        bodyInfo.format(a[0], a[1], a[2]) + "\n[entry_rinda]")
+                        html_entries = html_entries.replace("[header]", headerInfo.format(info[last_id][7], info[last_id][2],
+                                                                                        info[last_id][1]))
+                    else:
+                        html_entries = html_entries.replace("[entry_rinda]",
+                                                        bodyInfo.format(a[0], a[1], a[2]) + "\n[entry_rinda]")
+                        html_entries = html_entries.replace("[header]", headerInfo.format(info[last_id][7], info[last_id][2],
+                                                                                        info[last_id][1]))
+                        first_insert_start = False
 
-                    with open(os.path.join(html_dir, f"log_noq_{last}.html"), "w", encoding='utf-8') as ft:
-                        ft.write(html_results_noQual)
+                    last = a[-1]
+                    last_id += 1
 
-                    with open(os.path.join(html_dir, "body_r_noQual.html"), "r") as f:
-                        html_results_noQual = f.read()
+            html_entries = html_entries.replace("[entry_rinda]", "")
+            with open(os.path.join(html_dir, f"entry_by_events_log_{last}.html"), "w", encoding='utf-8') as ft:
+                ft.write(html_entries)
 
-                    html_results_noQual = html_results_noQual.format(compName=self.comp_name.text, compDates=self.comp_date.text,
-                                         cDate=current_date,
-                                         cTime=current_time)
+        if selectedFile == "RESULTS WITH NO QUAL":
 
-                    with open(os.path.join(html_dir, "body_r_usualNoQual.txt"), "r") as f:
-                        bodyInfo = f.read()
+            with open("html/body_r_noQual.html", "r") as f:
+                html_results_noQual = f.read()
 
-                    with open(os.path.join(html_dir, "header_r_usualNoQual.txt"), "r") as f:
-                        headerInfo = f.read()
+            html_results_noQual = html_results_noQual.format(compName=self.comp_name.text, compDates=self.comp_date.text,
+                                                             cDate=current_date,
+                                                             cTime=current_time)
 
-                    html_results_noQual = html_results_noQual.replace("[rinda_noq]", bodyInfo.format(a[0], a[1], a[2], a[3], a[4], a[5],
-                                                             a[6], a[7], a[8], a[9], a[10], a[11], a[12], a[13], a[14], a[15], a[16], a[17], a[18], a[19], a[20]) + "\n[rinda_noq]")
-                    html_results_noQual = html_results_noQual.replace("[header]",
-                                          headerInfo.format(info[last_id][7], info[last_id][2], info[last_id][1],
-                                                         info[last_id][4], info[last_id][3], info[last_id][0],
-                                                         info[last_id][5], info[last_id][6]))
+            with open(os.path.join(html_dir, "body_r_usualNoQual.txt"), "r") as f:
+                bodyInfo = f.read()
+
+            with open(os.path.join(html_dir, "header_r_usualNoQual.txt"), "r") as f:
+                headerInfo = f.read()
+
+            last = ''
+            last_id = 0
+            first_insert = True
+
+            for j, a in enumerate(res_noQual):
+                if a[-1] == last:
+                    html_results_noQual = html_results_noQual.replace("[rinda_noq]",
+                                          bodyInfo.format(a[0], a[1], a[2], a[3], a[4], a[5],
+                                                                 a[6], a[7], a[8], a[9], a[10], a[11], a[12], a[13], a[14], a[15], a[16], a[17], a[18], a[19], a[20]) + "\n[rinda_noq]")
+                    last = a[-1]
                 else:
-                    html_results_noQual = html_results_noQual.replace("[header]",
-                                          headerInfo.format(info[last_id][7], info[last_id][2], info[last_id][1],
-                                                         info[last_id][4], info[last_id][3], info[last_id][0],
-                                                         info[last_id][5], info[last_id][6]))
-                    html_results_noQual = html_results_noQual.replace("[rinda_noq]", bodyInfo.format(a[0], a[1], a[2], a[3], a[4], a[5],
-                                                             a[6], a[7], a[8], a[9], a[10], a[11], a[12], a[13], a[14], a[15], a[16], a[17], a[18], a[19], a[20]) + "\n[rinda_noq]")
-                    first_insert = False
+                    if not first_insert:
+                        html_results_noQual = html_results_noQual.replace("[rinda_noq]", "")
+                        html_results_noQual = html_results_noQual.replace("[prog_sys]", "")
 
-                last = a[-1]
-                last_id += 1
+                        with open(os.path.join(html_dir, f"log_noq_{last}.html"), "w", encoding='utf-8') as ft:
+                            ft.write(html_results_noQual)
 
-        html_results_noQual = html_results_noQual.replace("[rinda_noq]", "")
-        html_results_noQual = html_results_noQual.replace("[prog_sys]", "")
+                        with open(os.path.join(html_dir, "body_r_noQual.html"), "r") as f:
+                            html_results_noQual = f.read()
 
-        with open(os.path.join(html_dir, f"log_noq_{last}.html"), "w", encoding='utf-8') as ft:
-            ft.write(html_results_noQual)
-# ------------------------------------------------------------------------------
+                        html_results_noQual = html_results_noQual.format(compName=self.comp_name.text, compDates=self.comp_date.text,
+                                             cDate=current_date,
+                                             cTime=current_time)
+
+                        with open(os.path.join(html_dir, "body_r_usualNoQual.txt"), "r") as f:
+                            bodyInfo = f.read()
+
+                        with open(os.path.join(html_dir, "header_r_usualNoQual.txt"), "r") as f:
+                            headerInfo = f.read()
+
+                        html_results_noQual = html_results_noQual.replace("[rinda_noq]", bodyInfo.format(a[0], a[1], a[2], a[3], a[4], a[5],
+                                                                 a[6], a[7], a[8], a[9], a[10], a[11], a[12], a[13], a[14], a[15], a[16], a[17], a[18], a[19], a[20]) + "\n[rinda_noq]")
+                        html_results_noQual = html_results_noQual.replace("[header]",
+                                              headerInfo.format(info[last_id][7], info[last_id][2], info[last_id][1],
+                                                             info[last_id][4], info[last_id][3], info[last_id][0],
+                                                             info[last_id][5], info[last_id][6]))
+                    else:
+                        html_results_noQual = html_results_noQual.replace("[header]",
+                                              headerInfo.format(info[last_id][7], info[last_id][2], info[last_id][1],
+                                                             info[last_id][4], info[last_id][3], info[last_id][0],
+                                                             info[last_id][5], info[last_id][6]))
+                        html_results_noQual = html_results_noQual.replace("[rinda_noq]", bodyInfo.format(a[0], a[1], a[2], a[3], a[4], a[5],
+                                                                 a[6], a[7], a[8], a[9], a[10], a[11], a[12], a[13], a[14], a[15], a[16], a[17], a[18], a[19], a[20]) + "\n[rinda_noq]")
+                        first_insert = False
+
+                    last = a[-1]
+                    last_id += 1
+
+            html_results_noQual = html_results_noQual.replace("[rinda_noq]", "")
+            html_results_noQual = html_results_noQual.replace("[prog_sys]", "")
+
+            with open(os.path.join(html_dir, f"log_noq_{last}.html"), "w", encoding='utf-8') as ft:
+                ft.write(html_results_noQual)
+
+        if selectedFile == "RESULTS WITH NO QUAL (START TIME)":
+
+            with open("html/body_r_noQual.html", "r") as f:
+                html_results_noQual_wthStart = f.read()
+
+            html_results_noQual_wthStart = html_results_noQual_wthStart.format(compName=self.comp_name.text,
+                                                                               compDates=self.comp_date.text,
+                                                                               cDate=current_date,
+                                                                               cTime=current_time)
+
             with open(os.path.join(html_dir, "body_r_usualNoQual.txt"), "r") as f:
                 bodyInfo = f.read()
 
@@ -2679,139 +2623,161 @@ class RaceApp(BoxLayout):
 
             with open(os.path.join(html_dir, f"log_noq_wthStart_{last}.html"), "w", encoding='utf-8') as ft:
                 ft.write(html_results_noQual_wthStart)
-        # ------------------------------------------------------------------------------
 
-        with open(os.path.join(html_dir, "body_atlase.txt"), "r") as f:
-            bodyInfo = f.read()
+        if selectedFile == "TEST RACE":
 
-        with open(os.path.join(html_dir, "header_atlase.txt"), "r") as f:
-            headerInfo = f.read()
+            with open("html/main_atlase.html", "r") as f:
+                html_atlase = f.read()
 
-        last = ''
-        last_id = 0
-        first_insert = True
+            html_atlase = html_atlase.format(compName=self.comp_name.text, compDates=self.comp_date.text,
+                                             cDate=current_date, cTime=current_time)
 
-        for j, a in enumerate(atlase):
-            if a[-1] == last:
-                html_atlase = html_atlase.replace("[rinda_noq]",
-                                      bodyInfo.format(a[0], a[1], a[2], a[3], a[4], a[5], a[6], a[7], a[8]) + "\n[rinda_noq]")
-                last = a[-1]
-            else:
-                if not first_insert:
-                    html_atlase = html_atlase.replace("[rinda_noq]", "")
-                    html_atlase = html_atlase.replace("[prog_sys]", "")
+            with open(os.path.join(html_dir, "body_atlase.txt"), "r") as f:
+                bodyInfo = f.read()
 
-                    with open(os.path.join(html_dir, f"atlase_{last}.html"), "w", encoding='utf-8') as ft:
-                        ft.write(html_atlase)
+            with open(os.path.join(html_dir, "header_atlase.txt"), "r") as f:
+                headerInfo = f.read()
 
-                    with open(os.path.join(html_dir, "body_r_noQual.html"), "r") as f:
-                        html_atlase = f.read()
+            last = ''
+            last_id = 0
+            first_insert = True
 
-                    html_atlase = html_atlase.format(compName=self.comp_name.text, compDates=self.comp_date.text,
-                                         cDate=current_date,
-                                         cTime=current_time)
-
-                    with open(os.path.join(html_dir, "body_atlase.txt"), "r") as f:
-                        bodyInfo = f.read()
-
-                    with open(os.path.join(html_dir, "header_atlase.txt"), "r") as f:
-                        headerInfo = f.read()
-
-                    html_atlase = html_atlase.replace("[rinda_noq]", bodyInfo.format(a[0], a[1], a[2], a[3], a[4], a[5],
-                                                                    a[6], a[7], a[8]) + "\n[rinda_noq]")
-                    html_atlase = html_atlase.replace("[header]",
-                                          headerInfo.format(info[last_id][7], info[last_id][2], info[last_id][1],
-                                                         info[last_id][4], info[last_id][3], info[last_id][0],
-                                                         info[last_id][5], info[last_id][6]))
+            for j, a in enumerate(atlase):
+                if a[-1] == last:
+                    html_atlase = html_atlase.replace("[rinda_noq]",
+                                          bodyInfo.format(a[0], a[1], a[2], a[3], a[4], a[5], a[6], a[7], a[8]) + "\n[rinda_noq]")
+                    last = a[-1]
                 else:
-                    html_atlase = html_atlase.replace("[header]",
-                                          headerInfo.format(info[last_id][7], info[last_id][2], info[last_id][1],
-                                                         info[last_id][4], info[last_id][3], info[last_id][0],
-                                                         info[last_id][5], info[last_id][6]))
-                    html_atlase = html_atlase.replace("[rinda_noq]", bodyInfo.format(a[0], a[1], a[2], a[3],
-                                                                    a[4], a[5], a[6], a[7], a[8]) + "\n[rinda_noq]")
-                    first_insert = False
+                    if not first_insert:
+                        html_atlase = html_atlase.replace("[rinda_noq]", "")
+                        html_atlase = html_atlase.replace("[prog_sys]", "")
 
-                last = a[-1]
-                last_id += 1
+                        with open(os.path.join(html_dir, f"atlase_{last}.html"), "w", encoding='utf-8') as ft:
+                            ft.write(html_atlase)
 
-        html_atlase = html_atlase.replace("[rinda_noq]", "")
-        html_atlase = html_atlase.replace("[prog_sys]", "")
+                        with open(os.path.join(html_dir, "body_r_noQual.html"), "r") as f:
+                            html_atlase = f.read()
 
-        with open(os.path.join(html_dir, f"atlase_{last}.html"), "w", encoding='utf-8') as ft:
-            ft.write(html_atlase)
-# --------------------------------------------------------------------------------------
+                        html_atlase = html_atlase.format(compName=self.comp_name.text, compDates=self.comp_date.text,
+                                             cDate=current_date,
+                                             cTime=current_time)
 
-        with open(os.path.join(html_dir, "body_r_masterNoQual.txt"), "r") as f:
-            bodyInfo = f.read()
+                        with open(os.path.join(html_dir, "body_atlase.txt"), "r") as f:
+                            bodyInfo = f.read()
 
+                        with open(os.path.join(html_dir, "header_atlase.txt"), "r") as f:
+                            headerInfo = f.read()
 
-        with open(os.path.join(html_dir, "header_r_masterNoQual.txt"), "r") as f:
-            headerInfo = f.read()
+                        html_atlase = html_atlase.replace("[rinda_noq]", bodyInfo.format(a[0], a[1], a[2], a[3], a[4], a[5],
+                                                                        a[6], a[7], a[8]) + "\n[rinda_noq]")
+                        html_atlase = html_atlase.replace("[header]",
+                                              headerInfo.format(info[last_id][7], info[last_id][2], info[last_id][1],
+                                                             info[last_id][4], info[last_id][3], info[last_id][0],
+                                                             info[last_id][5], info[last_id][6]))
+                    else:
+                        html_atlase = html_atlase.replace("[header]",
+                                              headerInfo.format(info[last_id][7], info[last_id][2], info[last_id][1],
+                                                             info[last_id][4], info[last_id][3], info[last_id][0],
+                                                             info[last_id][5], info[last_id][6]))
+                        html_atlase = html_atlase.replace("[rinda_noq]", bodyInfo.format(a[0], a[1], a[2], a[3],
+                                                                        a[4], a[5], a[6], a[7], a[8]) + "\n[rinda_noq]")
+                        first_insert = False
 
-        last = ''
-        last_id = 0
-        first_insert = True
+                    last = a[-1]
+                    last_id += 1
 
-        for j, a in enumerate(res_noQual_master):
-            if a[-1] == last:
-                html_master_noQual = html_master_noQual.replace("[rinda_noq]",
-                                                  bodyInfo.format(a[0], a[1], a[2], a[3], a[4], a[5], a[6], a[7], a[8],
-                                                                   a[9], a[10], a[11], a[12], a[13], a[14]) + "\n[rinda_noq]")
-                last = a[-1]
-            else:
-                if not first_insert:
-                    html_master_noQual = html_master_noQual.replace("[rinda_noq]", "")
-                    html_master_noQual = html_master_noQual.replace("[prog_sys]", "")
+            html_atlase = html_atlase.replace("[rinda_noq]", "")
+            html_atlase = html_atlase.replace("[prog_sys]", "")
 
-                    with open(os.path.join(html_dir, f"log_noq_master_{last}.html"), "w", encoding='utf-8') as ft:
-                        ft.write(html_master_noQual)
+            with open(os.path.join(html_dir, f"atlase_{last}.html"), "w", encoding='utf-8') as ft:
+                ft.write(html_atlase)
 
-                    with open(os.path.join(html_dir, "body_r_noQual.html"), "r") as f:
-                        html_master_noQual = f.read()
+        if selectedFile == "MASTER RESULTS WITH NO QUAL":
 
-                    html_master_noQual = html_master_noQual.format(compName=self.comp_name.text, compDates=self.comp_date.text,
-                                                     cDate=current_date,
-                                                     cTime=current_time)
+            with open("html/body_r_noQual.html", "r") as f:
+                html_master_noQual = f.read()
 
-                    with open(os.path.join(html_dir, "body_r_masterNoQual.txt"), "r") as f:
-                        bodyInfo = f.read()
+            html_master_noQual = html_master_noQual.format(compName=self.comp_name.text, compDates=self.comp_date.text,
+                                                           cDate=current_date,
+                                                           cTime=current_time)
 
-                    with open(os.path.join(html_dir, "header_r_masterNoQual.txt"), "r") as f:
-                        headerInfo = f.read()
+            with open(os.path.join(html_dir, "body_r_masterNoQual.txt"), "r") as f:
+                bodyInfo = f.read()
 
+            with open(os.path.join(html_dir, "header_r_masterNoQual.txt"), "r") as f:
+                headerInfo = f.read()
+
+            last = ''
+            last_id = 0
+            first_insert = True
+
+            for j, a in enumerate(res_noQual_master):
+                if a[-1] == last:
                     html_master_noQual = html_master_noQual.replace("[rinda_noq]",
-                                                      bodyInfo.format(a[0], a[1], a[2], a[3], a[4], a[5],
-                                                                       a[6], a[7], a[8], a[9], a[10],
-                                                                       a[11], a[12], a[13], a[14]) + "\n[rinda_noq]")
-                    html_master_noQual = html_master_noQual.replace("[header]", headerInfo.format(info[last_id][7], info[last_id][2],
-                                                                                     info[last_id][1],
-                                                                                     info[last_id][4], info[last_id][3],
-                                                                                     info[last_id][0],
-                                                                                     info[last_id][5],
-                                                                                     info[last_id][6]))
+                                                      bodyInfo.format(a[0], a[1], a[2], a[3], a[4], a[5], a[6], a[7], a[8],
+                                                                       a[9], a[10], a[11], a[12], a[13], a[14]) + "\n[rinda_noq]")
+                    last = a[-1]
                 else:
-                    html_master_noQual = html_master_noQual.replace("[header]", headerInfo.format(info[last_id][7], info[last_id][2],
-                                                                                     info[last_id][1],
-                                                                                     info[last_id][4], info[last_id][3],
-                                                                                     info[last_id][0],
-                                                                                     info[last_id][5],
-                                                                                     info[last_id][6]))
-                    html_master_noQual = html_master_noQual.replace("[rinda_noq]", bodyInfo.format(a[0], a[1], a[2], a[3], a[4],
-                                                                                      a[5], a[6], a[7], a[8], a[9],
-                                                                                      a[10], a[11], a[12], a[13], a[14]) + "\n[rinda_noq]")
-                    first_insert = False
+                    if not first_insert:
+                        html_master_noQual = html_master_noQual.replace("[rinda_noq]", "")
+                        html_master_noQual = html_master_noQual.replace("[prog_sys]", "")
 
-                last = a[-1]
-                last_id += 1
+                        with open(os.path.join(html_dir, f"log_noq_master_{last}.html"), "w", encoding='utf-8') as ft:
+                            ft.write(html_master_noQual)
 
-        html_master_noQual = html_master_noQual.replace("[rinda_noq]", "")
-        html_master_noQual = html_master_noQual.replace("[prog_sys]", "")
+                        with open(os.path.join(html_dir, "body_r_noQual.html"), "r") as f:
+                            html_master_noQual = f.read()
 
-        with open(os.path.join(html_dir, f"log_noq_master_{last}.html"), "w", encoding='utf-8') as ft:
-            ft.write(html_master_noQual)
+                        html_master_noQual = html_master_noQual.format(compName=self.comp_name.text, compDates=self.comp_date.text,
+                                                         cDate=current_date,
+                                                         cTime=current_time)
 
-            # --------------------------------------------------------------------------------------
+                        with open(os.path.join(html_dir, "body_r_masterNoQual.txt"), "r") as f:
+                            bodyInfo = f.read()
+
+                        with open(os.path.join(html_dir, "header_r_masterNoQual.txt"), "r") as f:
+                            headerInfo = f.read()
+
+                        html_master_noQual = html_master_noQual.replace("[rinda_noq]",
+                                                          bodyInfo.format(a[0], a[1], a[2], a[3], a[4], a[5],
+                                                                           a[6], a[7], a[8], a[9], a[10],
+                                                                           a[11], a[12], a[13], a[14]) + "\n[rinda_noq]")
+                        html_master_noQual = html_master_noQual.replace("[header]", headerInfo.format(info[last_id][7], info[last_id][2],
+                                                                                         info[last_id][1],
+                                                                                         info[last_id][4], info[last_id][3],
+                                                                                         info[last_id][0],
+                                                                                         info[last_id][5],
+                                                                                         info[last_id][6]))
+                    else:
+                        html_master_noQual = html_master_noQual.replace("[header]", headerInfo.format(info[last_id][7], info[last_id][2],
+                                                                                         info[last_id][1],
+                                                                                         info[last_id][4], info[last_id][3],
+                                                                                         info[last_id][0],
+                                                                                         info[last_id][5],
+                                                                                         info[last_id][6]))
+                        html_master_noQual = html_master_noQual.replace("[rinda_noq]", bodyInfo.format(a[0], a[1], a[2], a[3], a[4],
+                                                                                          a[5], a[6], a[7], a[8], a[9],
+                                                                                          a[10], a[11], a[12], a[13], a[14]) + "\n[rinda_noq]")
+                        first_insert = False
+
+                    last = a[-1]
+                    last_id += 1
+
+            html_master_noQual = html_master_noQual.replace("[rinda_noq]", "")
+            html_master_noQual = html_master_noQual.replace("[prog_sys]", "")
+
+            with open(os.path.join(html_dir, f"log_noq_master_{last}.html"), "w", encoding='utf-8') as ft:
+                ft.write(html_master_noQual)
+
+        if selectedFile == "MASTER RESULTS WITH NO QUAL (START TIME)":
+
+            with open("html/body_r_noQual.html", "r") as f:
+                html_master_noQual_wthStart = f.read()
+
+            html_master_noQual_wthStart = html_master_noQual_wthStart.format(compName=self.comp_name.text,
+                                                                             compDates=self.comp_date.text,
+                                                                             cDate=current_date,
+                                                                             cTime=current_time)
 
             with open(os.path.join(html_dir, "body_r_masterNoQual.txt"), "r") as f:
                 bodyInfo = f.read()
@@ -2892,50 +2858,55 @@ class RaceApp(BoxLayout):
             with open(os.path.join(html_dir, f"log_noq_master_wthStart_{last}.html"), "w", encoding='utf-8') as ft:
                 ft.write(html_master_noQual_wthStart)
 
-# --------------------------------------------------------------------------------------
-        with open(os.path.join(html_dir, "body_s_short.txt"), "r") as f:
-            stListSh = f.read()
+        if selectedFile == "SHORT STARTLIST":
 
-        last = ''
-        last_id = 0
-        first_insert = True
+            with open("html/main_s_short.html", "r") as f:
+                html_short_startlists = f.read()
 
-        for j, a in enumerate(infoShort):
-            if a[-1] == last:
-                html_short_startlists = html_short_startlists.replace("[short_rinda]",
-                                                  stListSh.format(a[0], a[1], a[2], a[3], a[4], a[5], a[6], a[7],
-                                                                   a[8],
-                                                                   a[9], a[10], a[11], a[12], a[13], a[14], a[15], a[16], a[17], a[18], a[19], a[20], a[21], a[22], a[23], a[24]) + "\n[short_rinda]")
-                last = a[-1]
-            else:
-                if not first_insert:
+            html_short_startlists = html_short_startlists.format(compName=self.comp_name.text,
+                                                                 compDates=self.comp_date.text, cDate=current_date,
+                                                                 cTime=current_time)
+
+            with open(os.path.join(html_dir, "body_s_short.txt"), "r") as f:
+                stListSh = f.read()
+
+            last = ''
+            last_id = 0
+            first_insert = True
+
+            for j, a in enumerate(infoShort):
+                if a[-1] == last:
                     html_short_startlists = html_short_startlists.replace("[short_rinda]",
                                                       stListSh.format(a[0], a[1], a[2], a[3], a[4], a[5], a[6], a[7],
-                                                                   a[8],
-                                                                   a[9], a[10], a[11], a[12], a[13], a[14], a[15], a[16], a[17], a[18], a[19], a[20], a[21], a[22], a[23], a[24]) + "\n[short_rinda]")
+                                                                       a[8],
+                                                                       a[9], a[10], a[11], a[12], a[13], a[14], a[15], a[16], a[17], a[18], a[19], a[20], a[21], a[22], a[23], a[24]) + "\n[short_rinda]")
+                    last = a[-1]
                 else:
-                    html_short_startlists = html_short_startlists.replace("[short_rinda]", stListSh.format(a[0], a[1], a[2], a[3], a[4], a[5], a[6], a[7],
-                                                                   a[8],
-                                                                   a[9], a[10], a[11], a[12], a[13], a[14], a[15], a[16], a[17], a[18], a[19], a[20], a[21], a[22], a[23], a[24]) + "\n[short_rinda]")
-                    first_insert = False
+                    if not first_insert:
+                        html_short_startlists = html_short_startlists.replace("[short_rinda]",
+                                                          stListSh.format(a[0], a[1], a[2], a[3], a[4], a[5], a[6], a[7],
+                                                                       a[8],
+                                                                       a[9], a[10], a[11], a[12], a[13], a[14], a[15], a[16], a[17], a[18], a[19], a[20], a[21], a[22], a[23], a[24]) + "\n[short_rinda]")
+                    else:
+                        html_short_startlists = html_short_startlists.replace("[short_rinda]", stListSh.format(a[0], a[1], a[2], a[3], a[4], a[5], a[6], a[7],
+                                                                       a[8],
+                                                                       a[9], a[10], a[11], a[12], a[13], a[14], a[15], a[16], a[17], a[18], a[19], a[20], a[21], a[22], a[23], a[24]) + "\n[short_rinda]")
+                        first_insert = False
 
-                last = a[-1]
-                last_id += 1
+                    last = a[-1]
+                    last_id += 1
 
-        html_short_startlists = html_short_startlists.replace("[short_rinda]", "")
-        with open(os.path.join(html_dir, f"html_short_startlists_log.html"), "w", encoding='utf-8') as ft:
-            ft.write(html_short_startlists)
-
+            html_short_startlists = html_short_startlists.replace("[short_rinda]", "")
+            with open(os.path.join(html_dir, f"html_short_startlists_log.html"), "w", encoding='utf-8') as ft:
+                ft.write(html_short_startlists)
 
         end = datetime.datetime.now()
         print("End: ", end)
         print("Total: ", (end - start))
 
-
 class MyApp(App):
     def build(self):
         return RaceApp()
-
 
 if __name__ == '__main__':
     MyApp().run()

@@ -16,7 +16,7 @@
     <td style="width: 2.91mm"></td>
     <td style="width: 12.96mm;"></td>
     <td style="width: 10mm;"></td>
-    <td style="width:45mm; text-align: left; font-size: 10px;">{}</td>
+    <td style="width: 45mm; text-align: left; font-size: 10px; white-space: nowrap;">{}</td>
     <td style="width: 8.15mm;"></td>
     <td style="width: 20mm;"></td>
     <td style="width: 20mm;"></td>
