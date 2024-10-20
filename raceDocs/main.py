@@ -22,12 +22,16 @@ from kivy.uix.dropdown import DropDown
 from kivy.uix.behaviors import ButtonBehavior
 from kivy.uix.button import Button
 from kivy.utils import platform
+from kivy.uix.widget import Widget
+
 from ftplib import FTP_TLS
 import webbrowser
 from kivy.uix.filechooser import FileChooserListView
 from win32file import GetFileAttributesExW, FILE_ATTRIBUTE_HIDDEN
 import pywintypes
 import math
+import win32print
+import win32api
 
 class FileChooserPopup(Popup):
     def __init__(self, is_ftp=False, **kwargs):
@@ -430,30 +434,75 @@ class RaceApp(BoxLayout):
         self.show_file_interaction_popup(file_name, file_path, is_local=True)
 
     def show_file_interaction_popup(self, file_name, file_path, is_local):
-        """Show popup for file interaction: download, delete, rename, move, open in browser."""
-        content = BoxLayout(orientation='vertical', padding=20, spacing=10)
-
-        download_btn = Button(text='Download', size_hint_y=None, height=50)
-        delete_btn = Button(text='Delete', size_hint_y=None, height=50)
-        rename_btn = Button(text='Rename', size_hint_y=None, height=50)
-        move_btn = Button(text='Move to Opposite Folder', size_hint_y=None, height=50)
-        open_in_browser_btn = Button(text='Open in Browser', size_hint_y=None, height=50)
+        """Показать всплывающее окно для взаимодействия с файлом: загрузка, удаление, переименование, перемещение, открытие в браузере, печать."""
+        content = GridLayout(cols=1, padding=20, spacing=10)
 
         content.add_widget(Label(text=f'File: {file_name}', size_hint_y=None, height=40))
-        content.add_widget(download_btn)
-        content.add_widget(delete_btn)
-        content.add_widget(rename_btn)
-        content.add_widget(move_btn)
-        content.add_widget(open_in_browser_btn)
+
+        buttons = {
+            'Download': self.download_file,
+            'Delete': self.delete_file,
+            'Rename': self.rename_file,
+            'Move to Opposite Folder': self.move_file,
+            'Open in Browser': self.open_file_in_browser,
+            'Print': self.show_printer_selection
+        }
+
+        for btn_text, action in buttons.items():
+            btn = Button(text=btn_text, size_hint_y=None, height=50)
+            btn.bind(on_press=lambda x, action=action: action(file_path, is_local,
+                                                              content) if action != self.show_printer_selection else self.show_printer_selection(
+                file_path))
+            content.add_widget(btn)
 
         popup = Popup(title='File Actions', content=content, size_hint=(0.8, 0.6), auto_dismiss=True)
         popup.open()
 
-        download_btn.bind(on_press=lambda x: self.download_file(file_name, is_local, popup))
-        delete_btn.bind(on_press=lambda x: self.delete_file(file_path, is_local, popup))
-        rename_btn.bind(on_press=lambda x: self.rename_file(file_path, is_local, popup))
-        move_btn.bind(on_press=lambda x: self.move_file(file_name, is_local, popup))
-        open_in_browser_btn.bind(on_press=lambda x: self.open_file_in_browser(file_path, is_local, popup))
+    def get_printers(self):
+        """Получить список доступных принтеров."""
+        printers = win32print.EnumPrinters(win32print.PRINTER_ENUM_LOCAL | win32print.PRINTER_ENUM_CONNECTIONS)
+        printer_names = [printer[2] for printer in printers]
+        return printer_names
+
+    def show_printer_selection(self, file_path):
+        """Показать всплывающее окно для выбора принтера и инициировать печать."""
+        printers = self.get_printers()
+
+        content = BoxLayout(orientation='vertical', padding=20, spacing=10)
+
+        printer_label = Label(text='Select Printer:', size_hint_y=None, height=40)
+        content.add_widget(printer_label)
+
+        printer_dropdown = DropDown()
+        for printer in printers:
+            btn = Button(text=printer, size_hint_y=None, height=40)
+            btn.bind(on_release=lambda btn: (printer_dropdown.select(btn.text), printer_dropdown.dismiss()))
+            printer_dropdown.add_widget(btn)
+
+        main_button = Button(text='Choose Printer', size_hint_y=None, height=50)
+        main_button.bind(on_release=printer_dropdown.open)
+        content.add_widget(main_button)
+
+        def on_select(printer_name, *args):
+            self.print_file(file_path, printer_name)
+
+        printer_dropdown.bind(on_select=on_select)
+
+        spacer = Widget(size_hint_y=1)
+        content.add_widget(spacer)
+
+        popup = Popup(title='Printer Selection', content=content, size_hint=(0.5, 0.5), auto_dismiss=True)
+        popup.open()
+
+    def print_file(self, file_path, printer_name):
+        """Печать файла на выбранном принтере."""
+        try:
+            win32api.ShellExecute(0, "print", file_path, f'/d:"{printer_name}"', ".", 0)
+            print("Print command sent successfully.")
+
+            os.system("taskkill /im AcroRd32.exe /f")
+        except Exception as e:
+            print(f"Error printing file: {e}")
 
     def download_file(self, file_name, is_local, popup):
         """Download the selected file."""
@@ -837,6 +886,17 @@ class RaceApp(BoxLayout):
         )
         open_in_browser_btn.bind(on_press=lambda x: self.open_file_in_browser(file_path, is_local, popup))
         content.add_widget(open_in_browser_btn)
+
+        print_btn = Button(
+            text='Print',
+            size_hint_y=None,
+            height=50,
+            background_color=(0.6, 0.3, 0.9, 1),
+            color=(1, 1, 1, 1),
+            font_size='16sp'
+        )
+        print_btn.bind(on_press=lambda x: self.print_file(file_path))
+        content.add_widget(print_btn)
 
         popup = Popup(
             title='File Actions',
@@ -1241,32 +1301,6 @@ class RaceApp(BoxLayout):
             self.selected_events.remove(self.df.iloc[index])
 
     def show_export_popup(self, instance):
-        content = BoxLayout(orientation='vertical', padding=10)
-        content.add_widget(Label(text='Enter destination directory:', size_hint_y=None, height=40))
-        directory_input = TextInput(multiline=False)
-        content.add_widget(directory_input)
-        export_btn = Button(text='Export', size_hint_y=None, height=40)
-        content.add_widget(export_btn)
-
-        popup = Popup(title='Export Files', content=content, size_hint=(0.6, 0.4))
-
-        def on_export(btn_instance):
-            destination_directory = directory_input.text.strip()
-            popup.dismiss()
-            if destination_directory:
-                for event in self.selected_events:
-                    event_file = event.get('File', None)
-                    if event_file:
-                        destination = os.path.join(destination_directory, os.path.basename(event_file))
-                        os.system(f'cp "{event_file}" "{destination}"')
-                popup = Popup(title='Export Complete', content=Label(text=f'Files exported to {destination_directory}'),
-                              size_hint=(0.6, 0.4))
-                popup.open()
-
-        export_btn.bind(on_press=on_export)
-        popup.open()
-
-    def show_export_popup(self, instance):
         content = BoxLayout(orientation='horizontal')
 
         left_layout = BoxLayout(orientation='vertical', spacing=10, padding=[10, 20, 10, 20], size_hint=(0.7, 1))
@@ -1276,8 +1310,10 @@ class RaceApp(BoxLayout):
 
         file_spinner = Spinner(
             text='Select File',
-            values=('ENTRY LIST','MASTER RESULTS WITH NO QUAL', 'MASTER RESULTS WITH NO QUAL (START TIME)', 'MASTER RESULTS WITH QUAL', 'MASTER RESULTS WITH QUAL (START TIME)',
-                    'MASTER STARTLIST', 'RESULTS WITH NO QUAL', 'RESULTS WITH NO QUAL (START TIME)', 'RESULTS WITH QUAL', 'RESULTS WITH QUAL (START TIME)',
+            values=('ENTRY LIST', 'MASTER RESULTS WITH NO QUAL', 'MASTER RESULTS WITH NO QUAL (START TIME)',
+                    'MASTER RESULTS WITH QUAL', 'MASTER RESULTS WITH QUAL (START TIME)',
+                    'MASTER STARTLIST', 'RESULTS WITH NO QUAL', 'RESULTS WITH NO QUAL (START TIME)',
+                    'RESULTS WITH QUAL', 'RESULTS WITH QUAL (START TIME)',
                     'SHORT STARTLIST', 'STARTLIST', 'TEST RACE'),
             size_hint_y=None,
             height=dp(44)
@@ -1298,11 +1334,27 @@ class RaceApp(BoxLayout):
         open_in_chrome_layout.add_widget(open_in_chrome_label)
         left_layout.add_widget(open_in_chrome_layout)
 
+        combine_races_cb = CheckBox(size_hint_y=None, height=dp(44))
+        combine_races_label = Label(text='Combine races', size_hint_y=None, height=dp(44))
+        combine_races_layout = BoxLayout(orientation='horizontal', size_hint_y=None, height=dp(44))
+        combine_races_layout.add_widget(combine_races_cb)
+        combine_races_layout.add_widget(combine_races_label)
+
+        hint_label = Label(
+            text='Race combination works only with: Results with qual, Results with qual (start time), Master results with qual, Master results with qual (start time)',
+            size_hint_y=None,
+            height=dp(44),
+            color=(1, 0, 0, 1)
+        )
+        left_layout.add_widget(combine_races_layout)
+        left_layout.add_widget(hint_label)
+
         dropdown = DropDown()
         for drive in ['C:', 'D:', 'E:', 'F:', 'G:']:
             btn = Button(text=drive, size_hint_y=None, height=dp(44))
             btn.bind(on_release=lambda btn: self.select_drive(btn.text, file_chooser))
             dropdown.add_widget(btn)
+
         drive_button = Button(text='Select Drive', size_hint_y=None, height=dp(44))
         drive_button.bind(on_release=dropdown.open)
         dropdown.bind(on_select=lambda instance, x: setattr(drive_button, 'text', x))
@@ -1312,10 +1364,34 @@ class RaceApp(BoxLayout):
         reset_path_button.bind(on_press=lambda x: self.reset_to_default_path(file_chooser, get_default_folder()))
         left_layout.add_widget(reset_path_button)
 
-        export_btn = Button(text='Export', size_hint_y=None, height=dp(44))
-        export_btn.bind(on_press=lambda x: self.print_files(file_name_input.text, file_spinner.text, file_chooser.path,
-                                                            delete_intermediate_cb.active, open_in_chrome_cb.active))
-        left_layout.add_widget(export_btn)
+        button_layout = BoxLayout(orientation='horizontal', size_hint_y=None, height=dp(44))
+
+        export_btn = Button(text='Export', size_hint_x=0.5, height=dp(44))
+        export_and_print_btn = Button(text='Export and Print', size_hint_x=0.5, height=dp(44))
+
+        button_layout.add_widget(export_btn)
+        button_layout.add_widget(export_and_print_btn)
+
+        left_layout.add_widget(button_layout)
+
+        # Bind export button actions
+        export_btn.bind(on_press=lambda x: self.export_files(
+            file_name_input.text,
+            file_spinner.text,
+            file_chooser.path,
+            delete_intermediate_cb.active,
+            open_in_chrome_cb.active,
+            combine_races_cb.active
+        ))
+
+        export_and_print_btn.bind(on_press=lambda x: self.export_and_print(
+            file_name_input.text,
+            file_spinner.text,
+            file_chooser.path,
+            delete_intermediate_cb.active,
+            open_in_chrome_cb.active,
+            combine_races_cb.active
+        ))
 
         default_folder = get_default_folder()
         file_chooser = FileChooserListView(path=default_folder, size_hint=(0.3, 1))
@@ -1326,12 +1402,33 @@ class RaceApp(BoxLayout):
         popup = Popup(title='Export File', content=content, size_hint=(0.9, 0.9))
         popup.open()
 
+    def export_and_print(self, file_name, selected_file, folder_path, delete_intermediate, open_in_chrome,
+                         combine_race):
+        try:
+            # Generate the files first and get the merged output path
+            merged_output_path = self.print_files(file_name, selected_file, folder_path, delete_intermediate,
+                                                  open_in_chrome, combine_race)
+
+            if os.path.exists(merged_output_path):
+                self.show_printer_selection(merged_output_path)
+            else:
+                raise FileNotFoundError(f"The generated file {merged_output_path} does not exist.")
+        except Exception as e:
+            popup = Popup(title='Error', content=Label(text=f'Error: {str(e)}'), size_hint=(0.6, 0.4))
+            popup.open()
+            print(f"Error: {str(e)}")
+
+    def export_files(self, file_name, selected_file, folder_path, delete_intermediate, open_in_chrome, combine_race):
+        # Call the print_files function to generate the files without printing
+        self.print_files(file_name, selected_file, folder_path, delete_intermediate, open_in_chrome, combine_race)
+
     def reset_to_default_path(self, file_chooser, default_folder):
         file_chooser.path = default_folder
 
-    def print_files(self, file_name, selected_file, folder_path, delete_intermediate, open_in_chrome):
-        global selectedFile
+    def print_files(self, file_name, selected_file, folder_path, delete_intermediate, open_in_chrome, combine_race):
+        global selectedFile, combineRace
         selectedFile = selected_file
+        combineRace = combine_race
         try:
             if not self.selected_events:
                 raise ValueError("No events selected")
@@ -1357,52 +1454,20 @@ class RaceApp(BoxLayout):
             eventNumFILE = os.path.join(race_docs_dir, "compInfo/event_num.csv")
             cl = pd.read_csv(eventNumFILE, skip_blank_lines=True, na_filter=True)
 
-            cat_list = {}
-            for index, row in cl.iterrows():
-                cat_list[row["Category"]] = row["EventNum"]
+            cat_list = {row["Category"]: row["EventNum"] for index, row in cl.iterrows()}
 
             temp_pdf_files = []
             html_short_startlists_log_handled = False
-            for ev in selected_event_nums:
+
+            event_loop_range = [selected_event_nums[0]] if combineRace else selected_event_nums
+
+            for ev in event_loop_range:
                 event_row = self.df[self.df['EventNum'] == int(ev)].iloc[0]
                 event_name = event_row['Event'].split()[1]
                 eta = event_row['Event'].split()[2] if len(event_row['Event'].split()) > 2 else event_row['EventNum']
-
                 ev_num = cat_list.get(event_name)
 
-                if selected_file == 'RESULTS WITH QUAL':
-                    html_file = f"log_{ev}.html"
-                elif selected_file == 'RESULTS WITH NO QUAL':
-                    html_file = f"log_noq_{ev}.html"
-                elif selected_file == 'MASTER RESULTS WITH QUAL':
-                    html_file = f"log_mast_{ev}.html"
-                elif selected_file == 'MASTER RESULTS WITH NO QUAL':
-                    html_file = f"log_noq_master_{ev}.html"
-                elif selected_file == 'STARTLIST':
-                    html_file = f"start_log_{ev}.html"
-                elif selected_file == 'MASTER STARTLIST':
-                    html_file = f"start_log_master_{ev}.html"
-                elif selected_file == 'ENTRY LIST':
-                    html_file = f"entry_by_events_log_{ev}.html"
-                elif selected_file == 'SHORT STARTLIST':
-                    if not html_short_startlists_log_handled:
-                        html_file = "html_short_startlists_log.html"
-                        html_short_startlists_log_handled = True
-                    else:
-                        continue
-                elif selected_file == 'TEST RACE':
-                    html_file = f"atlase_{ev}.html"
-
-                elif selected_file == 'MASTER RESULTS WITH NO QUAL (START TIME)':
-                    html_file = f"log_noq_master_wthStart_{ev}.html"
-                elif selected_file == 'MASTER RESULTS WITH QUAL (START TIME)':
-                    html_file = f"log_mast_wthStart_{ev}.html"
-                elif selected_file == 'RESULTS WITH NO QUAL (START TIME)':
-                    html_file = f"log_noq_wthStart_{ev}.html"
-                elif selected_file == 'RESULTS WITH QUAL (START TIME)':
-                    html_file = f"log_wthStart_{ev}.html"
-                else:
-                    raise ValueError("Invalid file selection")
+                html_file = self.get_html_file(selected_file, ev)
 
                 output_file_name = f"race-{ev}___event-{ev_num}___name-{event_name}___eta-{eta}.pdf"
                 output_file_path = os.path.join(folder_path, output_file_name)
@@ -1415,9 +1480,7 @@ class RaceApp(BoxLayout):
                 if not os.path.isfile(input_file_path):
                     raise FileNotFoundError(f"{input_file_path} does not exist")
 
-                input_file_path_url = input_file_path.replace('\\', '/').replace(' ', '%20')
-                input_file_path_url = f"file:///{input_file_path_url}"
-
+                input_file_path_url = f"file:///{input_file_path.replace('\\', '/').replace(' ', '%20')}"
                 print(f"Input file path URL: {input_file_path_url}")
 
                 cmd = [
@@ -1430,17 +1493,15 @@ class RaceApp(BoxLayout):
                 ]
 
                 print(f"Running command: {' '.join(cmd)}")
-
                 result = subprocess.run(cmd, capture_output=True, text=True)
 
                 print("stdout:", result.stdout)
                 print("stderr:", result.stderr)
 
                 if result.returncode != 0:
-                    error_msg = f"Command failed with exit code {result.returncode}: {result.stderr}"
-                    print(error_msg)
-                    raise RuntimeError(error_msg)
+                    raise RuntimeError(f"Command failed with exit code {result.returncode}: {result.stderr}")
 
+            # Merge PDFs
             merged_output_path = os.path.join(folder_path, f"{file_name}.pdf")
             merger = PdfMerger()
 
@@ -1450,22 +1511,18 @@ class RaceApp(BoxLayout):
             merger.write(merged_output_path)
             merger.close()
 
+            # Delete intermediate files if required
             if delete_intermediate:
                 for pdf in temp_pdf_files:
                     os.remove(pdf)
             else:
                 print("Intermediate files retained.")
-                if os.path.exists(merged_output_path):
-                    os.remove(merged_output_path)
 
-            if open_in_chrome:
-                file_to_open = merged_output_path if os.path.exists(merged_output_path) else temp_pdf_files
-                if isinstance(file_to_open, list):
-                    for pdf in file_to_open:
-                        subprocess.Popen([chrome_path, pdf])
-                else:
-                    subprocess.Popen([chrome_path, file_to_open])
+            # Open merged PDF in Chrome if required
+            if open_in_chrome and os.path.exists(merged_output_path):
+                subprocess.Popen([chrome_path, merged_output_path])
 
+            # Clean up HTML files
             html_files = glob.glob(os.path.join(html_dir, '*.html'))
             exceptions = {'body_r_noQual.html', 'body_r_withQual.html', 'main_s.html', 'main_entries.html',
                           'main_s_short.html', 'main_atlase.html'}
@@ -1476,10 +1533,43 @@ class RaceApp(BoxLayout):
             popup = Popup(title='Print Complete', content=Label(text='Files printed and merged successfully!'),
                           size_hint=(0.6, 0.4))
             popup.open()
+
+            return merged_output_path  # Return the merged PDF path
         except Exception as e:
             popup = Popup(title='Error', content=Label(text=f'Error printing file: {str(e)}'), size_hint=(0.6, 0.4))
             popup.open()
             print(f"Error: {str(e)}")
+            return None  # Return None on error
+
+    def get_html_file(self, selected_file, ev):
+        if selected_file == 'RESULTS WITH QUAL':
+            return f"log_{ev}.html"
+        elif selected_file == 'RESULTS WITH NO QUAL':
+            return f"log_noq_{ev}.html"
+        elif selected_file == 'MASTER RESULTS WITH QUAL':
+            return f"log_mast_{ev}.html"
+        elif selected_file == 'MASTER RESULTS WITH NO QUAL':
+            return f"log_noq_master_{ev}.html"
+        elif selected_file == 'STARTLIST':
+            return f"start_log_{ev}.html"
+        elif selected_file == 'MASTER STARTLIST':
+            return f"start_log_master_{ev}.html"
+        elif selected_file == 'ENTRY LIST':
+            return f"entry_by_events_log_{ev}.html"
+        elif selected_file == 'SHORT STARTLIST':
+            return "html_short_startlists_log.html"
+        elif selected_file == 'TEST RACE':
+            return f"atlase_{ev}.html"
+        elif selected_file == 'MASTER RESULTS WITH NO QUAL (START TIME)':
+            return f"log_noq_master_wthStart_{ev}.html"
+        elif selected_file == 'MASTER RESULTS WITH QUAL (START TIME)':
+            return f"log_mast_wthStart_{ev}.html"
+        elif selected_file == 'RESULTS WITH NO QUAL (START TIME)':
+            return f"log_noq_wthStart_{ev}.html"
+        elif selected_file == 'RESULTS WITH QUAL (START TIME)':
+            return f"log_wthStart_{ev}.html"
+        else:
+            raise ValueError("Invalid file selection")
 
     def select_drive(self, drive, file_chooser):
         file_chooser.path = drive
@@ -1597,7 +1687,7 @@ class RaceApp(BoxLayout):
                     cat_list[df["Event"][i].split()[1]],
                     df["Prog"][i] if df["Prog"][i] and not math.isnan(df["Prog"][i]) else " "
                 ])
-
+                print(info)
                 def safe_split(value):
                     parts = str(value).split()
                     return parts if len(parts) >= 3 else [None] * 3
@@ -1645,6 +1735,30 @@ class RaceApp(BoxLayout):
                         df["Prog"][i] if df["Prog"][i] and not math.isnan(df["Prog"][i]) else " ",
                         en
                     ])
+
+        def combine_first_last(info):
+            if len(info) < 2:
+                return info
+
+            first = info[0]
+            last = info[-1]
+
+            combined_result = [
+                [
+                    f"{first[0]}-{last[0]}",
+                    *first[1:3],
+                    first[3][0],
+                    *first[4:6],
+                    f"{first[6]}-{last[6]}",
+                    *first[7:]
+                ]
+            ]
+
+            return combined_result
+
+        if (combineRace and (selectedFile == "RESULTS WITH QUAL" or selectedFile == "RESULTS WITH QUAL (START TIME)"
+                or selectedFile == " MASTER RESULTS WITH QUAL" or selectedFile == "MASTER RESULTS WITH QUAL (START TIME)")):
+            info = combine_first_last(info)
 
         def format_time(seconds):
             """Format time as mm:ss.00 if more than a minute, otherwise as ss.00."""
@@ -1800,6 +1914,7 @@ class RaceApp(BoxLayout):
                                 f'+ {format_time(time_to_seconds(fl["Delta"][j]))}' if fl["Delta"][j] else "",
                                 mFinsplit, fl["Qual"][j], coach_list.get(fl["Stroke"][j]), en
                             ])
+
                         if selectedFile == "RESULTS WITH QUAL (START TIME)":
                             res_withQual_start.append([
                                 str(fl["Place"][j]).split(sep=".")[0],
@@ -1903,6 +2018,149 @@ class RaceApp(BoxLayout):
                             entry_data.append([f'<img src="flags/{flag_list.get(str(fl["CrewAbbrev"][j]), "default_flag")}" style="max-width: 6mm">',
                                                   fl["Crew"][j], fl["Stroke"][j].replace("/", ", "), en])
 
+        print(res_withQual)
+
+        if combineRace and selectedFile == "RESULTS WITH QUAL":
+            first_en_value = res_withQual[0][21]
+            for entry in res_withQual:
+                entry[21] = first_en_value
+
+            res_withQual.sort(key=lambda x: (not x[0], x[16] if x[16] is not None else '99:99.99'))
+
+            place_counter = 1
+            for entry in res_withQual:
+                if entry[0]:
+                    entry[0] = str(place_counter)
+                    place_counter += 1
+                else:
+                    entry[0] = ""
+
+            first_time = time_to_seconds(res_withQual[0][16]) if res_withQual[0][
+                16] else None
+
+            for entry in res_withQual:
+                current_time = time_to_seconds(entry[16]) if entry[16] else None
+                if current_time is not None and first_time is not None:
+                    delta = current_time - first_time
+                    entry[17] = f'+ {format_time(delta)}' if delta > 0 else ''
+                else:
+                    entry[17] = ""
+
+            for entry in res_withQual:
+
+                entry[5] = ""
+                entry[6] = ""
+                entry[7] = ""
+                entry[8] = ""
+                entry[9] = ""
+                entry[10] = ""
+                entry[11] = ""
+                entry[12] = ""
+                entry[13] = ""
+                entry[14] = ""
+                entry[15] = ""
+                entry[18] = ""
+
+        if combineRace and selectedFile == "RESULTS WITH QUAL (START TIME)":
+            first_en_value = res_withQual_start[0][21]
+            for entry in res_withQual_start:
+                entry[21] = first_en_value
+
+            res_withQual_start.sort(key=lambda x: (not x[0], x[16] if x[16] is not None else '99:99.99'))
+
+            place_counter = 1
+            for entry in res_withQual_start:
+                if entry[0]:
+                    entry[0] = str(place_counter)
+                    place_counter += 1
+                else:
+                    entry[0] = ""
+
+            first_time = time_to_seconds(res_withQual_start[0][16]) if res_withQual_start[0][
+                16] else None
+
+            for entry in res_withQual_start:
+                current_time = time_to_seconds(entry[16]) if entry[16] else None
+                if current_time is not None and first_time is not None:
+                    delta = current_time - first_time
+                    entry[17] = f'+ {format_time(delta)}' if delta > 0 else ''
+                else:
+                    entry[17] = ""
+
+            for entry in res_withQual_start:
+                entry[5] = ""
+                entry[6] = ""
+                entry[7] = ""
+                entry[8] = ""
+                entry[9] = ""
+                entry[10] = ""
+                entry[11] = ""
+                entry[13] = ""
+                entry[14] = ""
+                entry[15] = ""
+                entry[18] = ""
+
+        if combineRace and selectedFile == "MASTER RESULTS WITH QUAL":
+            first_en_value = res_withQual_master[0][14]
+            for entry in res_withQual_master:
+                entry[14] = first_en_value
+
+            res_withQual_master.sort(key=lambda x: (not x[0], x[10] if x[10] is not None else '99:99.99'))
+
+            place_counter = 1
+            for entry in res_withQual_master:
+                if entry[0]:
+                    entry[0] = str(place_counter)
+                    place_counter += 1
+                else:
+                    entry[0] = ""
+
+            first_time = time_to_seconds(res_withQual_master[0][10]) if res_withQual_master[0][10] else None
+
+            for entry in res_withQual_master:
+                current_time = time_to_seconds(entry[10]) if entry[10] else None
+                if current_time is not None and first_time is not None:
+                    delta = current_time - first_time
+                    entry[11] = f'+ {format_time(delta)}' if delta > 0 else ''
+                else:
+                    entry[11] = ""
+
+            for entry in res_withQual_master:
+                entry[5] = ""
+                entry[6] = ""
+                entry[7] = ""
+                entry[9] = ""
+
+        if combineRace and selectedFile == "MASTER RESULTS WITH QUAL (START TIME)":
+            first_en_value = res_withQual_master_start[0][14]
+            for entry in res_withQual_master_start:
+                entry[14] = first_en_value
+
+            res_withQual_master_start.sort(key=lambda x: (not x[0], x[10] if x[10] is not None else '99:99.99'))
+
+            place_counter = 1
+            for entry in res_withQual_master_start:
+                if entry[0]:
+                    entry[0] = str(place_counter)
+                    place_counter += 1
+                else:
+                    entry[0] = ""
+
+            first_time = time_to_seconds(res_withQual_master_start[0][10]) if res_withQual_master_start[0][10] else None
+
+            for entry in res_withQual_master_start:
+                current_time = time_to_seconds(entry[10]) if entry[10] else None
+                if current_time is not None and first_time is not None:
+                    delta = current_time - first_time
+                    entry[11] = f'+ {format_time(delta)}' if delta > 0 else ''
+                else:
+                    entry[11] = ""
+
+            for entry in res_withQual_master_start:
+                entry[6] = ""
+                entry[7] = ""
+                entry[9] = ""
+
         atlase.sort(key=lambda x: x[8] if x[8] is not None else -float('inf'), reverse=True)
         for index, row in enumerate(atlase, start=1):
             row[0] = str(index)
@@ -1932,8 +2190,13 @@ class RaceApp(BoxLayout):
 
             with open(os.path.join(html_dir, "body_r_usualWithQual.txt"), "r") as f:
                 bodyInfo = f.read()
-            with open(os.path.join(html_dir, "header_r_usualWithQual.txt"), "r") as f:
-                headerInfo = f.read()
+
+            if combineRace:
+                with open(os.path.join(html_dir, "header_r_usualWithQual_cmb.txt"), "r") as f:
+                    headerInfo = f.read()
+            else:
+                with open(os.path.join(html_dir, "header_r_usualWithQual.txt"), "r") as f:
+                    headerInfo = f.read()
 
             last = ''
             last_id = 0
@@ -1998,8 +2261,13 @@ class RaceApp(BoxLayout):
 
             with open(os.path.join(html_dir, "body_r_usualWithQual.txt"), "r") as f:
                 bodyInfo = f.read()
-            with open(os.path.join(html_dir, "header_r_usualWithQual_wthStart.txt"), "r") as f:
-                headerInfo = f.read()
+
+            if combineRace:
+                with open(os.path.join(html_dir, "header_r_usualWithQual_wthStart_cmb.txt"), "r") as f:
+                    headerInfo = f.read()
+            else:
+                with open(os.path.join(html_dir, "header_r_usualWithQual_wthStart.txt"), "r") as f:
+                    headerInfo = f.read()
 
             last = ''
             last_id = 0
@@ -2071,9 +2339,12 @@ class RaceApp(BoxLayout):
 
             with open(os.path.join(html_dir, "body_r_masterWithQual.txt"), "r") as f:
                 bodyInfo = f.read()
-
-            with open(os.path.join(html_dir, "header_r_masterWithQual.txt"), "r") as f:
-                headerInfo = f.read()
+            if combineRace:
+                with open(os.path.join(html_dir, "header_r_masterWithQual_cmb.txt"), "r") as f:
+                    headerInfo = f.read()
+            else:
+                with open(os.path.join(html_dir, "header_r_masterWithQual.txt"), "r") as f:
+                    headerInfo = f.read()
 
             last = ''
             last_id = 0
@@ -2155,8 +2426,12 @@ class RaceApp(BoxLayout):
             with open(os.path.join(html_dir, "body_r_masterWithQual.txt"), "r") as f:
                 bodyInfo = f.read()
 
-            with open(os.path.join(html_dir, "header_r_masterWithQual_wthStart.txt"), "r") as f:
-                headerInfo = f.read()
+            if combineRace:
+                with open(os.path.join(html_dir, "header_r_masterWithQual_wthStart_cmb.txt"), "r") as f:
+                    headerInfo = f.read()
+            else:
+                with open(os.path.join(html_dir, "header_r_masterWithQual_wthStart.txt"), "r") as f:
+                    headerInfo = f.read()
 
             last = ''
             last_id = 0
