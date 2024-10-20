@@ -434,29 +434,33 @@ class RaceApp(BoxLayout):
         self.show_file_interaction_popup(file_name, file_path, is_local=True)
 
     def show_file_interaction_popup(self, file_name, file_path, is_local):
-        """Показать всплывающее окно для взаимодействия с файлом: загрузка, удаление, переименование, перемещение, открытие в браузере, печать."""
-        content = GridLayout(cols=1, padding=20, spacing=10)
+        """Show popup for file interaction: download, delete, rename, move, open in browser."""
+        content = BoxLayout(orientation='vertical', padding=20, spacing=10)
+
+        download_btn = Button(text='Download', size_hint_y=None, height=50)
+        delete_btn = Button(text='Delete', size_hint_y=None, height=50)
+        rename_btn = Button(text='Rename', size_hint_y=None, height=50)
+        move_btn = Button(text='Move to Opposite Folder', size_hint_y=None, height=50)
+        open_in_browser_btn = Button(text='Open in Browser', size_hint_y=None, height=50)
+        show_printer_selection_btn = Button(text='Print', size_hint_y=None, height=50)
 
         content.add_widget(Label(text=f'File: {file_name}', size_hint_y=None, height=40))
-
-        buttons = {
-            'Download': self.download_file,
-            'Delete': self.delete_file,
-            'Rename': self.rename_file,
-            'Move to Opposite Folder': self.move_file,
-            'Open in Browser': self.open_file_in_browser,
-            'Print': self.show_printer_selection
-        }
-
-        for btn_text, action in buttons.items():
-            btn = Button(text=btn_text, size_hint_y=None, height=50)
-            btn.bind(on_press=lambda x, action=action: action(file_path, is_local,
-                                                              content) if action != self.show_printer_selection else self.show_printer_selection(
-                file_path))
-            content.add_widget(btn)
+        content.add_widget(download_btn)
+        content.add_widget(delete_btn)
+        content.add_widget(rename_btn)
+        content.add_widget(move_btn)
+        content.add_widget(open_in_browser_btn)
+        content.add_widget(show_printer_selection_btn)
 
         popup = Popup(title='File Actions', content=content, size_hint=(0.8, 0.6), auto_dismiss=True)
         popup.open()
+
+        download_btn.bind(on_press=lambda x: self.download_file(file_name, is_local, popup))
+        delete_btn.bind(on_press=lambda x: self.delete_file(file_path, is_local, popup))
+        rename_btn.bind(on_press=lambda x: self.rename_file(file_path, is_local, popup))
+        move_btn.bind(on_press=lambda x: self.move_file(file_name, is_local, popup))
+        open_in_browser_btn.bind(on_press=lambda x: self.open_file_in_browser(file_path, is_local, popup))
+        show_printer_selection_btn.bind(on_press=lambda x: self.show_printer_selection(file_path))
 
     def get_printers(self):
         """Получить список доступных принтеров."""
@@ -886,17 +890,6 @@ class RaceApp(BoxLayout):
         )
         open_in_browser_btn.bind(on_press=lambda x: self.open_file_in_browser(file_path, is_local, popup))
         content.add_widget(open_in_browser_btn)
-
-        print_btn = Button(
-            text='Print',
-            size_hint_y=None,
-            height=50,
-            background_color=(0.6, 0.3, 0.9, 1),
-            color=(1, 1, 1, 1),
-            font_size='16sp'
-        )
-        print_btn.bind(on_press=lambda x: self.print_file(file_path))
-        content.add_widget(print_btn)
 
         popup = Popup(
             title='File Actions',
@@ -1517,10 +1510,18 @@ class RaceApp(BoxLayout):
                     os.remove(pdf)
             else:
                 print("Intermediate files retained.")
+                os.remove(merged_output_path)
 
-            # Open merged PDF in Chrome if required
-            if open_in_chrome and os.path.exists(merged_output_path):
-                subprocess.Popen([chrome_path, merged_output_path])
+            if open_in_chrome:
+                if os.path.exists(merged_output_path):
+                    subprocess.Popen([chrome_path, merged_output_path])
+                    print(f"Opened merged PDF: {merged_output_path}")
+                elif temp_pdf_files:  # Check if there are any generated PDFs
+                    for pdf_file in temp_pdf_files:
+                        subprocess.Popen([chrome_path, pdf_file])  # Open each generated PDF
+                        print(f"Opened generated PDF: {pdf_file}")
+                else:
+                    print("No generated PDF files found.")
 
             # Clean up HTML files
             html_files = glob.glob(os.path.join(html_dir, '*.html'))
