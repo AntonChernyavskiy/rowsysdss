@@ -1307,7 +1307,7 @@ class RaceApp(BoxLayout):
                     'MASTER RESULTS WITH QUAL', 'MASTER RESULTS WITH QUAL (START TIME)',
                     'MASTER STARTLIST', 'RESULTS WITH NO QUAL', 'RESULTS WITH NO QUAL (START TIME)',
                     'RESULTS WITH QUAL', 'RESULTS WITH QUAL (START TIME)',
-                    'SHORT STARTLIST', 'STARTLIST', 'TEST RACE'),
+                    'SHORT STARTLIST', 'STARTLIST', 'STARTLIST (START TIME)' 'TEST RACE'),
             size_hint_y=None,
             height=dp(44)
         )
@@ -1553,6 +1553,8 @@ class RaceApp(BoxLayout):
             return f"log_noq_master_{ev}.html"
         elif selected_file == 'STARTLIST':
             return f"start_log_{ev}.html"
+        elif selected_file == 'STARTLIST (START TIME)':
+            return f"start_log_wthTime_{ev}.html"
         elif selected_file == 'MASTER STARTLIST':
             return f"start_log_master_{ev}.html"
         elif selected_file == 'ENTRY LIST':
@@ -1650,6 +1652,7 @@ class RaceApp(BoxLayout):
         res_noQual_master_start = []
 
         start_data = []
+        start_data_wthStart = []
         start_data_master = []
         entry_data = []
 
@@ -2009,6 +2012,11 @@ class RaceApp(BoxLayout):
                             start_data.append([str(fl["Bow"][j]) if "[" in str(fl["Bow"][j]) else str(fl["Bow"][j]).split(sep=".")[0],
                                                f'<img src="flags/{flag_list.get(str(fl["CrewAbbrev"][j]), "default_flag")}" style="max-width: 6mm">',
                                                fl["Crew"][j], fl["Stroke"][j].replace("/", ", "), coach_list.get(fl["Stroke"][j]), en])
+
+                        if selectedFile == "STARTLIST (START TIME)":
+                            start_data_wthStart.append([str(fl["Bow"][j]).split(sep="[")[0],
+                                               str(fl["Bow"][j]).split(sep="[")[1],
+                                               fl["Crew"][j], fl["Stroke"][j].replace("/", ", "), coach_list.get(fl["Stroke"][j]), en])
                         if selectedFile == "MASTER STARTLIST":
                             start_data_master.append([str(fl["Bow"][j]) if "[" in str(fl["Bow"][j]) else str(fl["Bow"][j]).split(sep=".")[0],
                                                f'<img src="flags/{flag_list.get(str(fl["CrewAbbrev"][j]), "default_flag")}" style="max-width: 6mm">',
@@ -2174,6 +2182,7 @@ class RaceApp(BoxLayout):
                 match.group()) if match else 999999
 
         start_data.sort(key=lambda x: (extract_number(x[5]), extract_number(x[0])))
+        start_data_wthStart.sort(key=lambda x: (extract_number(x[5]), extract_number(x[0])))
         start_data_master.sort(key=lambda x: (extract_number(x[6]), extract_number(x[0])))
 
         current_date = datetime.datetime.now().strftime('%Y-%m-%d')
@@ -2669,6 +2678,79 @@ class RaceApp(BoxLayout):
             html_startlists = html_startlists.replace("[prog_sys]", "")
             with open(os.path.join(html_dir, f"start_log_{last}.html"), "w", encoding='utf-8') as ft:
                 ft.write(html_startlists)
+
+        if selectedFile == "STARTLIST (START TIME)":
+
+            with open("html/main_s.html", "r") as f:
+                html_wthStart_startlists = f.read()
+
+            html_wthStart_startlists = html_wthStart_startlists.format(compName=self.comp_name.text, compDates=self.comp_date.text,
+                                                     cDate=current_date,
+                                                     cTime=current_time)
+
+            with open(os.path.join(html_dir, "body_s_wthTime.txt"), "r") as f:
+                bodyInfo = f.read()
+
+            with open(os.path.join(html_dir, "header_s_usual_wthTime.txt"), "r") as f:
+                headerInfo = f.read()
+
+            last = ''
+            last_id = 0
+            first_insert_start = True
+
+            for j, a in enumerate(start_data_wthStart):
+                if a[-1] == last:
+                    html_wthStart_startlists = html_wthStart_startlists.replace("[st_rinda]", bodyInfo.format(a[0], a[1], a[2], a[3], a[4]) + "\n[st_rinda]")
+                    last = a[-1]
+                else:
+                    if not first_insert_start:
+                        html_wthStart_startlists = html_wthStart_startlists.replace("[st_rinda]", "")
+                        last_prog = info[last_id - 1][8]
+                        html_wthStart_startlists = html_wthStart_startlists.replace("[prog_sys]", last_prog)
+                        html_wthStart_startlists = html_wthStart_startlists.replace("[prog_sys]", "")
+
+                        with open(os.path.join(html_dir, f"start_log_wthTime_{last}.html"), "w", encoding='utf-8') as ft:
+                            ft.write(html_wthStart_startlists)
+
+                        with open(os.path.join(html_dir, "main_s.html"), "r") as f:
+                            html_wthStart_startlists = f.read()
+
+                        html_wthStart_startlists = html_wthStart_startlists.format(compName=self.comp_name.text, compDates=self.comp_date.text,
+                                                       cDate=current_date,
+                                                       cTime=current_time)
+
+                        with open(os.path.join(html_dir, "body_s_wthStart.txt"), "r") as f:
+                            bodyInfo = f.read()
+
+                        with open(os.path.join(html_dir, "header_s_usual.txt"), "r") as f:
+                            headerInfo = f.read()
+
+                        html_wthStart_startlists = html_wthStart_startlists.replace("[st_rinda]",
+                                                        bodyInfo.format(a[0], a[1], a[2], a[3], a[4]) + "\n[st_rinda]")
+                        html_wthStart_startlists = html_wthStart_startlists.replace("[header]", headerInfo.format(info[last_id][7], info[last_id][2],
+                                                                                  info[last_id][1],
+                                                                                  info[last_id][4], info[last_id][3],
+                                                                                  info[last_id][0],
+                                                                                  info[last_id][5], info[last_id][6]))
+                    else:
+                        html_wthStart_startlists = html_wthStart_startlists.replace("[st_rinda]",
+                                                        bodyInfo.format(a[0], a[1], a[2], a[3], a[4]) + "\n[st_rinda]")
+                        html_wthStart_startlists = html_wthStart_startlists.replace("[header]", headerInfo.format(info[last_id][7], info[last_id][2],
+                                                                                  info[last_id][1],
+                                                                                  info[last_id][4], info[last_id][3],
+                                                                                  info[last_id][0],
+                                                                                  info[last_id][5], info[last_id][6]))
+                        first_insert_start = False
+
+                    last = a[-1]
+                    last_id += 1
+
+            html_wthStart_startlists = html_wthStart_startlists.replace("[st_rinda]", "")
+            last_prog = info[last_id - 1][8]
+            html_wthStart_startlists = html_wthStart_startlists.replace("[prog_sys]", last_prog)
+            html_wthStart_startlists = html_wthStart_startlists.replace("[prog_sys]", "")
+            with open(os.path.join(html_dir, f"start_log_wthTime_{last}.html"), "w", encoding='utf-8') as ft:
+                ft.write(html_wthStart_startlists)
 
         if selectedFile == "ENTRY LIST":
 
